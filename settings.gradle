@@ -1,0 +1,4 @@
+rootProject.name = "amigo-platform"
+
+include "platform-domain"
+include "platform-rest"

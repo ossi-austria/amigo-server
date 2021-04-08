@@ -1,0 +1,49 @@
+# original source: https://github.com/sameersbn/docker-gitlab/blob/master/docker-compose.yml
+version: '3.5'
+
+# please research https://docs.docker.com/compose/environment-variables/ for howto setup your environment
+services:
+
+  #  amigo-platform:
+  #    container_name: amigo-platform
+  #    image: registry.gitlab.com/ossiaustria/amigo/amigo-platform:master
+  #    restart: always
+  #    depends_on:
+  #      - postgres
+  #      - redis
+  #    ports: ["8080:8080"]
+  #    env_file: system.env
+  #    environment:
+  #      - SPRING_PROFILES_ACTIVE=docker
+  #    networks:
+  #      - amigo-network
+
+  postgres:
+    container_name: postgres
+    restart: always
+    image: postgres:11.7
+    ports: [ "5432:5432" ]
+    volumes:
+      - amigo-db:/var/lib/postgresql:Z
+    env_file: system.env
+    environment:
+      - DB_EXTENSION=pg_trgm
+    networks:
+      - amigo-network
+
+
+  redis:
+    container_name: redis
+    restart: always
+    image: redis:6.0.0-alpine
+    ports: ["6379:6379"]
+    networks:
+      - amigo-network
+
+volumes:
+  sock:
+  amigo-db:
+
+networks:
+  amigo-network:
+    name: amigo-network

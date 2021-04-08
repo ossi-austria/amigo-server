@@ -1,0 +1,27 @@
+amigo-platform:
+
+spring:
+  devtools:
+    add-properties: true
+  jpa:
+    hibernate:
+      ddl-auto: create-drop # USE for dev only
+  flyway:
+    enabled: false # USE for dev only
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+
+logging:
+  level:
+    root: INFO
+    org.ossiaustria.platform: DEBUG
+    web: INFO
+    org.springframework.security: DEBUG
+    org.springframework.orm: WARN
+    org.hibernate: WARN
+    org.springframework.boot.autoconfigure: ERROR
+    org.springframework.security.web.util.matcher.AndRequestMatcher: INFO
+    org.springframework.security.web.util.matcher.AntPathRequestMatcher: INFO
+    org.springframework.security.web.util.matcher.NegatedRequestMatcher: INFO
+    org.springframework.security.web.FilterChainProxy: INFO

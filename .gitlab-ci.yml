@@ -1,0 +1,31 @@
+
+test backend:
+  allow_failure: false
+  stage: build
+  image: java:8
+  services:
+    - docker:19.03.0-dind
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+    - .gradle/wrapper
+    - .gradle/caches
+  script: bin/ci-test-backend
+  artifacts:
+    paths:
+      - platform-rest/build/
+    reports:
+      junit: platform-rest/build/test-results/test/**/TEST-*.xml
+
+
+build backend:
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+    paths:
+      - .gradle/wrapper
+      - .gradle/caches
+  script: |
+    docker build --tag "$BACKEND_IMAGE_PATH" -f Dockerfile backend
+    docker push "$BACKEND_IMAGE_PATH"
+
+

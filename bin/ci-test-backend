@@ -1,0 +1,34 @@
+#!/bin/bash
+########################################
+set -x # output all commands
+set -e # exit on immediately on every error
+set -u # error on usage of undefined variables
+########################################
+
+export DB_HOST=postgres
+export DB_NAME=amigo_platform
+export DB_PASSWORD=password
+export DB_PORT=5432
+export DB_USER=postgres
+
+export REDIS_HOST="redis"
+export REDIS_PORT=6379
+export POSTGRES_DB=$DB_NAME
+export POSTGRES_USER=$DB_USER
+export POSTGRES_PASSWORD=$DB_PASSWORD
+export DOCKER_HOST="tcp://docker:2375" # gitlab needs this to support docker testcontainers
+export DOCKER_DRIVER=overlay2          # gitlab needs this to support docker testcontainers
+export DOCKER_TLS_CERTDIR=""           # "/certs" gitlab needs this to support docker testcontainers
+
+export GRADLE_USER_HOME=$(pwd)/.gradle
+
+# ensure that there exists a gradle configuration
+if [ ! -e build.gradle ]; then exit 1; fi
+
+./gradlew :platform-rest:build :platform-domain:test :platform-rest:test  :platform-rest:bootJar :platform-rest:prepareDocker :platform-rest:asciidoctor
+
+mkdir platform-rest/build/test-results/test/platform-domain
+cp platform-domain/build/test-results/test/TEST-*.xml platform-rest/build/test-results/test/platform-domain/
+./gradlew jacocoTestReport coverageReport
+
+ls -lisa platform-rest/build/

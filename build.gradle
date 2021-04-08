@@ -1,0 +1,50 @@
+
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.0"
+        classpath("org.jetbrains.kotlin:kotlin-noarg:1.4.0")
+        classpath("org.jetbrains.kotlin:kotlin-allopen:1.4.0")
+//        classpath "gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.22.1"
+    }
+}
+
+plugins {
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+//    id 'org.springframework.boot' version '2.3.1.RELEASE'
+}
+
+subprojects {
+
+    group = 'org.ossiaustria.amigo'
+    version = '0.0.1-SNAPSHOT'
+
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'java-library'
+    apply plugin: 'kotlin'
+
+    ext['junit-jupiter.version'] = '5.6.2'
+
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom("org.springframework.boot:spring-boot-dependencies:2.2.9.RELEASE") {
+                bomProperty("kotlin.version", "1.4.0")
+            }
+        }
+    }
+
+}
+
+

@@ -1,0 +1,15 @@
+**/.idea/
+!**/.idea/codeStyles/codeStyleConfig.xml
+!**/.idea/codeStyles/Project.xml
+.editorconfig
+*.ipr
+*.iml
+
+# Gradle files
+.gradle/
+build/
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+system.env
