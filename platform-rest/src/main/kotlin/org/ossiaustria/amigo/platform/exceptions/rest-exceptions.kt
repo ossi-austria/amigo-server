@@ -9,7 +9,8 @@ enum class ErrorCode(val errorCode: Int, val errorName: String) {
     NotFound(1404, "Entity not found"),
     NotAllowed(1405, "Method NotAllowed "),
     Conflict(1409, "Entity already exists"),
-    AccessDenied(1401, "Access denied exception"),
+    Unauthorized(401, "Access denied exception"),
+    Forbidden(403, "Access denied exception"),
     ValidationFailed(1400, "ValidationFailed"),
 
 
@@ -28,7 +29,6 @@ enum class ErrorCode(val errorCode: Int, val errorName: String) {
 }
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Operation cannot be executed due to malformed input or invalid states.")
-@Deprecated("Use BadRequestException or another specific type")
 open class RestException(
     val errorCode: Int,
     val errorName: String,
@@ -45,13 +45,17 @@ class ValidationException(val validationErrors: Array<FieldError?>) : RestExcept
 @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Cannot create entity due to a bad request")
 class BadRequestException(errorCode: ErrorCode, detailMessage: String) : RestException(errorCode, detailMessage)
 
-@ResponseStatus(code = HttpStatus.UNAUTHORIZED, reason = "Unauthorized for the request")
-class AccessDeniedException(message: String? = null) : RestException(ErrorCode.AccessDenied, message
-    ?: "Access denied")
+@ResponseStatus(code = HttpStatus.UNAUTHORIZED, reason = "Unauthorized")
+class UnauthorizedException(message: String? = null) : RestException(
+    ErrorCode.Unauthorized, message
+        ?: "Unauthorized"
+)
 
-@ResponseStatus(code = HttpStatus.FORBIDDEN, reason = "Bad credentials")
-class IncorrectCredentialsException(message: String? = null) : RestException(ErrorCode.AccessDenied, message
-    ?: "Access denied")
+@ResponseStatus(code = HttpStatus.FORBIDDEN, reason = "Authorized, but forbidden")
+class ForbiddenException(message: String? = null) : RestException(
+    ErrorCode.Forbidden, message
+        ?: "Forbidden"
+)
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Operation cannot be executed due to malformed input or invalid states.")
 class InternalException(message: String? = null) : RestException(ErrorCode.ValidationFailed, message

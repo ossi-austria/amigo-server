@@ -3,9 +3,9 @@ package org.ossiaustria.amigo.platform.persistence
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.ossiaustria.amigo.platform.repositories.AccountRepository
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Person
+import org.ossiaustria.amigo.platform.repositories.AccountRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.util.*
@@ -19,12 +19,12 @@ class AccountTest : AbstractRepositoryTest() {
     private lateinit var repository: AccountRepository
 
     private fun createEntity(
-        slug: String = "slug",
+        name: String = "name",
         email: String = "email",
         changeAccountToken: String? = null
     ): Pair<UUID, Account> {
         val id = randomUUID()
-        val person = Person(randomUUID(), slug, randomUUID())
+        val person = Person(randomUUID(), randomUUID(), name, randomUUID())
         val entity = Account(
             id = id,
             passwordEncrypted = "enc",
@@ -38,7 +38,7 @@ class AccountTest : AbstractRepositoryTest() {
 
     @BeforeEach
     fun prepare() {
-        truncateDbTables(listOf("account", "account_token"), cascade = true)
+        truncateDbTables(listOf("account", "person"), cascade = true)
     }
 
     @Transactional

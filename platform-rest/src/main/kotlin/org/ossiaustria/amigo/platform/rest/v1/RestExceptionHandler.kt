@@ -1,15 +1,9 @@
 package org.ossiaustria.amigo.platform.rest.v1
 
+import org.hibernate.exception.ConstraintViolationException
+import org.ossiaustria.amigo.platform.exceptions.*
 import org.ossiaustria.amigo.platform.rest.v1.common.RestExceptionDto
 import org.ossiaustria.amigo.platform.rest.v1.common.ValidationFailureDto
-import org.ossiaustria.amigo.platform.exceptions.BadRequestException
-import org.ossiaustria.amigo.platform.exceptions.ConflictException
-import org.ossiaustria.amigo.platform.exceptions.ErrorCode
-import org.ossiaustria.amigo.platform.exceptions.ForbiddenContentException
-import org.ossiaustria.amigo.platform.exceptions.NotFoundException
-import org.ossiaustria.amigo.platform.exceptions.RestException
-import org.ossiaustria.amigo.platform.exceptions.ValidationException
-import org.hibernate.exception.ConstraintViolationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.FieldError
@@ -28,6 +22,12 @@ class RestExceptionHandler {
     fun handleNotFoundException(exception: NotFoundException): ResponseEntity<RestExceptionDto> {
         val error = RestExceptionDto(exception)
         return ResponseEntity(error, HttpStatus.NOT_FOUND)
+    }
+
+    @ExceptionHandler(UnauthorizedException::class)
+    fun handleUnauthorizedException(exception: UnauthorizedException): ResponseEntity<RestExceptionDto> {
+        val error = RestExceptionDto(exception)
+        return ResponseEntity(error, HttpStatus.UNAUTHORIZED)
     }
 
     @ExceptionHandler(ConstraintViolationException::class)

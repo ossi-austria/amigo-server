@@ -8,9 +8,6 @@ spring:
       ddl-auto: create-drop # USE for dev only
   flyway:
     enabled: false # USE for dev only
-  redis:
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:6379}
 
 logging:
   level:

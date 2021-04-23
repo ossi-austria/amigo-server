@@ -1,7 +1,5 @@
 package org.ossiaustria.amigo.platform.domain.models
 
-import org.hibernate.annotations.Fetch
-import org.hibernate.annotations.FetchMode
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import java.util.*
 import javax.persistence.*
@@ -14,6 +12,9 @@ data class Person(
     @Id
     @Column(length = 16, unique = true, nullable = false)
     val id: UUID,
+
+    @Column(name = "account_id")
+    val accountId: UUID,
 
     val name: String,
 

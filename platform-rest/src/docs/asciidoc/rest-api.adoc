@@ -48,18 +48,18 @@ use of HTTP status codes.
 | Status code | Usage
 
 | `200 OK`
-|  * The request completed successfully
-* An update to an existing resource has been applied successfully
+|  The request completed successfully.
+An update to an existing resource has been applied successfully
 
 | `201 Created`
-| A new resource has been created successfully. The resource's URI is available from the response's
+| A new resource has been created successfully.The resource's URI is available from the response's
 `Location` header
 
 | `204 No Content`
 | An update to an existing resource has been applied successfully
 
 | `400 Bad Request`
-| The request was malformed. The response body will include an error providing further information.
+| The request was malformed.The response body will include an error providing further information.
 
 | `401 Unauthorized`
 | User is not logged in and Authorization is necessary
@@ -95,7 +95,7 @@ Every authenticated request needs following header(s):
 ----
 Content-Type: application/json
 Accept: application/json
-PRIVATE-TOKEN: $SECRET_PRIVATE_TOKEN
+Authorization: Bearer $SECRET_ACCESS_TOKEN
 ----
 
 The Private Token can be obtained during authentication
@@ -111,12 +111,12 @@ Content-Length: $NUMBER
 [[overview-errors]]
 == Errors
 
-Whenever an error response (status code >= 400) is returned, the body will contain a JSON object
-that describes the problem. The error object has the following structure:
+Whenever an error response (status code >= 400) is returned, the body will contain a JSON object that describes the problem.
+The error object has the following structure:
 
 include::{snippets}/register-fail/response-fields.adoc[]
 
-For example, a request that attempts to register a user with a existing username
+For example, a request that attempts to register a user with an existing username
 `400 Bad Request` response:
 
 include::{snippets}/register-fail/http-response.adoc[]
@@ -126,7 +126,6 @@ include::{snippets}/register-fail/http-response.adoc[]
 
 [[authentication-register]]
 === POST /auth/register
-
 
 operation::register-success[snippets='curl-request,request-fields,http-response,response-fields']
 
@@ -138,17 +137,17 @@ Login can be executed with the username or the email.
 operation::login-success[snippets='curl-request,request-fields,http-response,response-fields']
 
 [[update-profile]]
-=== PUT /auth/user
+=== PUT /auth/register
 
-Update own user's information
+register
 
-operation::update-own-profile-success[snippets='curl-request,request-fields,http-response,response-fields']
+operation::register-success[snippets='curl-request,request-fields,http-response,response-fields']
 
-=== PUT /auth/update/:user_id
+=== GET /auth/refresh-token
 
-Update user's information, can be used by Admins or by that user itself.
+refresh-token-success
 
-operation::update-profile-success[snippets='curl-request,request-fields,http-response,response-fields']
+operation::refresh-token-success[snippets='curl-request,request-fields,http-response,response-fields']
 
 === GET /auth/whoami
 
@@ -156,77 +155,3 @@ Get user short profile info
 
 operation::who-am-i[snippets='curl-request,http-response,response-fields']
 
-=== GET /auth/check/token
-
-Check token is correct and alive
-
-operation::check-token[snippets='curl-request,http-response,response-fields']
-
-[[password-management]]
-= Passwords management - /password
-== Password reset request - POST /password/reset
-
-operation::password-reset-successful[snippets='curl-request,request-parameters,response-body']
-
-== Password reset confirmation - POST /password/reset/confirm
-
-operation::password-reset-confirmation[snippets='curl-request,request-body,response-body']
-
-[[resources]]
-= Resources
-
-[[projects]]
-== Projects - /projects, /code-projects, /data-projects
-
-Projects are abstract entities with the subtypes DataProject and CodeProject.
-For many requests, Projects can be used, but create or update operations, you must use the specific /data-project and /code-project endpoints
-
-=== GET /projects
-
-All *accessible* Projects (own, shared, public)
-
-operation::project-retrieve-accessible[snippets='curl-request,response-body,response-fields']
-
-=== GET /projects/own
-
-All *own* Projects (created by user)
-
-operation::project-retrieve-own[snippets='curl-request']
-
-=== GET /projects/my
-
-All *own* (created by user) and *shared* (user or group is member of ) Projects
-
-operation::project-retrieve-my[snippets='curl-request']
-
-=== GET /projects/starred
-
-All *accessible* Projects *(own,shared,public)* which the user starred.
-
-operation::project-retrieve-starred[snippets='curl-request']
-
-=== GET /projects/public/all
-
-Public projects (can include own and shared), but without paging.
-
-operation::project-retrieve-public-all[snippets='curl-request']
-
-=== GET /projects/:id
-
-operation::data-project-retrieve-one[snippets='curl-request,response-body,response-fields']
-
-=== GET /projects/slug/:slug
-
-operation::projects-retrieve-by-slug[snippets='curl-request,response-body,response-fields']
-
-=== GET /projects/namespace/:namespace
-
-operation::projects-retrieve-by-namespace[snippets='curl-request,response-body,response-fields']
-
-=== GET /projects/:namespace/:slug
-
-operation::data-project-retrieve-one-by-namespace-slug[snippets='curl-request,response-body,response-fields']
-
-=== GET /projects/:namespace/:slug/processor
-
-operation::data-processors-codeproject-retrieve-one-by-namespace-slug[snippets='curl-request,response-body,response-fields']

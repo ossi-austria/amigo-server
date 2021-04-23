@@ -1,25 +1,26 @@
 package org.ossiaustria.amigo.platform.persistence
 
-import org.ossiaustria.amigo.platform.ApplicationProfiles
-import org.ossiaustria.amigo.platform.testcommons.TestPostgresContainer
-import org.ossiaustria.amigo.platform.testcommons.TestRedisContainer
 import org.junit.jupiter.api.assertThrows
+import org.ossiaustria.amigo.platform.ApplicationProfiles
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.ComponentScan
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.transaction.TestTransaction
 import org.springframework.transaction.annotation.Transactional
 import javax.persistence.EntityManager
 import javax.sql.DataSource
 
-@TestPropertySource("classpath:application-integration-test.yml")
+@TestPropertySource("classpath:application-test.yml")
 @SpringBootTest
-@ActiveProfiles(ApplicationProfiles.INTEGRATION_TEST)
-@ContextConfiguration(initializers = [TestPostgresContainer.Initializer::class, TestRedisContainer.Initializer::class])
+@ActiveProfiles(ApplicationProfiles.TEST)
+@ComponentScan("org.ossiaustria.amigo.platform")
+@AutoConfigureTestDatabase(connection = org.springframework.boot.jdbc.EmbeddedDatabaseConnection.H2)
 class AbstractRepositoryTest {
+
     @Autowired
     val dataSource: DataSource? = null
 
@@ -30,28 +31,33 @@ class AbstractRepositoryTest {
     val entityManager: EntityManager? = null
 
 
-
     protected fun truncateAllTables() {
-        truncateDbTables(listOf(
-            "account", "account_token",
-
-            "subject",
-        ), cascade = true)
+        truncateDbTables(
+            listOf(
+                "account",
+                "person",
+            ), cascade = true
+        )
     }
 
     @Transactional
     protected fun truncateDbTables(tables: List<String>, cascade: Boolean = true) {
         println("Truncating tables: $tables")
+        println("Truncating tables: $tables")
         val joinToString = tables.joinToString("\", \"", "\"", "\"")
 
-        val createNativeQuery = if (cascade) {
-            entityManager!!.createNativeQuery("truncate table $joinToString CASCADE ")
-
-        } else {
-            entityManager!!.createNativeQuery("truncate table $joinToString ")
+        try {
+            val createNativeQuery = if (cascade) {
+                entityManager!!.createNativeQuery("truncate table $joinToString CASCADE ")
+            } else {
+                entityManager!!.createNativeQuery("truncate table $joinToString ")
+            }
+            entityManager!!.joinTransaction()
+            createNativeQuery.executeUpdate()
+        } catch (e: Exception) {
+            println(e)
         }
-        entityManager!!.joinTransaction()
-        createNativeQuery.executeUpdate()
+
     }
 
     fun commitAndFail(f: () -> Unit) {

@@ -1,13 +1,10 @@
-package org.ossiaustria.amigo.platform.feature.auth
+package org.ossiaustria.amigo.platform.services.auth
 
-import org.ossiaustria.amigo.platform.repositories.AccountRepository
-import org.ossiaustria.amigo.platform.services.auth.AuthService
 import org.ossiaustria.amigo.platform.domain.models.Account
-import org.ossiaustria.amigo.platform.exceptions.*
-import org.ossiaustria.amigo.platform.services.email.EmailMessageType
-import org.ossiaustria.amigo.platform.services.email.EmailService
-import org.ossiaustria.amigo.platform.services.email.EmailVariables
-import org.ossiaustria.amigo.platform.services.email.TemplateType
+import org.ossiaustria.amigo.platform.exceptions.ConflictException
+import org.ossiaustria.amigo.platform.exceptions.ErrorCode
+import org.ossiaustria.amigo.platform.exceptions.UnknownUserException
+import org.ossiaustria.amigo.platform.repositories.AccountRepository
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -23,14 +20,12 @@ interface PasswordService {
 @Service
 class APPasswordService(
     private val accountRepository: AccountRepository,
-    private val emailService: EmailService,
     private val authService: AuthService,
 ) : PasswordService {
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
         private const val RESET_PASSWORD_SUBJECT = "Password reset"
-
     }
 
     override fun resetPasswordStart(email: String?, userName: String?, userId: UUID?) {
@@ -56,23 +51,23 @@ class APPasswordService(
             return
         }
 
-        val savedAccount = accountRepository.save(
-            account.copy(
-                changeAccountToken = UUID.randomUUID().toString(),
-                changeAccountTokenCreatedAt = ZonedDateTime.now()
-            )
-        )
+//        val savedAccount = accountRepository.save(
+//            account.copy(
+//                changeAccountToken = UUID.randomUUID().toString(),
+//                changeAccountTokenCreatedAt = ZonedDateTime.now()
+//            )
+//        )
+//
+//        val resetPasswordUrl = "reset/${account.changeAccountToken}"
 
-        val resetPasswordUrl = "reset/${account.changeAccountToken}"
+//        val variables = mapOf(
+//            EmailVariables.USER_NAME to savedAccount.email,
+//            EmailVariables.RECIPIENT_EMAIL to savedAccount.email,
+//            EmailVariables.SUBJECT to RESET_PASSWORD_SUBJECT,
+//            EmailVariables.REDIRECT_URL to resetPasswordUrl
+//        )
 
-        val variables = mapOf(
-            EmailVariables.USER_NAME to savedAccount.email,
-            EmailVariables.RECIPIENT_EMAIL to savedAccount.email,
-            EmailVariables.SUBJECT to RESET_PASSWORD_SUBJECT,
-            EmailVariables.REDIRECT_URL to resetPasswordUrl
-        )
-
-        emailService.sendAsync(savedAccount.id, EmailMessageType.HTML, TemplateType.PASSWORD_RESET_TEMPLATE, variables)
+//        emailService.sendAsync(savedAccount.id, EmailMessageType.HTML, TemplateType.PASSWORD_RESET_TEMPLATE, variables)
     }
 
     override fun passwordResetConfirm(token: String, password: String): Boolean {

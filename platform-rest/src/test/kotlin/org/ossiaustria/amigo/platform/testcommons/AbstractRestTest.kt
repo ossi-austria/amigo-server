@@ -21,19 +21,19 @@ abstract class AbstractRestTest {
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
-        const val HEADER_PRIVATE_TOKEN = "PRIVATE-TOKEN"
-        const val EPF_HEADER = "EPF-BOT-TOKEN"
+        const val HEADER_PRIVATE_TOKEN = "Authorization"
     }
 
-    @Autowired protected lateinit var objectMapper: ObjectMapper
+    @Autowired
+    protected lateinit var objectMapper: ObjectMapper
 
     protected fun acceptContentAuth(
         requestBuilder: MockHttpServletRequestBuilder,
-        token: String
+        jwtToken: String
     ): MockHttpServletRequestBuilder {
         return requestBuilder
             .accept(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN)
-            .header(HEADER_PRIVATE_TOKEN, token)
+            .header(HEADER_PRIVATE_TOKEN, "Bearer $jwtToken")
             .contentType(MediaType.APPLICATION_JSON)
     }
 
@@ -43,42 +43,29 @@ abstract class AbstractRestTest {
             .contentType(MediaType.APPLICATION_JSON)
     }
 
-    protected fun defaultAcceptContentEPFBot(token: String, requestBuilder: MockHttpServletRequestBuilder): MockHttpServletRequestBuilder {
-        return requestBuilder
-            .accept(MediaType.APPLICATION_JSON)
-            .header(EPF_HEADER, token)
-            .contentType(MediaType.APPLICATION_JSON)
-    }
 
-    protected fun performPost(url: String, token: String? = null, body: Any? = null) =
-        mockMvc.perform(
-            generateRequestBuilder(url, token, body, HttpMethod.POST)
-        )
+    protected fun performPost(url: String, accessToken: String? = null, body: Any? = null) = mockMvc.perform(
+        generateRequestBuilder(url, accessToken, body, HttpMethod.POST)
+    )
 
-    protected fun performPut(url: String, token: String? = null, body: Any? = null) =
-        mockMvc.perform(
-            generateRequestBuilder(url, token, body, HttpMethod.PUT)
-        )
+    protected fun performPut(url: String, accessToken: String? = null, body: Any? = null) = mockMvc.perform(
+        generateRequestBuilder(url, accessToken, body, HttpMethod.PUT)
+    )
 
-    protected fun performGet(url: String, token: String? = null) =
-        mockMvc.perform(
-            generateRequestBuilder(url, token, null, HttpMethod.GET)
-        )
+    protected fun performGet(url: String, accessToken: String? = null) = mockMvc.perform(
+        generateRequestBuilder(url, accessToken, null, HttpMethod.GET)
+    )
 
-    protected fun performDelete(url: String, token: String? = null) =
-        mockMvc.perform(
-            generateRequestBuilder(url, token, null, HttpMethod.DELETE)
-        )
+    protected fun performDelete(url: String, accessToken: String? = null) = mockMvc.perform(
+        generateRequestBuilder(url, accessToken, null, HttpMethod.DELETE)
+    )
 
-    protected fun performEPFPut(token: String, url: String, body: Any? = null) =
-        if (body != null) {
-            this.mockMvc.perform(this.defaultAcceptContentEPFBot(token, RestDocumentationRequestBuilders.put(url))
-                .content(objectMapper.writeValueAsString(body)))
-        } else {
-            this.mockMvc.perform(this.defaultAcceptContentEPFBot(token, RestDocumentationRequestBuilders.put(url)))
-        }
-
-    private fun generateRequestBuilder(url: String, token: String?, body: Any?, method: HttpMethod = HttpMethod.GET): MockHttpServletRequestBuilder {
+    private fun generateRequestBuilder(
+        url: String,
+        jwtToken: String?,
+        body: Any?,
+        method: HttpMethod = HttpMethod.GET
+    ): MockHttpServletRequestBuilder {
         val builder = when (method) {
             HttpMethod.GET -> RestDocumentationRequestBuilders.get(url)
             HttpMethod.POST -> RestDocumentationRequestBuilders.post(url)
@@ -91,10 +78,10 @@ abstract class AbstractRestTest {
             builder.content(objectMapper.writeValueAsString(body))
         }
 
-        return if (token == null) {
+        return if (jwtToken == null) {
             acceptAnonymousAuth(builder)
         } else {
-            acceptContentAuth(builder, token)
+            acceptContentAuth(builder, jwtToken)
         }
     }
 
@@ -109,7 +96,7 @@ abstract class AbstractRestTest {
         }
     }
 
-    final inline fun <reified T : Any> ResultActions.returns(): T {
+    inline fun <reified T : Any> ResultActions.returns(): T {
         return this.andReturn().let {
             `access$objectMapper`.readValue(it.response.contentAsByteArray)
         }
@@ -133,6 +120,10 @@ abstract class AbstractRestTest {
 
     fun ResultActions.expectForbidden(): ResultActions {
         return this.andExpect(MockMvcResultMatchers.status().isForbidden)
+    }
+
+    fun ResultActions.expectUnauthorized(): ResultActions {
+        return this.andExpect(MockMvcResultMatchers.status().isUnauthorized)
     }
 
     fun ResultActions.expect4xx(): ResultActions {
@@ -165,7 +156,6 @@ abstract class AbstractRestTest {
         set(value) {
             objectMapper = value
         }
-
 }
 
 

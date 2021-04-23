@@ -1,17 +1,12 @@
 package org.ossiaustria.amigo.platform.rest.v1.auth
 
-import org.ossiaustria.amigo.platform.feature.auth.PasswordService
+import org.ossiaustria.amigo.platform.services.auth.PasswordService
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
+import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
-@RequestMapping("/api/v1/password", produces = ["application/json"], consumes = ["application/json"])
+@RequestMapping("/v1/auth/password", produces = ["application/json"], consumes = ["application/json"])
 class PasswordController(
     private val passwordService: PasswordService
 ) {

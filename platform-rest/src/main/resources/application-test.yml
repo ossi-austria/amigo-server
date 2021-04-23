@@ -7,18 +7,9 @@ spring:
       repositories:
         enabled: false
   jpa:
-    show-sql: true # true for debugging
+    show-sql: false # true for debugging
     generate-ddl: true
     hibernate:
       ddl-auto: create-drop
   flyway:
     enabled: false # USE for dev only
-  redis:
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:6379}
-  session:
-    store-type: redis
-    redis:
-      flush-mode: on_save
-      namespace: spring:session
-

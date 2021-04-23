@@ -1,5 +1,10 @@
 
-test backend:
+variables:
+  DOCKER_HOST: "tcp://docker:2375"  # gitlab needs this to support docker testcontainers
+  DOCKER_DRIVER: overlay2           # gitlab needs this to support docker testcontainers
+  DOCKER_TLS_CERTDIR: ""            # "/certs" gitlab needs this to support docker testcontainers
+
+build & test:
   allow_failure: false
   stage: build
   image: java:8
@@ -8,9 +13,9 @@ test backend:
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
-    - .gradle/wrapper
-    - .gradle/caches
-  script: bin/ci-test-backend
+      - .gradle/wrapper
+      - .gradle/caches
+  script: ci-bin/ci-build-test
   artifacts:
     paths:
       - platform-rest/build/
@@ -18,7 +23,9 @@ test backend:
       junit: platform-rest/build/test-results/test/**/TEST-*.xml
 
 
-build backend:
+push docker:
+  stage: deploy
+  allow_failure: true
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
@@ -28,4 +35,14 @@ build backend:
     docker build --tag "$BACKEND_IMAGE_PATH" -f Dockerfile backend
     docker push "$BACKEND_IMAGE_PATH"
 
+pages:
+  stage: deploy
+  cache:
+    key: pages-public-cache
+    paths:
+      - public/
+  script: ci-bin/ci-docs-pages
+  artifacts:
+    paths:
+      - public
 
