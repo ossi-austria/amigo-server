@@ -1,38 +1,40 @@
 package org.ossiaustria.amigo.platform.rest.v1.auth
 
 
-import org.ossiaustria.amigo.platform.services.auth.AuthService
 import org.ossiaustria.amigo.platform.rest.CurrentUserService
+import org.ossiaustria.amigo.platform.services.auth.AuthService
 import org.springframework.web.bind.annotation.*
-import java.time.ZonedDateTime
 import javax.validation.constraints.Email
 import javax.validation.constraints.NotEmpty
 
 @RestController
-@RequestMapping("/api/v1/auth", produces = ["application/json"], consumes = ["application/json"])
+@RequestMapping("/v1/auth", produces = ["application/json"], consumes = ["application/json"])
 class AuthController(
     val authService: AuthService,
     val currentUserService: CurrentUserService
 ) {
 
     @PostMapping("/login")
-    fun login(@RequestBody loginRequest: LoginRequest): AccountDto = authService
+    fun login(@RequestBody loginRequest: LoginRequest): LoginResultDto = authService
         .loginUser(
-            plainPassword = loginRequest.password,
-            username = loginRequest.username,
-            email = loginRequest.email
+            email = loginRequest.email,
+            plainPassword = loginRequest.password
         )
+        .toDto()
+
+    @PostMapping("/refresh-token")
+    fun refreshToken(@RequestBody refreshAccessTokenRequest: RefreshAccessTokenRequest): TokenResultDto = authService
+        .refreshAccessToken(refreshToken = refreshAccessTokenRequest.refreshToken)
         .toDto()
 
     @PostMapping("/register")
     fun register(@RequestBody registerRequest: RegisterRequest): SecretAccountDto = authService
         .registerUser(
+            email = registerRequest.email,
             plainPassword = registerRequest.password,
-            username = registerRequest.username,
-            email = registerRequest.email
+            name = registerRequest.name
         )
         .toSecretUserDto()
-
 
     @GetMapping("/whoami")
     fun whoami(): AccountDto = currentUserService.account().toDto()
@@ -40,22 +42,20 @@ class AuthController(
 }
 
 data class LoginRequest(
-    val username: String?,
-    @get:Email val email: String?,
+    @get:Email val email: String,
     @get:NotEmpty val password: String
 )
 
+data class RefreshAccessTokenRequest(
+    val refreshToken: String
+)
+
 data class RegisterRequest(
-    @get:NotEmpty val username: String,
     @get:Email @get:NotEmpty val email: String,
     @get:NotEmpty val password: String,
     @get:NotEmpty val name: String
 )
 
 data class UpdateRequest(
-    @get:NotEmpty val username: String? = null,
-    @get:Email @get:NotEmpty val email: String? = null,
     val name: String? = null,
-    val termsAcceptedAt: ZonedDateTime? = null,
-    val hasNewsletters: Boolean? = null
 )

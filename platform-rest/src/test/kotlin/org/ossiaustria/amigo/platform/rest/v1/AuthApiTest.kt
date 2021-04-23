@@ -1,51 +1,30 @@
 package org.ossiaustria.amigo.platform.rest.v1
 
-import org.ossiaustria.amigo.platform.utils.RandomUtils
-import com.ninjasquad.springmockk.SpykBean
-import io.mockk.Runs
-import io.mockk.every
-import io.mockk.just
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.rest.v1.auth.*
-import org.ossiaustria.amigo.platform.services.auth.TokenDetails
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.mail.SimpleMailMessage
-import org.springframework.mail.javamail.JavaMailSender
+import org.ossiaustria.amigo.platform.utils.RandomUtils
 import org.springframework.restdocs.payload.FieldDescriptor
-import org.springframework.restdocs.payload.JsonFieldType
-import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
+import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.requestFields
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
 import org.springframework.test.annotation.Rollback
-import java.time.ZonedDateTime
-import java.util.UUID
-import javax.mail.internet.MimeMessage
+import java.util.*
 import javax.transaction.Transactional
 
-class AuthApiTest : AbstractRestApiTest() {
+internal class AuthApiTest : AbstractRestApiTest() {
 
-    val authUrl = "/api/v1/auth"
+    val authUrl = "/v1/auth"
 
-    @SpykBean
-    lateinit var mailSender: JavaMailSender
-
-    @Autowired
-    private lateinit var accountSubjectPreparationTrait: AccountSubjectPreparationTrait
 
     @BeforeEach
     @AfterEach
     fun clearRepo() {
         truncateAllTables()
-
-        every { mailSender.send(ofType(SimpleMailMessage::class)) } just Runs
-        every { mailSender.send(ofType(MimeMessage::class)) } just Runs
-
         accountSubjectPreparationTrait.apply()
-
         account = accountSubjectPreparationTrait.account
     }
 
@@ -57,7 +36,7 @@ class AuthApiTest : AbstractRestApiTest() {
         val randomUserName = RandomUtils.generateRandomUserName(10)
         val randomPassword = RandomUtils.generateRandomPassword(30, true)
         val email = "$randomUserName@example.com"
-        val registerRequest = RegisterRequest(randomUserName, email, randomPassword, "absolute-new-name")
+        val registerRequest = RegisterRequest(email, randomPassword, "absolute-new-name")
 
         val url = "$authUrl/register"
 
@@ -67,8 +46,7 @@ class AuthApiTest : AbstractRestApiTest() {
                 "register-success",
                 requestFields(registerRequestFields()),
                 responseFields(userSecretDtoResponseFields())
-            )
-            .returns(SecretAccountDto::class.java)
+            ).returns(SecretAccountDto::class.java)
 
         with(accountRepository.findOneByEmail(email)!!) {
             assertThat(id).isEqualTo(result.id)
@@ -80,140 +58,150 @@ class AuthApiTest : AbstractRestApiTest() {
     @Test
     @Tag(TestTags.RESTDOC)
     fun `Cannot register with existing user`() {
-        val existingUser = createMockUser()
+        val existingUser = createMockUser("password", "0001")
         val registerRequest =
-            RegisterRequest(existingUser.email, existingUser.email, "any other password", "another-new-name")
+            RegisterRequest(existingUser.email, "any other password", "another-new-name")
 
         val url = "$authUrl/register"
 
         this.performPost(url, body = registerRequest)
             .expect4xx()
-            .document("register-fail",
-                responseFields(errorResponseFields()))
+            .document("register-fail", responseFields(errorResponseFields()))
     }
-
 
     @Transactional
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Cannot login with Gitlab is rejected credentials`() {
+    fun `Can login with correct credentials`() {
 
-        val plainPassword = "password"
-        val existingUser = createMockUser(plainPassword, "0000")
-        val loginRequest = LoginRequest(existingUser.email, existingUser.email, plainPassword)
+        val existingUser = createMockUser("password", "0001")
+        val loginRequest = LoginRequest(existingUser.email, "password")
+
+        val url = "$authUrl/login"
+
+        val loginResult = this.performPost(url, body = loginRequest)
+            .expectOk()
+            .document(
+                "login-success",
+                requestFields(loginRequestFields()),
+                responseFields(loginResponseFields())
+            ).returns(LoginResultDto::class.java)
+
+        this.performGet(securedUrl(loginResult.account.persons.first().id), accessToken = loginResult.accessToken.token)
+            .expectOk()
+
+    }
+
+    @Transactional
+    @Rollback
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `login should return usable accessToken`() {
+
+        val existingUser = createMockUser("password", "0001")
+        val loginRequest = LoginRequest(existingUser.email, "password")
+
+        val loginResult = this.performPost("$authUrl/login", body = loginRequest).returns(LoginResultDto::class.java)
+
+        this.performGet(securedUrl(loginResult.account.persons.first().id), accessToken = loginResult.accessToken.token)
+            .expectOk()
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `login should return usable refreshToken`() {
+
+        val existingUser = createMockUser("password", "0001")
+        val loginRequest = LoginRequest(existingUser.email, "password")
+
+        val loginResult = this.performPost("$authUrl/login", body = loginRequest).returns(LoginResultDto::class.java)
+
+        RefreshAccessTokenRequest(refreshToken = loginResult.refreshToken.token).let {
+            this.performPost("$authUrl/refresh-token", body = it).expectOk()
+        }
+    }
+
+    @Transactional
+    @Rollback
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `login should return accessToken invalid for refresh`() {
+
+        val existingUser = createMockUser("password", "0001")
+        val loginRequest = LoginRequest(existingUser.email, "password")
+
+        val loginResult = this.performPost("$authUrl/login", body = loginRequest).returns(LoginResultDto::class.java)
+
+        RefreshAccessTokenRequest(refreshToken = loginResult.accessToken.token).let {
+            this.performPost("$authUrl/refresh-token", body = it).expectUnauthorized()
+        }
+    }
+
+    @Transactional
+    @Rollback
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `login should return refreshToken invalid for access`() {
+
+        val existingUser = createMockUser("password", "0001")
+        val loginRequest = LoginRequest(existingUser.email, "password")
+
+        val loginResult = this.performPost("$authUrl/login", body = loginRequest).returns(LoginResultDto::class.java)
+
+        this.performGet(securedUrl(), accessToken = loginResult.refreshToken.token).expectUnauthorized()
+    }
+
+    @Transactional
+    @Rollback
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `Cannot login with wrong credentials`() {
+
+        val existingUser = createMockUser("password", "0001")
+        val loginRequest = LoginRequest(existingUser.email, "wrongpassword")
 
         val url = "$authUrl/login"
 
         this.performPost(url, body = loginRequest)
             .expect4xx()
-            .document("login-fail",
-                responseFields(errorResponseFields()))
+            .document("login-fail", responseFields(errorResponseFields()))
     }
 
     @Transactional
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Can update an existing user`() {
-        val randomUserName = RandomUtils.generateRandomUserName(10)
-        val randomPassword = RandomUtils.generateRandomPassword(30, true)
-        val email = "$randomUserName@example.com"
-        val registerRequest = RegisterRequest(randomUserName, email, randomPassword, "absolute-new-name")
+    fun `Can retrieve new accessToken with valid refreshToken`() {
 
-        val url = "$authUrl/register"
+        mockUserAuthentication(refreshTokenTime = 8)
 
-        val result = this.performPost(url, body = registerRequest)
-            .expectOk()
-            .returns(SecretAccountDto::class.java)
-
-        with(accountRepository.findOneByEmail(email)!!) {
-            assertThat(id).isEqualTo(result.id)
-            assertThat(email).isEqualTo(result.email).isEqualTo(randomUserName)
-        }
-
-        val newRandomUserName = RandomUtils.generateRandomUserName(10)
-        val newEmail = "$newRandomUserName@example.com"
-
-        val updateRequest = UpdateRequest(
-            newRandomUserName,
-            newEmail
-        )
-
-        val tokenDetails = TokenDetails(
-            result.email,
-            result.id,
-            UUID.randomUUID(),
-            result.email,
-        )
-
-        mockSecurityContextHolder(tokenDetails)
-
-        val returnedResult2: AccountDto = this.performPut(
-            "$authUrl/update/${result.id}",
-            token = "new-token-${UUID.randomUUID()}",
-            body = updateRequest
+        val accessToken = this.performPost(
+            "$authUrl/refresh-token",
+            body = RefreshAccessTokenRequest(refreshToken = refreshToken.token)
         )
             .expectOk()
             .document(
-                "update-profile-success",
-                requestFields(updateProfileRequestFields()),
-                responseFields(AccountDtoResponseFields())
-            )
-            .returns()
+                "refresh-token-success",
+                requestFields(refreshTokenRequestFields()),
+                responseFields(tokenResultFields())
+            ).returns(TokenResultDto::class.java)
 
-        with(accountRepository.findOneByEmail(newEmail)!!) {
-            assertThat(id).isEqualTo(returnedResult2.id)
-            assertThat(email).isEqualTo(returnedResult2.email).isEqualTo(newRandomUserName)
-        }
-
-        assertThat(accountRepository.findOneByEmail(email)).isNull()
-        assertThat(accountRepository.findOneByEmail(randomUserName)).isNull()
+        this.performGet(securedUrl(), accessToken = accessToken.token).expectOk()
     }
 
     @Transactional
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Can update own user`() {
-        val randomUserName = RandomUtils.generateRandomUserName(10)
-        val randomPassword = RandomUtils.generateRandomPassword(30, true)
-        val email = "$randomUserName@example.com"
-        val registerRequest = RegisterRequest(randomUserName, email, randomPassword, "absolute-new-name")
+    fun `Cannot retrieve new accessToken with expired refreshToken`() {
 
-        val result = this.performPost("$authUrl/register", body = registerRequest)
-            .expectOk()
-            .returns(SecretAccountDto::class.java)
+        mockUserAuthentication(refreshTokenTime = 1)
+        Thread.sleep(2_000)
 
-        mockSecurityContextHolder(
-            TokenDetails(
-                result.email,
-                result.id,
-                UUID.randomUUID(),
-                "new-token-${UUID.randomUUID()}",
-            )
-        )
+        this.performPost("$authUrl/refresh-token", body = RefreshAccessTokenRequest(refreshToken = refreshToken.token))
+            .expectUnauthorized()
 
-        val returnedResult2: AccountDto = this.performPut(
-            "$authUrl/user",
-            token = "new-token-${UUID.randomUUID()}",
-            body = UpdateRequest(
-                termsAcceptedAt = ZonedDateTime.now(),
-                hasNewsletters = true,
-                email = email,
-            )
-        )
-            .expectOk()
-            .document(
-                "update-own-profile-success",
-                requestFields(updateProfileRequestFields()),
-                responseFields(AccountDtoResponseFields())
-            )
-            .returns()
-
-        with(accountRepository.findOneByEmail(email)!!) {
-            assertThat(id).isEqualTo(returnedResult2.id)
-        }
     }
 
     @Transactional
@@ -224,12 +212,9 @@ class AuthApiTest : AbstractRestApiTest() {
 
         mockUserAuthentication()
 
-        val result: AccountDto = this.performGet("$authUrl/whoami", token = "new-token-${UUID.randomUUID()}")
+        val result: AccountDto = this.performGet("$authUrl/whoami", accessToken = accessToken.token)
             .expectOk()
-            .document(
-                "who-am-i",
-                responseFields(AccountDtoResponseFields())
-            )
+            .document("who-am-i", responseFields(accountDtoResponseFields()))
             .returns()
 
         assertThat(account.id).isEqualTo(result.id)
@@ -241,92 +226,106 @@ class AuthApiTest : AbstractRestApiTest() {
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Can check token`() {
+    fun `Can access private endpoint with valid accessToken`() {
         mockUserAuthentication()
-
-        val result: AccountDto = this.performGet("$authUrl/check/token", token = "new-token-${UUID.randomUUID()}")
-            .expectOk()
-            .document(
-                "check-token",
-                responseFields(AccountDtoResponseFields())
-            )
-            .returns()
-
-        assertThat(account.id).isEqualTo(result.id)
-        assertThat(result.email).isEqualTo("mock_user")
-        assertThat(result.email).isEqualTo("mock@example.com")
+        this.performGet(securedUrl(), accessToken = accessToken.token).expectOk()
     }
 
-    private fun userSecretDtoResponseFields(): List<FieldDescriptor> {
-        return listOf(
-            fieldWithPath("id").type(JsonFieldType.STRING).description("UUID"),
-            fieldWithPath("email").type(JsonFieldType.STRING).description("An unique email"),
-            fieldWithPath("email").type(JsonFieldType.STRING).description("An valid email"),
-            fieldWithPath("gitlab_id").type(JsonFieldType.NUMBER).description("A gitlab id"),
-            fieldWithPath("token").type(JsonFieldType.STRING).optional().description(""),
-            fieldWithPath("access_token").type(JsonFieldType.STRING).optional().description(""),
-            fieldWithPath("refresh_token").type(JsonFieldType.STRING).optional().description(""),
-            fieldWithPath("user_role").optional().type(JsonFieldType.STRING)
-                .description("UserRole describes the main usage type of this user"),
-            fieldWithPath("terms_accepted_at").optional().type(JsonFieldType.STRING)
-                .description("Timestamp, when the terms & conditions have been accepted."),
-            fieldWithPath("has_newsletters").optional().type(JsonFieldType.BOOLEAN)
-                .description("Indicates that the user wants to retrieve newsletters, or not"),
-        )
+    @Transactional
+    @Rollback
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `Cannot access private endpoint without accessToken`() {
+        mockUserAuthentication()
+        this.performGet(securedUrl()).expectUnauthorized()
     }
 
-    private fun AccountDtoResponseFields(): List<FieldDescriptor> {
-        return listOf(
-            fieldWithPath("id").type(JsonFieldType.STRING).description("UUID"),
-            fieldWithPath("email").type(JsonFieldType.STRING).description("An unique email"),
-            fieldWithPath("email").type(JsonFieldType.STRING).description("An valid email"),
-            fieldWithPath("gitlab_id").type(JsonFieldType.NUMBER).description("A gitlab id"),
-            fieldWithPath("user_role").optional().type(JsonFieldType.STRING)
-                .description("UserRole describes the main usage type of this user"),
-            fieldWithPath("terms_accepted_at").optional().type(JsonFieldType.STRING)
-                .description("Timestamp, when the terms & conditions have been accepted."),
-            fieldWithPath("has_newsletters").optional().type(JsonFieldType.BOOLEAN)
-                .description("Indicates that the user wants to retrieve newsletters, or not"),
-        )
+    @Transactional
+    @Rollback
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `Cannot access private endpoint with invalid accessToken`() {
+        mockUserAuthentication(accessTokenTime = 1)
+        Thread.sleep(1000)
+        this.performGet(securedUrl(), accessToken = accessToken.token).expectUnauthorized()
+    }
+
+    private fun securedUrl(subjectId: UUID = account.persons.first().id): String =
+        "/v1/messages/filter?receiverId=${subjectId}"
+
+
+    private fun userSecretDtoResponseFields(prefix: String = ""): List<FieldDescriptor> {
+        return arrayListOf(
+            field(prefix + "id", STRING, "UUID"),
+            field(prefix + "email", STRING, "An unique email"),
+            field(prefix + "persons", ARRAY, "All persons of that Account"),
+            field(prefix + "changeAccountToken", STRING, "").optional(),
+            field(prefix + "changeAccountTokenCreatedAt", STRING, "").optional(),
+            field(prefix + "persons", ARRAY, "persops"),
+
+            ).apply {
+            addAll(personFields(prefix + "persons[]."))
+        }
+    }
+
+    private fun accountDtoResponseFields(): List<FieldDescriptor> {
+        return arrayListOf(
+            field("id", STRING, "UUID"),
+            field("email", STRING, "An unique email"),
+            field("persons", ARRAY, "All persons of that Account"),
+        ).apply {
+            addAll(personFields("persons[]."))
+        }
     }
 
     private fun registerRequestFields(): List<FieldDescriptor> {
         return listOf(
-            fieldWithPath("password").type(JsonFieldType.STRING).description("A plain text password"),
-            fieldWithPath("email").type(JsonFieldType.STRING).description("A valid, not-yet-existing email"),
-            fieldWithPath("email").type(JsonFieldType.STRING).description("A valid email"),
-            fieldWithPath("name").type(JsonFieldType.STRING).description("The fullname of the user"),
-        )
-    }
-
-    private fun updateProfileRequestFields(): List<FieldDescriptor> {
-        return listOf(
-            fieldWithPath("email").type(JsonFieldType.STRING).description("A valid, not-yet-existing email"),
-            fieldWithPath("email").type(JsonFieldType.STRING).description("A valid email"),
-            fieldWithPath("name").type(JsonFieldType.STRING).optional().description("The fullname of the user"),
-            fieldWithPath("user_role").optional().type(JsonFieldType.STRING).description(
-                "UserRole: Can be DATA_SCIENTIST,\n" +
-                        "    DEVELOPER,\n" +
-                        "    ML_ENGINEER,\n" +
-                        "    RESEARCHER,\n" +
-                        "    STUDENT,\n" +
-                        "    TEAM_LEAD,"
-            ),
-            fieldWithPath("terms_accepted_at").optional().type(JsonFieldType.STRING)
-                .description("Timestamp, when the terms & conditions have been accepted."),
-            fieldWithPath("has_newsletters").optional().type(JsonFieldType.BOOLEAN)
-                .description("Indicates that the user wants to retrieve newsletters, or not")
-
+            field("password", STRING, "A plain text password"),
+            field("email", STRING, "A valid email"),
+            field("name", STRING, "The fullname of the user"),
         )
     }
 
     private fun loginRequestFields(): List<FieldDescriptor> {
         return listOf(
-            fieldWithPath("password").type(JsonFieldType.STRING).description("The plain text password"),
-            fieldWithPath("email").type(JsonFieldType.STRING).optional()
-                .description("At least email or email has to be provided"),
-            fieldWithPath("email").type(JsonFieldType.STRING).optional()
-                .description("At least email or email has to be provided")
+            field("password", STRING, "A plain text password"),
+            field("email", STRING, "A valid email"),
         )
     }
+
+    private fun loginResponseFields(prefix: String = ""): List<FieldDescriptor> {
+        return listOf(
+            field(prefix + "account", OBJECT, "users account"),
+            field(prefix + "refreshToken", OBJECT, "long living refreshToken"),
+            field(prefix + "accessToken", OBJECT, "short living accessToken"),
+
+            ).toMutableList().apply {
+            addAll(userSecretDtoResponseFields("account."))
+            addAll(tokenResultFields("refreshToken."))
+            addAll(tokenResultFields("accessToken."))
+        }
+    }
+
+    private fun refreshTokenRequestFields(): List<FieldDescriptor> {
+        return listOf(
+            field("refreshToken", STRING, "refreshToken"),
+        )
+    }
+
+    private fun tokenResultFields(prefix: String = ""): List<FieldDescriptor> {
+        return listOf(
+            field(prefix + "token", STRING, "A valid email"),
+            field(prefix + "subject", STRING, "The fullname of the user"),
+            field(prefix + "issuedAt", STRING, "The fullname of the user"),
+            field(prefix + "expiration", STRING, "The fullname of the user"),
+            field(prefix + "issuer", STRING, "The fullname of the user"),
+        )
+    }
+
+    private fun updateProfileRequestFields(): List<FieldDescriptor> {
+        return listOf(
+            field("name", STRING, "The fullname of the user"),
+        )
+    }
+
 }

@@ -4,7 +4,6 @@ import org.ossiaustria.amigo.platform.exceptions.ValidationException
 import org.springframework.validation.FieldError
 import java.time.LocalDateTime
 
-// FIXME: Coverage says: missing tests
 class ValidationFailureDto(
     val errorCode: Int,
     val errorName: String,

@@ -1,17 +1,13 @@
 package org.ossiaustria.amigo.platform.rest.v1
 
 import com.ninjasquad.springmockk.SpykBean
-import io.mockk.Runs
 import io.mockk.every
-import io.mockk.just
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.rest.v1.auth.PasswordResetRequest
 import org.ossiaustria.amigo.platform.services.email.TemplateService
-import org.springframework.mail.SimpleMailMessage
-import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
@@ -21,25 +17,19 @@ import org.springframework.restdocs.request.RequestDocumentation.requestParamete
 import org.springframework.test.annotation.Rollback
 import java.time.ZonedDateTime
 import java.util.*
-import javax.mail.internet.MimeMessage
 import javax.transaction.Transactional
 
-class PasswordApiTest : AbstractRestApiTest() {
+internal class PasswordApiTest : AbstractRestApiTest() {
 
-    val baseUrl = "/api/v1/password"
+    val baseUrl = "/v1/auth/password"
 
     @SpykBean
     lateinit var templateService: TemplateService
-
-    @SpykBean
-    lateinit var mailSender: JavaMailSender
 
     @BeforeEach
     @AfterEach
     fun clearRepo() {
         every { templateService.createPasswordResetTemplateHtml(any()) } returns "Generated email template"
-        every { mailSender.send(ofType(SimpleMailMessage::class)) } just Runs
-        every { mailSender.send(ofType(MimeMessage::class)) } just Runs
     }
 
     @Transactional
@@ -78,7 +68,7 @@ class PasswordApiTest : AbstractRestApiTest() {
     @Test
     @Tag(TestTags.RESTDOC)
     fun `Confirm password reset by email`() {
-        val existingUser = createMockUser()
+        val existingUser = createMockUser("0001")
 
         var changedUser = existingUser.copy(
             changeAccountToken = UUID.randomUUID().toString(),

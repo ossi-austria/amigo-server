@@ -1,5 +1,9 @@
 amigo-platform:
-
+  security:
+    accessTokenSecret: ${AMIGO_ACCESS_TOKEN_SECRET:asdf1234}
+    refreshTokenSecret: ${AMIGO_REFRESH_TOKEN_SECRET:asdf1234asdf}
+    accessTokenExpirationSec: 360000
+    refreshTokenExpirationSec: 360000
 
 spring:
   devtools:
@@ -9,6 +13,9 @@ spring:
     redis:
       repositories:
         enabled: false
+  cache.type: simple
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:amigo_platform}
     username: ${DB_USER:amigo}
@@ -24,25 +31,7 @@ spring:
       ddl-auto: none
   flyway:
     baseline-on-migrate: true
-  redis:
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:6379}
-  session:
-    store-type: redis
-    redis:
-      flush-mode: on_save
-      namespace: spring:session
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${NOREPLY_EMAIL}
-    password: ${NOREPLY_EMAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+
 
 logging:
   pattern:

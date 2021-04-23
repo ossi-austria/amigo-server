@@ -5,7 +5,7 @@ import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "group")
+@Table(name = "groups")
 data class Group(
 
     @Id

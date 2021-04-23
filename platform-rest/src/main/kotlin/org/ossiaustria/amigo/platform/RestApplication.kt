@@ -12,10 +12,11 @@ object ApplicationProfiles {
     const val INTEGRATION_TEST = "integration-test"
     const val DEV = "dev"
     const val DOCKER = "docker"
-    const val PROD = "prod"
 }
 
-@SpringBootApplication(scanBasePackages = ["org.ossiaustria.amigo.platform"])
+@SpringBootApplication(
+    scanBasePackages = ["org.ossiaustria.amigo.platform"],
+)
 @EntityScan("org.ossiaustria.amigo.platform.domain")
 @EnableJpaRepositories("org.ossiaustria.amigo.platform.repositories")
 @EnableConfigurationProperties(ApplicationConfiguration::class)

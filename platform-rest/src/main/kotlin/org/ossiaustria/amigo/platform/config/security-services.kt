@@ -1,7 +1,5 @@
 package org.ossiaustria.amigo.platform.config
 
-import java.util.UUID
-
 fun String?.censor(): String? {
     if (this == null)
         return null
@@ -14,15 +12,6 @@ fun String?.censor(): String? {
     }
 }
 
-fun String?.tryToUUID(): UUID? {
-    return this?.let {
-        try {
-            UUID.fromString(it)
-        } catch (ex: Exception) {
-            null
-        }
-    }
-}
 
 
 

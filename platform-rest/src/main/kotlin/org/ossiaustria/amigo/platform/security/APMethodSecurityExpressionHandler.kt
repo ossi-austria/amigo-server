@@ -20,12 +20,8 @@ class APMethodSecurityExpressionHandler(
     override fun createSecurityExpressionRoot(
         authentication: Authentication,
         invocation: MethodInvocation?
-    ): MethodSecurityExpressionOperations? {
-        val root = APSecurityExpressionRoot(
-            authentication,
-            personRepository,
-            groupRepository,
-        )
+    ): MethodSecurityExpressionOperations {
+        val root = APSecurityExpressionRoot(authentication)
         root.setPermissionEvaluator(permissionEvaluator)
         root.setTrustResolver(this.trustResolver)
         root.setRoleHierarchy(roleHierarchy)

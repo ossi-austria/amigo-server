@@ -1,20 +1,19 @@
 package org.ossiaustria.amigo.platform.services.auth
 
 
-import org.ossiaustria.amigo.platform.repositories.AccountRepository
-import org.ossiaustria.amigo.platform.repositories.PersonRepository
+import org.ossiaustria.amigo.platform.config.security.JwtService
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Group
 import org.ossiaustria.amigo.platform.domain.models.Person
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
-import org.ossiaustria.amigo.platform.exceptions.IncorrectCredentialsException
+import org.ossiaustria.amigo.platform.exceptions.UnauthorizedException
 import org.ossiaustria.amigo.platform.exceptions.UserAlreadyExistsException
-import org.ossiaustria.amigo.platform.services.email.EmailMessageType
-import org.ossiaustria.amigo.platform.services.email.EmailService
-import org.ossiaustria.amigo.platform.services.email.EmailVariables
-import org.ossiaustria.amigo.platform.services.email.TemplateType
+import org.ossiaustria.amigo.platform.repositories.AccountRepository
+import org.ossiaustria.amigo.platform.repositories.GroupRepository
+import org.ossiaustria.amigo.platform.repositories.PersonRepository
 import org.slf4j.LoggerFactory
-import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
@@ -25,113 +24,134 @@ import javax.transaction.Transactional
 
 @Service("authService")
 class AuthService(
+    private val jwtService: JwtService,
     private val accountRepository: AccountRepository,
     private val personRepository: PersonRepository,
-    private val passwordEncoder: PasswordEncoder,
-    private val emailService: EmailService
+    private val groupRepository: GroupRepository,
+    private val passwordEncoder: PasswordEncoder
 ) {
 
-
     companion object {
-        val log = LoggerFactory.getLogger(this::class.java)
+        private val log = LoggerFactory.getLogger(this::class.java)
 
         private val GUEST_ACCOUNT_ID = UUID(0L, 0L)
-        private val GUEST_PERSON_ID = UUID(0L, 0L)
 
-        private const val WELCOME_MESSAGE_SUBJECT = "Welcome"
+        private const val DEFAULT_GROUP = "DEFAULT_GROUP"
 
-        private val guestTokenDetails: TokenDetails by lazy {
-            TokenDetails(
-                username = "",
-                accessToken = "",
+        private val GUEST_TOKEN_USER_DETAILS: TokenUserDetails by lazy {
+            TokenUserDetails(
+                email = "",
                 accountId = GUEST_ACCOUNT_ID,
-                personId = GUEST_PERSON_ID,
+                personsIds = listOf(),
+                expiration = Date(),
+                issuedAt = Date(),
             )
         }
     }
 
-    fun loginUser(plainPassword: String, username: String?, email: String?): Account {
-        val byUsername: Account? = if (username != null) accountRepository.findOneByEmail(username) else null
-        val byEmail: Account? = if (email != null) accountRepository.findOneByEmail(email) else null
+    fun loginUser(email: String, plainPassword: String): LoginResult {
+        log.info("User tries to login: $email")
+        val account: Account = accountRepository.findOneByEmail(email)
+            ?: throw UnauthorizedException("username or password is incorrect")
 
-        val found: List<Account> = listOfNotNull(byUsername, byEmail).filter { account ->
-            passwordEncoder.matches(plainPassword, account.passwordEncrypted)
-        }
+        val checkPw = passwordEncoder.matches(plainPassword, account.passwordEncrypted)
 
-        val account = found.getOrNull(0) ?: throw IncorrectCredentialsException("username or password is incorrect")
+        if (!checkPw) throw UnauthorizedException("username or password is incorrect")
 
-        val accountUpdate = account.copy(lastLogin = ZonedDateTime.now())
-        return accountRepository.save(accountUpdate)
+        val refreshToken = jwtService.generateRefreshToken(account.id, email)
+        val accessToken = jwtService.generateAccessToken(account.id, email, personsIds = account.persons.map { it.id })
+        accountRepository.save(account.copy(lastLogin = ZonedDateTime.now()))
+        return LoginResult(
+            account = account,
+            accessToken = accessToken,
+            refreshToken = refreshToken,
+        )
     }
 
     @Transactional
     fun registerUser(
-        plainPassword: String, username: String, email: String
+        plainPassword: String,
+        email: String,
+        name: String
     ): Account {
         val encryptedPassword = passwordEncoder.encode(plainPassword)
-        val byUsername: Account? = accountRepository.findOneByEmail(username)
         val byEmail: Account? = accountRepository.findOneByEmail(email)
 
-        if (listOfNotNull(byUsername, byEmail).isNotEmpty()) {
-            throw UserAlreadyExistsException(username, email)
-        }
+        log.info("Someone tries to register: $name $email")
+        if (byEmail != null) throw UserAlreadyExistsException(email, email)
 
         val accountUuid = randomUUID()
 
-        val person = personRepository.save(
+        val newUser = accountRepository.save(
+            Account(id = accountUuid, email = email, passwordEncrypted = encryptedPassword, persons = listOf())
+        )
+
+        personRepository.save(
             Person(
                 id = randomUUID(),
-                name = username,
-                groupId = UUID.randomUUID(),
-                memberType = MembershipType.MEMBER
+                name = name,
+                groupId = defaultGroupForNewUsers().id,
+                memberType = MembershipType.MEMBER,
+                accountId = accountUuid
             )
         )
-
-        val newUser = Account(
-            id = accountUuid, email = email, passwordEncrypted = encryptedPassword, persons = listOf(person)
-        )
-
-        accountRepository.save(newUser)
-
-        sendWelcomeMessage(newUser)
-
         return newUser
     }
 
+    fun refreshAccessToken(refreshToken: String): TokenResult {
 
-    private fun sendWelcomeMessage(account: Account) {
-        val variables = mapOf(
-            EmailVariables.USER_NAME to account.email,
-            EmailVariables.RECIPIENT_EMAIL to account.email,
-            EmailVariables.SUBJECT to WELCOME_MESSAGE_SUBJECT
-        )
-        emailService.sendAsync(account.id, EmailMessageType.HTML, TemplateType.WELCOME_MESSAGE_TEMPLATE, variables)
+        val claims = try {
+            jwtService.validateRefreshToken(refreshToken)
+            jwtService.getRefreshClaims(refreshToken)
+        } catch (e: Exception) {
+            throw UnauthorizedException(e.message)
+        }
+
+        log.info("RefreshToken for user ${claims.subject} was jwt valid")
+
+        val account = accountRepository.findOneByEmail(claims.subject)
+            ?: throw UnauthorizedException(claims.subject)
+
+        val lastRevocation = account.lastRevocationDate ?: ZonedDateTime.now().minusYears(5)
+
+        log.info("RefreshToken issuedAt ${claims.issuedAt}")
+        if (lastRevocation.toInstant().isAfter(claims.issuedAt.toInstant())) {
+            throw UsernameNotFoundException("Token expired or revoked. Please login again")
+        }
+
+        val personsIds = account.persons.map { it.id }
+
+        accountRepository.save(account.copy(lastRefresh = ZonedDateTime.now()))
+        return jwtService.generateAccessToken(account.id, account.email, personsIds = personsIds)
     }
 
+    fun checkValidAccessToken(accessToken: String): UserDetails = try {
+        val claims = jwtService.getAccessClaims(accessToken)
+        jwtService.validateAccessToken(accessToken)
+
+        val tokenUserDetails = TokenUserDetails(
+            accountId = UUID.fromString(claims[JwtService.CLAIM_ACCOUNT_ID].toString()),
+            email = claims.subject,
+            personsIds = (claims[JwtService.CLAIM_PERSONS_IDS] as List<*>).map { UUID.fromString(it.toString()) },
+            expiration = claims.expiration,
+            issuedAt = claims.issuedAt,
+            issuer = claims.issuer,
+        )
+        tokenUserDetails
+    } catch (e: Exception) {
+        throw UnauthorizedException(e.message)
+    }
+
+    private fun defaultGroupForNewUsers(): Group = groupRepository.findByName(DEFAULT_GROUP)
+        ?: groupRepository.save(Group(randomUUID(), DEFAULT_GROUP))
 
     @Transactional
     fun changePasswordForUser(account: Account, newPassword: String): Boolean {
-
         val passwordEncrypted = passwordEncoder.encode(newPassword)
-
-        accountRepository.save(
-            account.copy(passwordEncrypted = passwordEncrypted)
-        )
-
+        accountRepository.save(account.copy(passwordEncrypted = passwordEncrypted))
         return true
     }
 
-
-    fun createGuestDetails() = guestTokenDetails
-
-
-    fun findAccountById(id: UUID): Account? {
-        return accountRepository.findByIdOrNull(id)
-    }
-
-    fun findAccountByUsername(username: String): Account? {
-        return accountRepository.findOneByEmail(username)
-    }
-
-
+    fun createGuestDetails() = GUEST_TOKEN_USER_DETAILS
 }
+

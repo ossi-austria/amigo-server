@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/info", produces = ["application/json"], consumes = ["application/json"])
+@RequestMapping("/v1/info", produces = ["application/json"], consumes = ["application/json"])
 class SystemController(
     val currentUserService: CurrentUserService
 ) {
@@ -22,7 +22,6 @@ class SystemController(
     fun status(): StatusDto {
         return StatusDto("Hello.")
     }
-
 
     // FIXME: Coverage says: missing tests
     @RequestMapping(method = [RequestMethod.GET], value = ["/ping"])

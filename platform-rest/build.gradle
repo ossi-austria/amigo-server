@@ -31,14 +31,14 @@ dependencies {
 
     // Security
     implementation "org.springframework.boot:spring-boot-starter-security"
-    implementation "org.springframework.session:spring-session-data-redis"
 
     // spring data, JPA, Repositories and DB migration
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "org.flywaydb:flyway-core"
     runtimeOnly 'org.postgresql:postgresql'
-    runtimeOnly 'redis.clients:jedis:3.3.0'
     runtimeOnly 'com.h2database:h2'
+
+    implementation 'io.jsonwebtoken:jjwt:0.9.1'
 
     //Email
     implementation 'org.springframework.boot:spring-boot-starter-mail'
@@ -65,8 +65,7 @@ dependencies {
     testImplementation "org.testcontainers:postgresql:1.15.1"
 
     //embedded servers
-    testImplementation "com.github.kstyrc:embedded-redis:0.6"
-    testImplementation "org.eclipse.jgit:org.eclipse.jgit:5.8.1.202007141445-r"
+
 }
 
 compileKotlin {

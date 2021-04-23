@@ -1,16 +1,14 @@
 package org.ossiaustria.amigo.platform.services.email
 
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
-import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import javax.mail.internet.MimeMessage
 
@@ -35,7 +33,7 @@ enum class EmailVariables {
     SCHEDULED_AT
 }
 
-@Service
+@Deprecated("unused")
 class APEmailService(
     private val mailSender: JavaMailSender,
     private val templateService: TemplateService,
