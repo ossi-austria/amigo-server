@@ -67,7 +67,7 @@ internal class PasswordApiTest : AbstractRestApiTest() {
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Confirm password reset by email`() {
+    fun `should confirm password reset by email`() {
         val existingUser = createMockUser("0001")
 
         var changedUser = existingUser.copy(

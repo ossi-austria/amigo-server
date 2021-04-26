@@ -24,5 +24,7 @@ data class Call(
     val callType: CallType,
 
     val startedAt: ZonedDateTime? = null,
+
     val finishedAt: ZonedDateTime? = null,
-) : Sendable
+
+    ) : Sendable

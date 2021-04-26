@@ -36,6 +36,7 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
                 "/docs",
                 "/docs/*",
                 AUTH_URLS,
+                AUTH_LOGIN_URLS,
                 AUTH_PASSWORD_URLS,
                 AUTH_PASSWORD_RESET_URLS,
             )
@@ -47,7 +48,7 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
             .exceptionHandling().authenticationEntryPoint(forbiddenEntryPoint()).and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
             .anonymous().and()
-            .authorizeRequests().antMatchers("/docs", "/docs/*", AUTH_URLS, AUTH_PASSWORD_URLS)
+            .authorizeRequests().antMatchers("/docs", "/docs/*", AUTH_URLS, AUTH_LOGIN_URLS, AUTH_PASSWORD_URLS)
             .permitAll().and()
             .authorizeRequests().anyRequest().authenticated().and()
             .authenticationProvider(provider)
@@ -71,6 +72,7 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
         private const val AUTH_URLS = "/v1/auth/*"
+        private const val AUTH_LOGIN_URLS = "/v1/auth/login"
         private const val AUTH_PASSWORD_URLS = "/v1/auth/password/*"
         private const val AUTH_PASSWORD_RESET_URLS = "/v1/auth/password/reset/*"
     }

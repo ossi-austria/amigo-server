@@ -88,6 +88,8 @@ internal class AccountSubjectPreparationTrait {
             )
         )
 
+
+
         return accountRepository.findOneByEmail(account.email)!!
     }
 }

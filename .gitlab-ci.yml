@@ -5,11 +5,10 @@ variables:
   DOCKER_TLS_CERTDIR: ""            # "/certs" gitlab needs this to support docker testcontainers
 
 build & test:
-  allow_failure: false
   stage: build
   image: java:8
   services:
-    - docker:19.03.0-dind
+    - docker:19.03.12-dind
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
@@ -24,6 +23,7 @@ build & test:
 
 
 push docker:
+  image: docker:19.03.12
   stage: deploy
   allow_failure: true
   cache:
@@ -31,9 +31,14 @@ push docker:
     paths:
       - .gradle/wrapper
       - .gradle/caches
-  script: |
-    docker build --tag "$BACKEND_IMAGE_PATH" -f Dockerfile backend
-    docker push "$BACKEND_IMAGE_PATH"
+  services:
+    - docker:19.03.12-dind
+  variables:
+    IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $IMAGE_TAG .
+    - docker push $IMAGE_TAG
 
 pages:
   stage: deploy

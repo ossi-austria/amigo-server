@@ -2,10 +2,8 @@ package org.ossiaustria.amigo.platform.service.auth
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.config.security.JwtService
-import org.ossiaustria.amigo.platform.rest.v1.TestTags
 import org.ossiaustria.amigo.platform.service.AbstractServiceTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.annotation.Rollback
@@ -20,7 +18,6 @@ class JwtServiceTest : AbstractServiceTest() {
     @Transactional
     @Rollback
     @Test
-    @Tag(TestTags.RESTDOC)
     fun `should generate not-null accessToken`() {
         val email = "test@example.org"
         val token = jwtService.generateAccessToken(randomUUID(), email, personsIds = listOf())
@@ -36,7 +33,6 @@ class JwtServiceTest : AbstractServiceTest() {
     @Transactional
     @Rollback
     @Test
-    @Tag(TestTags.RESTDOC)
     fun `should generate accessToken with subject=email`() {
         val email = "test@example.org"
         val token = jwtService.generateAccessToken(randomUUID(), email, personsIds = listOf())
@@ -49,7 +45,6 @@ class JwtServiceTest : AbstractServiceTest() {
     @Transactional
     @Rollback
     @Test
-    @Tag(TestTags.RESTDOC)
     fun `should generate valid accessToken`() {
         val email = "test@example.org"
         val token = jwtService.generateAccessToken(randomUUID(), email, personsIds = listOf())
@@ -60,7 +55,6 @@ class JwtServiceTest : AbstractServiceTest() {
     @Transactional
     @Rollback
     @Test
-    @Tag(TestTags.RESTDOC)
     fun `should generate refreshToken with subject=email`() {
         val email = "test@example.org"
         val token = jwtService.generateRefreshToken(randomUUID(), email)
@@ -73,7 +67,6 @@ class JwtServiceTest : AbstractServiceTest() {
     @Transactional
     @Rollback
     @Test
-    @Tag(TestTags.RESTDOC)
     fun `should generate valid refreshToken`() {
         val email = "test@example.org"
         val token = jwtService.generateRefreshToken(randomUUID(), email)
@@ -84,7 +77,6 @@ class JwtServiceTest : AbstractServiceTest() {
     @Transactional
     @Rollback
     @Test
-    @Tag(TestTags.RESTDOC)
     fun `should retrieve claims of accessToken`() {
         val email = "test@example.org"
         val token = jwtService.generateAccessToken(randomUUID(), email, personsIds = listOf())
@@ -99,7 +91,6 @@ class JwtServiceTest : AbstractServiceTest() {
     @Transactional
     @Rollback
     @Test
-    @Tag(TestTags.RESTDOC)
     fun `should retrieve claims of refreshToken`() {
         val email = "test@example.org"
         val token = jwtService.generateRefreshToken(randomUUID(), email)

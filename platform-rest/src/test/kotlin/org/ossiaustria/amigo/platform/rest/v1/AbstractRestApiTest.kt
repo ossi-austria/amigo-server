@@ -9,7 +9,6 @@ import org.ossiaustria.amigo.platform.ApplicationProfiles
 import org.ossiaustria.amigo.platform.config.security.JwtService
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.repositories.AccountRepository
-import org.ossiaustria.amigo.platform.repositories.PersonRepository
 import org.ossiaustria.amigo.platform.rest.CurrentUserService
 import org.ossiaustria.amigo.platform.services.auth.TokenResult
 import org.ossiaustria.amigo.platform.testcommons.AbstractRestTest
@@ -28,8 +27,6 @@ import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import org.springframework.restdocs.snippet.Snippet
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
@@ -57,15 +54,10 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
     protected lateinit var currentUserService: CurrentUserService
 
     @Autowired
-    protected lateinit var personRepository: PersonRepository
-
-    @Autowired
     protected lateinit var jwtService: JwtService
 
     @Autowired
     protected lateinit var accountRepository: AccountRepository
-
-    private val passwordEncoder: PasswordEncoder = BCryptPasswordEncoder()
 
     @Autowired
     protected lateinit var accountSubjectPreparationTrait: AccountSubjectPreparationTrait
@@ -134,6 +126,16 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
         accountSubjectPreparationTrait.apply()
 //        every { currentUserService.person() } answers { personRepository.findAll().first() }
         every { currentUserService.account() } answers { account }
+    }
+
+
+    fun forbiddenGET(url: String) {
+        mockUserAuthentication()
+        this.performGet(url).expectUnauthorized()
+
+        mockUserAuthentication(accessTokenTime = 1)
+        Thread.sleep(1000)
+        this.performGet(url, accessToken = accessToken.token).expectUnauthorized()
     }
 
 //    fun mockTokenUserDetails(

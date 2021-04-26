@@ -3,11 +3,13 @@
 ls public/*
 
 # copy rest-api and prepare
-ls public/rest-api/develop public/rest-api/feature/* -al || echo "Develop REST docs empty"
-mkdir public/rest-api/$CI_COMMIT_BRANCH -p || echo "Specific Branch REST docs exists"
-rm public/rest-api/$CI_COMMIT_BRANCH/* -R || echo "SKIP CLEANING:Specific Branch REST docs still empty"
-mkdir public/rest-api/$CI_COMMIT_BRANCH/coverage -p
-cp -r platform-rest/build/reports/jacoco/test/html/* public/rest-api/$CI_COMMIT_BRANCH/coverage || echo "No jacoco docs on this Pipeline"
-cp platform-rest/build/asciidoc/html5/rest-api.html public/rest-api/$CI_COMMIT_BRANCH/index.html || echo "No rest docs on this Pipeline"
+ls public/develop public/feature/* -al || echo "Develop REST docs empty"
+mkdir public/$CI_COMMIT_BRANCH -p || echo "Specific Branch REST docs exists"
+rm public/$CI_COMMIT_BRANCH/* -R || echo "SKIP CLEANING:Specific Branch REST docs still empty"
+mkdir public/$CI_COMMIT_BRANCH/coverage -p
+mkdir public/$CI_COMMIT_BRANCH/rest-api -p
+cp -r platform-rest/build/reports/jacoco/test/html/* public/$CI_COMMIT_BRANCH/coverage || echo "No jacoco docs on this Pipeline"
+cp platform-rest/build/asciidoc/html5/rest-api.html public/$CI_COMMIT_BRANCH/rest-api/index.html || echo "No rest docs on this Pipeline"
 ls -al public/rest-api/$CI_COMMIT_BRANCH/
-echo "Documentation URL is $CI_PAGES_URL/$CI_COMMIT_BRANCH/rest-api/index.html"
+echo "REST Doc URL is $CI_PAGES_URL/$CI_COMMIT_BRANCH/rest-api/index.html"
+echo "Coverage URL is $CI_PAGES_URL/$CI_COMMIT_BRANCH/coverage"

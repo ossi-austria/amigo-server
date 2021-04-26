@@ -24,7 +24,7 @@ class AccountTest : AbstractRepositoryTest() {
         changeAccountToken: String? = null
     ): Pair<UUID, Account> {
         val id = randomUUID()
-        val person = Person(randomUUID(), randomUUID(), name, randomUUID())
+        val person = Person(randomUUID(), randomUUID(), name)
         val entity = Account(
             id = id,
             passwordEncrypted = "enc",

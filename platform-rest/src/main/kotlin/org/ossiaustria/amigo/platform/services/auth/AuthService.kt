@@ -36,7 +36,7 @@ class AuthService(
 
         private val GUEST_ACCOUNT_ID = UUID(0L, 0L)
 
-        private const val DEFAULT_GROUP = "DEFAULT_GROUP"
+        private const val DEFAULT_GROUP = "AMIGO"
 
         private val GUEST_TOKEN_USER_DETAILS: TokenUserDetails by lazy {
             TokenUserDetails(
@@ -49,6 +49,7 @@ class AuthService(
         }
     }
 
+    @Transactional
     fun loginUser(email: String, plainPassword: String): LoginResult {
         log.info("User tries to login: $email")
         val account: Account = accountRepository.findOneByEmail(email)
@@ -95,9 +96,10 @@ class AuthService(
                 accountId = accountUuid
             )
         )
-        return newUser
+        return accountRepository.findOneByEmail(newUser.email)!!
     }
 
+    @Transactional
     fun refreshAccessToken(refreshToken: String): TokenResult {
 
         val claims = try {
@@ -125,6 +127,7 @@ class AuthService(
         return jwtService.generateAccessToken(account.id, account.email, personsIds = personsIds)
     }
 
+    @Transactional
     fun checkValidAccessToken(accessToken: String): UserDetails = try {
         val claims = jwtService.getAccessClaims(accessToken)
         jwtService.validateAccessToken(accessToken)
@@ -142,7 +145,7 @@ class AuthService(
         throw UnauthorizedException(e.message)
     }
 
-    private fun defaultGroupForNewUsers(): Group = groupRepository.findByName(DEFAULT_GROUP)
+    private fun defaultGroupForNewUsers(): Group = groupRepository.findByName(DEFAULT_GROUP).firstOrNull()
         ?: groupRepository.save(Group(randomUUID(), DEFAULT_GROUP))
 
     @Transactional

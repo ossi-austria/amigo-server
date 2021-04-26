@@ -2,6 +2,7 @@ package org.ossiaustria.amigo.platform.domain.models
 
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import java.util.*
+import java.util.UUID.randomUUID
 import javax.persistence.*
 
 
@@ -18,20 +19,15 @@ data class Person(
 
     val name: String,
 
-
-//    @OneToOne(fetch = FetchType.EAGER)
-//    @Fetch(value = FetchMode.JOIN)
-//    @JoinColumn(
-//        name = "group_id",
-//        referencedColumnName = "id",
-//        foreignKey = ForeignKey(name = "person_group_group_id_fk"))
-//
-//    val group: Group,
-
     @Column(name = "group_id")
-    val groupId: UUID,
+    val groupId: UUID = randomUUID(),
 
     @Enumerated(EnumType.STRING)
     val memberType: MembershipType = MembershipType.MEMBER,
 
-    )
+    ) {
+
+    override fun toString(): String {
+        return "$id $accountId $name $memberType $groupId"
+    }
+}
