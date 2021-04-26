@@ -35,7 +35,7 @@ internal class MessagesApiTest : AbstractRestApiTest() {
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Can get messages via filter`() {
+    fun `filter should select messages via receiverId`() {
 
         val person = account.persons.first()
         val id = person.id

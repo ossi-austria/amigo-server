@@ -19,7 +19,6 @@ internal class AuthApiTest : AbstractRestApiTest() {
 
     val authUrl = "/v1/auth"
 
-
     @BeforeEach
     @AfterEach
     fun clearRepo() {
@@ -32,7 +31,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Can register with new user`() {
+    fun `should register with new user`() {
         val randomUserName = RandomUtils.generateRandomUserName(10)
         val randomPassword = RandomUtils.generateRandomPassword(30, true)
         val email = "$randomUserName@example.com"
@@ -57,7 +56,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Cannot register with existing user`() {
+    fun `must not register with existing user`() {
         val existingUser = createMockUser("password", "0001")
         val registerRequest =
             RegisterRequest(existingUser.email, "any other password", "another-new-name")
@@ -73,7 +72,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Can login with correct credentials`() {
+    fun `should login with correct credentials`() {
 
         val existingUser = createMockUser("password", "0001")
         val loginRequest = LoginRequest(existingUser.email, "password")
@@ -156,7 +155,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Cannot login with wrong credentials`() {
+    fun `must not login with wrong credentials`() {
 
         val existingUser = createMockUser("password", "0001")
         val loginRequest = LoginRequest(existingUser.email, "wrongpassword")
@@ -172,7 +171,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Can retrieve new accessToken with valid refreshToken`() {
+    fun `should return new accessToken with valid refreshToken`() {
 
         mockUserAuthentication(refreshTokenTime = 8)
 
@@ -194,7 +193,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Cannot retrieve new accessToken with expired refreshToken`() {
+    fun `must not return new accessToken with expired refreshToken`() {
 
         mockUserAuthentication(refreshTokenTime = 1)
         Thread.sleep(2_000)
@@ -208,7 +207,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Can get who-am-i`() {
+    fun `should answer get who-am-i`() {
 
         mockUserAuthentication()
 
@@ -226,7 +225,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Can access private endpoint with valid accessToken`() {
+    fun `should access private endpoint with valid accessToken`() {
         mockUserAuthentication()
         this.performGet(securedUrl(), accessToken = accessToken.token).expectOk()
     }
@@ -235,7 +234,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Cannot access private endpoint without accessToken`() {
+    fun `must not access private endpoint without accessToken`() {
         mockUserAuthentication()
         this.performGet(securedUrl()).expectUnauthorized()
     }
@@ -244,7 +243,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
     @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `Cannot access private endpoint with invalid accessToken`() {
+    fun `must not access private endpoint with invalid accessToken`() {
         mockUserAuthentication(accessTokenTime = 1)
         Thread.sleep(1000)
         this.performGet(securedUrl(), accessToken = accessToken.token).expectUnauthorized()

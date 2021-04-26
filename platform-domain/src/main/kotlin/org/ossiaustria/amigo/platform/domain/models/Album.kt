@@ -30,7 +30,6 @@ data class Album(
     @Column(name = "owner_id", insertable = false, updatable = false)
     val ownerId: UUID = owner.id,
 
-
     @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     @JoinColumn(
         name = "album_id",

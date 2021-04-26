@@ -1,11 +1,17 @@
 package org.ossiaustria.amigo.platform.domain.models
 
+import org.hibernate.annotations.Fetch
+import org.hibernate.annotations.FetchMode
 import java.time.ZonedDateTime
 import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "account")
+@Table(
+    name = "account", uniqueConstraints = [
+        UniqueConstraint(name = "account_unique_email", columnNames = ["email"])
+    ]
+)
 data class Account(
     @Id
     @Column(length = 16, unique = true, nullable = false)
@@ -15,7 +21,8 @@ data class Account(
 
     val passwordEncrypted: String,
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
+    @Fetch(FetchMode.SUBSELECT)
+    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     @JoinColumn(name = "account_id", foreignKey = ForeignKey(name = "person_account_account_id_fkey"))
     val persons: List<Person> = listOf(),
 
@@ -28,4 +35,5 @@ data class Account(
     val changeAccountTokenCreatedAt: ZonedDateTime? = null,
 ) {
 
+    fun person() = persons.first()
 }

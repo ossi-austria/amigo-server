@@ -5,7 +5,7 @@ import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.JsonFieldType.STRING
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import org.springframework.restdocs.request.ParameterDescriptor
-import org.springframework.restdocs.request.RequestDocumentation
+import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 
 object TestTags {
     const val SLOW = "slow"
@@ -16,6 +16,9 @@ object TestTags {
 
 internal fun field(path: String, type: JsonFieldType, description: String = "descr") =
     fieldWithPath(path).type(type).description(description)
+
+internal fun param(path: String, description: String = "descr") =
+    parameterWithName(path).description(description)
 
 
 internal fun personFields(prefix: String = ""): MutableList<FieldDescriptor> {
@@ -30,9 +33,9 @@ internal fun personFields(prefix: String = ""): MutableList<FieldDescriptor> {
 
 fun pageableResourceParameters(): Array<ParameterDescriptor> {
     return arrayOf(
-        RequestDocumentation.parameterWithName("page").optional().description("Page number (starting from 0)"),
-        RequestDocumentation.parameterWithName("size").optional().description("Number elements on the page"),
-        RequestDocumentation.parameterWithName("sort").optional().description("Sort by field (eg. &sort=id,asc)")
+        parameterWithName("page").optional().description("Page number (starting from 0)"),
+        parameterWithName("size").optional().description("Number elements on the page"),
+        parameterWithName("sort").optional().description("Sort by field (eg. &sort=id,asc)")
     )
 }
 
