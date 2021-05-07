@@ -1,11 +1,13 @@
 package org.ossiaustria.amigo.platform.config.security
 
-import org.ossiaustria.amigo.platform.services.auth.AuthService
+import org.ossiaustria.amigo.platform.domain.services.auth.AuthService
+import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider
 import org.springframework.security.core.userdetails.UserDetails
+import java.util.*
 
 
 @Configuration
@@ -22,7 +24,7 @@ class AuthenticationProvider(
      */
     override fun retrieveUser(accessToken: String?, authentication: UsernamePasswordAuthenticationToken?): UserDetails {
         if (accessToken == null || accessToken == EMPTY_TOKEN_NAME) {
-            return authService.createGuestDetails()
+            return createGuestDetails()
         }
         if (authentication == null) {
             throw BadCredentialsException("authentication is null during AuthenticationProvider")
@@ -38,4 +40,18 @@ class AuthenticationProvider(
         userDetails: UserDetails?,
         authentication: UsernamePasswordAuthenticationToken?
     ) = Unit
+
+    fun createGuestDetails(): TokenUserDetails {
+        return GUEST_TOKEN_USER_DETAILS
+    }
+
+    private val GUEST_TOKEN_USER_DETAILS: TokenUserDetails by lazy {
+        TokenUserDetails(
+            email = "",
+            accountId = AuthService.GUEST_ACCOUNT_ID,
+            personsIds = listOf(),
+            expiration = Date(),
+            issuedAt = Date(),
+        )
+    }
 }

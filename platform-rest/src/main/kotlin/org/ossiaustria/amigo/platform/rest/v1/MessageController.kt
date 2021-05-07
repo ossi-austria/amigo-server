@@ -2,14 +2,14 @@ package org.ossiaustria.amigo.platform.rest.v1
 
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Message
+import org.ossiaustria.amigo.platform.domain.repositories.AccountRepository
+import org.ossiaustria.amigo.platform.domain.services.MessageService
+import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.ossiaustria.amigo.platform.exceptions.BadRequestException
 import org.ossiaustria.amigo.platform.exceptions.ErrorCode
-import org.ossiaustria.amigo.platform.repositories.AccountRepository
 import org.ossiaustria.amigo.platform.rest.v1.sendables.MessageDto
 import org.ossiaustria.amigo.platform.rest.v1.sendables.toDto
-import org.ossiaustria.amigo.platform.services.MessageService
 import org.ossiaustria.amigo.platform.services.SecurityService
-import org.ossiaustria.amigo.platform.services.auth.TokenUserDetails
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

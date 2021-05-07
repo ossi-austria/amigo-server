@@ -3,9 +3,9 @@ package org.ossiaustria.amigo.platform.rest.v1
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Group
 import org.ossiaustria.amigo.platform.domain.models.Person
-import org.ossiaustria.amigo.platform.repositories.AccountRepository
-import org.ossiaustria.amigo.platform.repositories.GroupRepository
-import org.ossiaustria.amigo.platform.repositories.PersonRepository
+import org.ossiaustria.amigo.platform.domain.repositories.AccountRepository
+import org.ossiaustria.amigo.platform.domain.repositories.GroupRepository
+import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder

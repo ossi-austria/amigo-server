@@ -1,8 +1,8 @@
 package org.ossiaustria.amigo.platform.config.security
 
 
-import org.ossiaustria.amigo.platform.repositories.GroupRepository
-import org.ossiaustria.amigo.platform.repositories.PersonRepository
+import org.ossiaustria.amigo.platform.domain.repositories.GroupRepository
+import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.ossiaustria.amigo.platform.security.APMethodSecurityExpressionHandler
 import org.ossiaustria.amigo.platform.security.APPermissionEvaluator
 import org.springframework.context.annotation.Configuration

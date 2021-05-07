@@ -1,57 +1,40 @@
 plugins {
-    id 'org.springframework.boot' version '2.3.1.RELEASE'
-    id 'org.jetbrains.kotlin.jvm'
-    id 'kotlin-spring'
-    id 'kotlin-jpa'
-    id 'kotlin-allopen'
+    id 'org.springframework.boot' version '2.4.3'
     id 'org.asciidoctor.convert' version "1.5.9.2"
-    id 'jacoco'
 }
-
-group = 'org.ossiaustria.amigo'
-version = '0.0.1-SNAPSHOT'
 
 dependencies {
     implementation project(path: ':platform-domain', configuration: 'default')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
+
     implementation "org.projectlombok:lombok"
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10"
 
-    implementation "org.springframework.boot:spring-boot-devtools"
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-    implementation "org.springframework.boot:spring-boot-starter-aop"
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // Rest and HATEOAS
-    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
     // Security
     implementation "org.springframework.boot:spring-boot-starter-security"
-
     // spring data, JPA, Repositories and DB migration
+    implementation 'org.springframework.data:spring-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "org.flywaydb:flyway-core"
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2'
 
-    implementation 'io.jsonwebtoken:jjwt:0.9.1'
-
     //Email
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
-    def jupiter = "5.6.2"
-    def mockkVersion = "1.10.2"
-    testImplementation "org.junit.jupiter:junit-jupiter:$jupiter"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:$jupiterVersion"
     // DO NOT USE:   testImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter"
     // DO NOT USE:   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$jupiter"
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
-        exclude group: "org.junit.vintage", module: "junit-vintage-engine"
-        exclude group: 'junit', module: 'junit' //by both name and group
         exclude group: 'mockito', module: 'mockito-core' //by both name and group
     }
     testImplementation "org.springframework.security:spring-security-test"
@@ -61,25 +44,11 @@ dependencies {
     asciidoctor 'org.springframework.restdocs:spring-restdocs-asciidoctor'
 
     // testcontainers
-    testImplementation "org.testcontainers:testcontainers:1.15.1"
-    testImplementation "org.testcontainers:postgresql:1.15.1"
+    testImplementation "org.testcontainers:testcontainers:$testcontainersVersion"
+    testImplementation "org.testcontainers:postgresql:$testcontainersVersion"
 
-    testImplementation "org.hamcrest:hamcrest-all:1.3"
+    testImplementation "org.hamcrest:hamcrest-all:$hamcrestVersion"
 
-
-    //embedded servers
-
-}
-
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-}
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
 }
 
 noArg {
@@ -93,34 +62,6 @@ ext {
 
 test {
     outputs.dir snippetsDir
-    finalizedBy jacocoTestReport
-
-    useJUnitPlatform {
-        excludeTags 'slow', 'system'
-    }
-}
-
-//task allTests(type: Test) {
-//    useJUnitPlatform {
-//        includeTags 'any() | all()'
-//    }
-//}
-//
-//task integrationTest(type: Test) {
-//    useJUnitPlatform {
-//        includeTags 'integration'
-//    }
-//}
-
-tasks.withType(Test) {
-    testLogging {
-//        events "started", "passed", "skipped", "failed"
-        exceptionFormat = 'full'
-    }
-    systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
-    afterTest { descriptor, result ->
-        println "$descriptor.classDisplayName > $descriptor.displayName: $result.resultType"
-    }
 }
 
 asciidoctor {
@@ -141,7 +82,6 @@ jar {
     enabled = true
 }
 
-
 task fatJar(type: Jar) {
     manifest.from jar.manifest
     from {
@@ -152,13 +92,6 @@ task fatJar(type: Jar) {
         exclude "META-INF/*.RSA"
     }
     with jar
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled true
-        csv.enabled true
-    }
 }
 
 task explodeJar(type: Copy) {
@@ -173,33 +106,7 @@ task prepareDocker {
     dependsOn ":platform-rest:explodeJar"
     mustRunAfter ":platform-rest:explodeJar"
     doLast {
-       print("Exploded Jar for docker")
-    }
-}
-
-task coverageReport() {
-    dependsOn jacocoTestReport
-
-    def reportFile = project.file("build/reports/jacoco/test/jacocoTestReport.xml")
-    inputs.file(reportFile)
-
-    doLast {
-        def slurper = new XmlSlurper()
-        slurper.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
-        slurper.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-        def xml = slurper.parse(reportFile)
-        def counter = xml.counter.find {
-            node -> node.@type == 'BRANCH'
-        }
-        def missed = counter.@missed.toDouble()
-        def covered = counter.@covered.toDouble()
-        def total = missed + covered
-        def percentage = covered / total * 100
-
-        printf "Coverage: Missed %.0f branches%n", missed
-        printf "Covered %.0f branches%n", covered
-        printf "Total %.0f%%%n", percentage
-        printf "Coverage: Total %.0f%%%n", percentage
+        print("Exploded Jar for docker")
     }
 }
 

@@ -3,8 +3,8 @@ package org.ossiaustria.amigo.platform.rest.v1.groups
 
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Group
+import org.ossiaustria.amigo.platform.domain.services.GroupService
 import org.ossiaustria.amigo.platform.rest.CurrentUserService
-import org.ossiaustria.amigo.platform.services.GroupService
 import org.springframework.web.bind.annotation.*
 import java.util.*
 

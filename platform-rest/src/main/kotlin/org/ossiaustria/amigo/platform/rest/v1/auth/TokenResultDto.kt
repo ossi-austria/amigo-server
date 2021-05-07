@@ -1,6 +1,6 @@
 package org.ossiaustria.amigo.platform.rest.v1.auth
 
-import org.ossiaustria.amigo.platform.services.auth.TokenResult
+import org.ossiaustria.amigo.platform.domain.services.auth.TokenResult
 import java.util.*
 
 data class TokenResultDto(

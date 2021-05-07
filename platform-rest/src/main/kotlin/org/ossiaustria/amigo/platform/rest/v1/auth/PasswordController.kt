@@ -1,6 +1,6 @@
 package org.ossiaustria.amigo.platform.rest.v1.auth
 
-import org.ossiaustria.amigo.platform.services.auth.PasswordService
+import org.ossiaustria.amigo.platform.domain.services.auth.PasswordService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import java.util.*
