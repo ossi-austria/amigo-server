@@ -2,8 +2,8 @@ package org.ossiaustria.amigo.platform.security
 
 
 import org.aopalliance.intercept.MethodInvocation
-import org.ossiaustria.amigo.platform.repositories.GroupRepository
-import org.ossiaustria.amigo.platform.repositories.PersonRepository
+import org.ossiaustria.amigo.platform.domain.repositories.GroupRepository
+import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations
 import org.springframework.security.authentication.AuthenticationTrustResolver

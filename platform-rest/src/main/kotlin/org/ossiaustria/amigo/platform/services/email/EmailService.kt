@@ -7,7 +7,6 @@ import org.springframework.mail.javamail.MimeMessageHelper
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import javax.mail.internet.MimeMessage
@@ -125,7 +124,6 @@ class APEmailService(
         return when (template) {
             TemplateType.PASSWORD_RESET_TEMPLATE -> templateService.createPasswordResetTemplateHtml(variables)
             TemplateType.WELCOME_MESSAGE_TEMPLATE -> templateService.createWelcomeMessageTemplateHtml(variables)
-            else -> ""
         }
     }
 
@@ -133,7 +131,6 @@ class APEmailService(
         return when (template) {
             TemplateType.PASSWORD_RESET_TEMPLATE -> templateService.createPasswordResetTemplateText(variables)
             TemplateType.WELCOME_MESSAGE_TEMPLATE -> templateService.createWelcomeMessageTemplateText(variables)
-            else -> ""
         }
     }
 
@@ -153,12 +150,12 @@ class APEmailService(
 
                 log.debug("Email was sent successfully. Subject: ${email.get().subject} Recipient: ${email.get().recipientEmail}. Attempts: ${attempt+1}")
             } catch (ex: Exception) {
-                log.error("Unable to send email ${email.get().id}. Subject: ${email.get().subject} Recipient: ${email.get().recipientEmail}. Attempts: ${attempt+1} Exception: $ex")
-                val logDateTime = DateTimeFormatter.ISO_INSTANT.format(Instant.now())
-                val failedMessage =
-                    "${email.get().failedMessage ?: ""}${System.lineSeparator()}[$logDateTime}] ${ex}".trim()
-
-                val newAttempt = attempt + 1
+                log.error("Unable to send email ${email.get().id}. Subject: ${email.get().subject} Recipient: ${email.get().recipientEmail}. Attempts: ${attempt + 1} Exception: $ex")
+//                val logDateTime = DateTimeFormatter.ISO_INSTANT.format(Instant.now())
+//                val failedMessage =
+//                    "${email.get().failedMessage ?: ""}${System.lineSeparator()}[$logDateTime}] ${ex}".trim()
+//
+//                val newAttempt = attempt + 1
 
 
             }

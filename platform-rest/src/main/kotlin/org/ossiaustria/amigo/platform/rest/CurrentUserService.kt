@@ -2,10 +2,10 @@ package org.ossiaustria.amigo.platform.rest
 
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Person
+import org.ossiaustria.amigo.platform.domain.repositories.AccountRepository
+import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
+import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.ossiaustria.amigo.platform.exceptions.UserNotFoundException
-import org.ossiaustria.amigo.platform.repositories.AccountRepository
-import org.ossiaustria.amigo.platform.repositories.PersonRepository
-import org.ossiaustria.amigo.platform.services.auth.TokenUserDetails
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder

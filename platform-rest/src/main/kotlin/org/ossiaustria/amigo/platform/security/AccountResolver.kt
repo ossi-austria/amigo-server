@@ -1,9 +1,9 @@
 package org.ossiaustria.amigo.platform.security
 
 import org.ossiaustria.amigo.platform.domain.models.Account
+import org.ossiaustria.amigo.platform.domain.repositories.AccountRepository
+import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.ossiaustria.amigo.platform.exceptions.ForbiddenException
-import org.ossiaustria.amigo.platform.repositories.AccountRepository
-import org.ossiaustria.amigo.platform.services.auth.TokenUserDetails
 import org.springframework.core.MethodParameter
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.context.SecurityContextHolder

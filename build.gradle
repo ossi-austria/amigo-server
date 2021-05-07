@@ -1,5 +1,3 @@
-
-
 buildscript {
     repositories {
         mavenCentral()
@@ -12,13 +10,11 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.0"
         classpath("org.jetbrains.kotlin:kotlin-noarg:1.4.0")
         classpath("org.jetbrains.kotlin:kotlin-allopen:1.4.0")
-//        classpath "gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.22.1"
-    }
+  }
 }
 
 plugins {
-    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
-//    id 'org.springframework.boot' version '2.3.1.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
 }
 
 subprojects {
@@ -29,9 +25,21 @@ subprojects {
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'java-library'
     apply plugin: 'kotlin'
+    apply plugin: 'org.jetbrains.kotlin.jvm'
+    apply plugin: 'kotlin-spring'
+    apply plugin: 'kotlin-jpa'
+    apply plugin: 'kotlin-allopen'
+    apply plugin: 'jacoco'
 
     ext['junit-jupiter.version'] = '5.6.2'
 
+    ext {
+        kotlinxCoroutinesVersion = "1.3.9"
+        jupiterVersion = "5.6.2"
+        mockkVersion = "1.10.2"
+        testcontainersVersion = "1.15.1"
+        hamcrestVersion = "1.3"
+    }
     repositories {
         jcenter()
         mavenCentral()
@@ -39,12 +47,68 @@ subprojects {
 
     dependencyManagement {
         imports {
-            mavenBom("org.springframework.boot:spring-boot-dependencies:2.2.9.RELEASE") {
+            mavenBom("org.springframework.boot:spring-boot-dependencies:2.4.3.RELEASE") {
                 bomProperty("kotlin.version", "1.4.0")
             }
         }
     }
 
+    compileKotlin { kotlinOptions { jvmTarget = "1.8" } }
+    compileTestKotlin { kotlinOptions { jvmTarget = "1.8" } }
+
+    test {
+        systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+        useJUnitPlatform()
+        finalizedBy jacocoTestReport // report is always generated after tests run
+    }
+
+    tasks.withType(Test) {
+        testLogging {
+            exceptionFormat = 'full'
+        }
+        systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+        afterTest { descriptor, result ->
+            println "$descriptor.classDisplayName > $descriptor.displayName: $result.resultType"
+        }
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled true
+            csv.enabled true
+        }
+    }
+
+
+    jacocoTestReport {
+        dependsOn test // tests are required to run before generating the report
+    }
+
+    task coverageReport() {
+        dependsOn jacocoTestReport
+
+        def reportFile = project.file("build/reports/jacoco/test/jacocoTestReport.xml")
+        inputs.file(reportFile)
+
+        doLast {
+            def slurper = new XmlSlurper()
+            slurper.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
+            slurper.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
+            def xml = slurper.parse(reportFile)
+            def counter = xml.counter.find {
+                node -> node.@type == 'BRANCH'
+            }
+            def missed = counter.@missed.toDouble()
+            def covered = counter.@covered.toDouble()
+            def total = missed + covered
+            def percentage = covered / total * 100
+
+            printf "Coverage: Missed %.0f branches%n", missed
+            printf "Covered %.0f branches%n", covered
+            printf "Total %.0f%%%n", percentage
+            printf "Coverage: Total %.0f%%%n", percentage
+        }
+    }
 }
 
 

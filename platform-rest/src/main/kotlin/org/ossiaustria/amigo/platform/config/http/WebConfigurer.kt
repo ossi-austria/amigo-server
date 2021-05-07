@@ -1,7 +1,7 @@
 package org.ossiaustria.amigo.platform.config.http
 
-import org.ossiaustria.amigo.platform.repositories.AccountRepository
-import org.ossiaustria.amigo.platform.repositories.PersonRepository
+import org.ossiaustria.amigo.platform.domain.repositories.AccountRepository
+import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.ossiaustria.amigo.platform.security.AccountResolver
 import org.ossiaustria.amigo.platform.security.TokenDetailsResolver
 import org.springframework.context.annotation.Configuration

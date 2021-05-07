@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.domain.models.Group
 import org.ossiaustria.amigo.platform.domain.models.Person
-import org.ossiaustria.amigo.platform.repositories.GroupRepository
+import org.ossiaustria.amigo.platform.domain.repositories.GroupRepository
 import org.ossiaustria.amigo.platform.rest.v1.groups.GroupDto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull

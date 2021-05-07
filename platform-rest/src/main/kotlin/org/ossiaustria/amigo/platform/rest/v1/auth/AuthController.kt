@@ -1,8 +1,8 @@
 package org.ossiaustria.amigo.platform.rest.v1.auth
 
 
+import org.ossiaustria.amigo.platform.domain.services.auth.AuthService
 import org.ossiaustria.amigo.platform.rest.CurrentUserService
-import org.ossiaustria.amigo.platform.services.auth.AuthService
 import org.springframework.web.bind.annotation.*
 import javax.validation.constraints.Email
 import javax.validation.constraints.NotEmpty

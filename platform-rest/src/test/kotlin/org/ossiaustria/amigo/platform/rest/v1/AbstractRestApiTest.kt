@@ -6,11 +6,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.ossiaustria.amigo.platform.ApplicationProfiles
-import org.ossiaustria.amigo.platform.config.security.JwtService
 import org.ossiaustria.amigo.platform.domain.models.Account
-import org.ossiaustria.amigo.platform.repositories.AccountRepository
+import org.ossiaustria.amigo.platform.domain.repositories.AccountRepository
+import org.ossiaustria.amigo.platform.domain.services.auth.JwtService
+import org.ossiaustria.amigo.platform.domain.services.auth.TokenResult
 import org.ossiaustria.amigo.platform.rest.CurrentUserService
-import org.ossiaustria.amigo.platform.services.auth.TokenResult
 import org.ossiaustria.amigo.platform.testcommons.AbstractRestTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase

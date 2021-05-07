@@ -1,6 +1,6 @@
 package org.ossiaustria.amigo.platform.security
 
-import org.ossiaustria.amigo.platform.services.auth.TokenUserDetails
+import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.springframework.core.MethodParameter
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.support.WebDataBinderFactory
@@ -13,10 +13,12 @@ class TokenDetailsResolver : HandlerMethodArgumentResolver {
         return parameter.parameterType.equals(TokenUserDetails::class.java)
     }
 
-    override fun resolveArgument(parameter: MethodParameter,
-                                 mavContainer: ModelAndViewContainer?,
-                                 webRequest: NativeWebRequest,
-                                 binderFactory: WebDataBinderFactory?): Any? {
+    override fun resolveArgument(
+        parameter: MethodParameter,
+        mavContainer: ModelAndViewContainer?,
+        webRequest: NativeWebRequest,
+        binderFactory: WebDataBinderFactory?
+    ): Any {
         val authentication = SecurityContextHolder.getContext().authentication
         val principal = authentication.principal
         return principal as? TokenUserDetails
