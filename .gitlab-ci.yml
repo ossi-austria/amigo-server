@@ -25,6 +25,7 @@ build & test:
 push docker:
   image: docker:19.03.12
   stage: deploy
+  when: manual
   allow_failure: true
   cache:
     key: "$CI_COMMIT_REF_SLUG"

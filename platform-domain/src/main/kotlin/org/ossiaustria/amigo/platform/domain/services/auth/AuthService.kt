@@ -1,9 +1,7 @@
 package org.ossiaustria.amigo.platform.domain.services.auth
 
 
-import org.ossiaustria.amigo.platform.domain.models.Account
-import org.ossiaustria.amigo.platform.domain.models.Group
-import org.ossiaustria.amigo.platform.domain.models.Person
+import org.ossiaustria.amigo.platform.domain.models.*
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import org.ossiaustria.amigo.platform.domain.repositories.AccountRepository
 import org.ossiaustria.amigo.platform.domain.repositories.GroupRepository
@@ -11,24 +9,36 @@ import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.ossiaustria.amigo.platform.exceptions.UnauthorizedException
 import org.ossiaustria.amigo.platform.exceptions.UserAlreadyExistsException
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.validation.Validator
 import java.time.ZonedDateTime
 import java.util.*
 import java.util.UUID.randomUUID
 import javax.transaction.Transactional
+import javax.validation.constraints.Email
+import javax.validation.constraints.NotBlank
 
 
 @Service("authService")
 class AuthService(
     private val jwtService: JwtService,
-    private val accountRepository: AccountRepository,
-    private val personRepository: PersonRepository,
-    private val groupRepository: GroupRepository,
     private val passwordEncoder: PasswordEncoder
 ) {
+    @Autowired
+    private lateinit var accountRepository: AccountRepository
+
+    @Autowired
+    private lateinit var groupRepository: GroupRepository
+
+    @Autowired
+    private lateinit var personRepository: PersonRepository
+
+    @Autowired
+    private lateinit var validator: Validator
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
@@ -60,31 +70,42 @@ class AuthService(
 
     @Transactional
     fun registerUser(
-        plainPassword: String,
-        email: String,
-        name: String
+        @Email email: String,
+        @NotBlank plainPassword: String,
+        @NotBlank name: String
     ): Account {
+
+        EmailValidator.validate(email)
+        StringValidator.validateLength(plainPassword, 6)
+        StringValidator.validateLength(name, 6)
         val encryptedPassword = passwordEncoder.encode(plainPassword)
         val byEmail: Account? = accountRepository.findOneByEmail(email)
+
 
         log.info("Someone tries to register: $name $email")
         if (byEmail != null) throw UserAlreadyExistsException(email, email)
 
-        val accountUuid = randomUUID()
+        val accountId = randomUUID()
 
-        val newUser = accountRepository.save(
-            Account(id = accountUuid, email = email, passwordEncrypted = encryptedPassword, persons = listOf())
-        )
-
-        personRepository.save(
-            Person(
-                id = randomUUID(),
-                name = name,
-                groupId = defaultGroupForNewUsers().id,
-                memberType = MembershipType.MEMBER,
-                accountId = accountUuid
+        val account =
+            Account(
+                id = accountId, email = email, passwordEncrypted = encryptedPassword,
+                persons = listOf(
+                    Person(
+                        id = randomUUID(),
+                        name = name,
+                        groupId = defaultGroupForNewUsers().id,
+                        memberType = MembershipType.MEMBER,
+                        accountId = accountId
+                    )
+                )
             )
-        )
+
+        val newUser = accountRepository.save(account)
+
+//        personRepository.save(
+//
+//        )
         return accountRepository.findOneByEmail(newUser.email)!!
     }
 

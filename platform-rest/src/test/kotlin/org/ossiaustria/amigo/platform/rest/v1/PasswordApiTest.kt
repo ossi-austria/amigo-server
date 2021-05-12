@@ -14,10 +14,6 @@ import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import org.springframework.restdocs.payload.PayloadDocumentation.requestFields
 import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import org.springframework.restdocs.request.RequestDocumentation.requestParameters
-import org.springframework.test.annotation.Rollback
-import java.time.ZonedDateTime
-import java.util.*
-import javax.transaction.Transactional
 
 internal class PasswordApiTest : AbstractRestApiTest() {
 
@@ -32,14 +28,12 @@ internal class PasswordApiTest : AbstractRestApiTest() {
         every { templateService.createPasswordResetTemplateHtml(any()) } returns "Generated email template"
     }
 
-    @Transactional
-    @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
     fun `Can request password reset by email`() {
-        val existingUser = createMockUser()
+//        val existingUser = createMockUser()
 
-        val url = "$baseUrl/reset?email=${existingUser.email}"
+        val url = "$baseUrl/reset?email=${account.email}"
 
         this.performPost(url)
             .expectNoContent()
@@ -53,8 +47,6 @@ internal class PasswordApiTest : AbstractRestApiTest() {
             )
     }
 
-    @Transactional
-    @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
     fun `Cannot request password reset for non existing user`() {
@@ -63,18 +55,12 @@ internal class PasswordApiTest : AbstractRestApiTest() {
         this.performPost(url).isNotFound()
     }
 
-    @Transactional
-    @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
     fun `should confirm password reset by email`() {
-        val existingUser = createMockUser("0001")
+//        val existingUser = createMockUser("0001")
 
-        var changedUser = existingUser.copy(
-            changeAccountToken = UUID.randomUUID().toString(),
-            changeAccountTokenCreatedAt = ZonedDateTime.now()
-        )
-        changedUser = accountRepository.save(changedUser)
+        val changedUser = accountService.requestPasswordChange(account)
 
         val resetConfirmRequest = PasswordResetRequest(changedUser.changeAccountToken!!, "NEW-PASSWORD")
 

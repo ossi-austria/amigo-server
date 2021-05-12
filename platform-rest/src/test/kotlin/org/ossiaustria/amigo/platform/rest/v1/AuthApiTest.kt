@@ -1,7 +1,6 @@
 package org.ossiaustria.amigo.platform.rest.v1
 
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
@@ -11,24 +10,16 @@ import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType.*
 import org.springframework.restdocs.payload.PayloadDocumentation.requestFields
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
-import org.springframework.test.annotation.Rollback
 import java.util.*
-import javax.transaction.Transactional
 
 internal class AuthApiTest : AbstractRestApiTest() {
 
     val authUrl = "/v1/auth"
 
     @BeforeEach
-    @AfterEach
-    fun clearRepo() {
-        truncateAllTables()
-        accountSubjectPreparationTrait.apply()
-        account = accountSubjectPreparationTrait.account
+    fun prepare() {
     }
 
-    @Transactional
-    @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
     fun `should register with new user`() {
@@ -47,13 +38,11 @@ internal class AuthApiTest : AbstractRestApiTest() {
                 responseFields(userSecretDtoResponseFields())
             ).returns(SecretAccountDto::class.java)
 
-        with(accountRepository.findOneByEmail(email)!!) {
+        with(accountService.findOneByEmail(email)!!) {
             assertThat(id).isEqualTo(result.id)
         }
     }
 
-    @Transactional
-    @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
     fun `must not register with existing user`() {
@@ -68,8 +57,6 @@ internal class AuthApiTest : AbstractRestApiTest() {
             .document("register-fail", responseFields(errorResponseFields()))
     }
 
-    @Transactional
-    @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
     fun `should login with correct credentials`() {
@@ -92,8 +79,6 @@ internal class AuthApiTest : AbstractRestApiTest() {
 
     }
 
-    @Transactional
-    @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
     fun `login should return usable accessToken`() {
@@ -121,8 +106,6 @@ internal class AuthApiTest : AbstractRestApiTest() {
         }
     }
 
-    @Transactional
-    @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
     fun `login should return accessToken invalid for refresh`() {
@@ -137,8 +120,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
         }
     }
 
-    @Transactional
-    @Rollback
+
     @Test
     @Tag(TestTags.RESTDOC)
     fun `login should return refreshToken invalid for access`() {
@@ -151,8 +133,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
         this.performGet(securedUrl(), accessToken = loginResult.refreshToken.token).expectUnauthorized()
     }
 
-    @Transactional
-    @Rollback
+
     @Test
     @Tag(TestTags.RESTDOC)
     fun `must not login with wrong credentials`() {
@@ -167,8 +148,6 @@ internal class AuthApiTest : AbstractRestApiTest() {
             .document("login-fail", responseFields(errorResponseFields()))
     }
 
-    @Transactional
-    @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
     fun `should return new accessToken with valid refreshToken`() {
@@ -189,8 +168,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
         this.performGet(securedUrl(), accessToken = accessToken.token).expectOk()
     }
 
-    @Transactional
-    @Rollback
+
     @Test
     @Tag(TestTags.RESTDOC)
     fun `must not return new accessToken with expired refreshToken`() {
@@ -203,8 +181,6 @@ internal class AuthApiTest : AbstractRestApiTest() {
 
     }
 
-    @Transactional
-    @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
     fun `should answer get who-am-i`() {
@@ -221,8 +197,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
         assertThat(account.email).isEqualTo(result.email)
     }
 
-    @Transactional
-    @Rollback
+
     @Test
     @Tag(TestTags.RESTDOC)
     fun `should access private endpoint with valid accessToken`() {
@@ -230,8 +205,6 @@ internal class AuthApiTest : AbstractRestApiTest() {
         this.performGet(securedUrl(), accessToken = accessToken.token).expectOk()
     }
 
-    @Transactional
-    @Rollback
     @Test
     @Tag(TestTags.RESTDOC)
     fun `must not access private endpoint without accessToken`() {
@@ -239,8 +212,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
         this.performGet(securedUrl()).expectUnauthorized()
     }
 
-    @Transactional
-    @Rollback
+
     @Test
     @Tag(TestTags.RESTDOC)
     fun `must not access private endpoint with invalid accessToken`() {

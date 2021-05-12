@@ -7,14 +7,12 @@ import org.ossiaustria.amigo.platform.domain.services.AbstractServiceTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.annotation.Rollback
 import java.util.UUID.randomUUID
-import javax.transaction.Transactional
 
-class JwtServiceTest : AbstractServiceTest() {
+internal class JwtServiceTest : AbstractServiceTest() {
 
     @Autowired
     private lateinit var jwtService: JwtService
 
-    @Transactional
     @Rollback
     @Test
     fun `should generate not-null accessToken`() {
@@ -29,7 +27,6 @@ class JwtServiceTest : AbstractServiceTest() {
         assertNotNull(token.issuedAt)
     }
 
-    @Transactional
     @Rollback
     @Test
     fun `should generate accessToken with subject=email`() {
@@ -41,7 +38,6 @@ class JwtServiceTest : AbstractServiceTest() {
         jwtService.validateAccessToken(token.token)
     }
 
-    @Transactional
     @Rollback
     @Test
     fun `should generate valid accessToken`() {
@@ -51,7 +47,6 @@ class JwtServiceTest : AbstractServiceTest() {
         jwtService.validateAccessToken(token.token)
     }
 
-    @Transactional
     @Rollback
     @Test
     fun `should generate refreshToken with subject=email`() {
@@ -63,7 +58,6 @@ class JwtServiceTest : AbstractServiceTest() {
         jwtService.validateRefreshToken(token.token)
     }
 
-    @Transactional
     @Rollback
     @Test
     fun `should generate valid refreshToken`() {
@@ -73,7 +67,6 @@ class JwtServiceTest : AbstractServiceTest() {
         jwtService.validateRefreshToken(token.token)
     }
 
-    @Transactional
     @Rollback
     @Test
     fun `should retrieve claims of accessToken`() {
@@ -87,7 +80,6 @@ class JwtServiceTest : AbstractServiceTest() {
         assertEquals(token.expiration, claims.expiration)
     }
 
-    @Transactional
     @Rollback
     @Test
     fun `should retrieve claims of refreshToken`() {

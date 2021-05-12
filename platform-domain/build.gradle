@@ -13,6 +13,7 @@ dependencies {
     implementation "org.projectlombok:lombok"
 
     implementation "org.springframework.boot:spring-boot-starter-security"
+    implementation "org.springframework.boot:spring-boot-starter-validation"
 
     // spring data, JPA, Repositories and DB migration
     implementation 'org.springframework.data:spring-data-jpa'
@@ -29,7 +30,7 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter:$jupiterVersion"
     testImplementation('org.springframework.boot:spring-boot-starter-test')
     testImplementation "io.mockk:mockk:${mockkVersion}"
-
+    testImplementation "com.ninja-squad:springmockk:$springmockkVersion"
 }
 
 jar {

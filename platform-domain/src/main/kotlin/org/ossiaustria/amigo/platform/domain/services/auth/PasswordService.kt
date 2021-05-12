@@ -6,6 +6,7 @@ import org.ossiaustria.amigo.platform.exceptions.ConflictException
 import org.ossiaustria.amigo.platform.exceptions.ErrorCode
 import org.ossiaustria.amigo.platform.exceptions.UnknownUserException
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
@@ -19,9 +20,11 @@ interface PasswordService {
 
 @Service
 class APPasswordService(
-    private val accountRepository: AccountRepository,
     private val authService: AuthService,
 ) : PasswordService {
+
+    @Autowired
+    private lateinit var accountRepository: AccountRepository
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)

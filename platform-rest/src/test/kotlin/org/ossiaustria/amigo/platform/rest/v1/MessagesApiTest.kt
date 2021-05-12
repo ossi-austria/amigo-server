@@ -9,9 +9,7 @@ import org.ossiaustria.amigo.platform.domain.models.Message
 import org.ossiaustria.amigo.platform.domain.services.MessageService
 import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import org.springframework.restdocs.request.RequestDocumentation.requestParameters
-import org.springframework.test.annotation.Rollback
 import java.util.*
-import javax.transaction.Transactional
 
 internal class MessagesApiTest : AbstractRestApiTest() {
 
@@ -21,18 +19,11 @@ internal class MessagesApiTest : AbstractRestApiTest() {
     lateinit var messageService: MessageService
 
     @BeforeEach
-
     fun before() {
-        truncateAllTables()
-
-        accountSubjectPreparationTrait.apply()
-        account = accountSubjectPreparationTrait.account
-
         every { messageService.getAll() } returns listOf()
     }
 
-    @Transactional
-    @Rollback
+
     @Test
     @Tag(TestTags.RESTDOC)
     fun `filter should select messages via receiverId`() {

@@ -6,8 +6,9 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface MessageRepository : CrudRepository<Message, UUID> {
+internal interface MessageRepository : CrudRepository<Message, UUID> {
     fun findAllBySenderIdOrderByCreatedAt(id: UUID): List<Message>
     fun findAllByReceiverIdOrderByCreatedAt(id: UUID): List<Message>
     fun findAllByReceiverIdAndSenderIdOrderByCreatedAtDesc(receiverId: UUID, senderId: UUID): List<Message>
 }
+
