@@ -9,7 +9,11 @@ import java.util.*
 import javax.persistence.*
 
 @Entity
-@Table(name = "groups")
+@Table(
+    name = "groups", uniqueConstraints = [
+        UniqueConstraint(name = "group_unique_name", columnNames = ["name"])
+    ]
+)
 data class Group(
 
     @Id

@@ -10,7 +10,11 @@ import javax.persistence.*
 
 
 @Entity
-@Table(name = "album")
+@Table(
+    name = "album", uniqueConstraints = [
+        UniqueConstraint(name = "album_unique_email_per_owner", columnNames = ["name", "owner_id"])
+    ]
+)
 data class Album(
     @Id
     @Column(length = 16, unique = true, nullable = false)
@@ -18,7 +22,7 @@ data class Album(
 
     val name: String,
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @Fetch(value = FetchMode.SELECT)
     @JoinColumn(
         name = "owner_id",
@@ -35,7 +39,7 @@ data class Album(
         name = "album_id",
         foreignKey = ForeignKey(name = "multimedias_album_id_id_fkey")
     )
-    val items: List<Multimedia>,
+    val items: List<Multimedia> = listOf(),
 
     @CreatedDate
     val createdAt: ZonedDateTime = ZonedDateTime.now(),

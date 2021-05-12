@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface AccountRepository : CrudRepository<Account, UUID> {
+internal interface AccountRepository : CrudRepository<Account, UUID> {
     fun findOneByEmail(email: String): Account?
     fun findByChangeAccountToken(token: String): Account?
 }

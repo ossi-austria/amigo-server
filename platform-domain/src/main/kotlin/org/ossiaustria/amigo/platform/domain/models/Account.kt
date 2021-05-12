@@ -5,6 +5,7 @@ import org.hibernate.annotations.FetchMode
 import java.time.ZonedDateTime
 import java.util.*
 import javax.persistence.*
+import javax.validation.constraints.NotBlank
 
 @Entity
 @Table(
@@ -17,8 +18,10 @@ data class Account(
     @Column(length = 16, unique = true, nullable = false)
     val id: UUID,
 
+    @NotBlank
     val email: String,
 
+    @NotBlank
     val passwordEncrypted: String,
 
     @Fetch(FetchMode.SUBSELECT)
@@ -36,4 +39,8 @@ data class Account(
 ) {
 
     fun person() = persons.first()
+
+    fun validate() {
+        email
+    }
 }

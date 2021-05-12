@@ -4,6 +4,7 @@ import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import java.util.*
 import java.util.UUID.randomUUID
 import javax.persistence.*
+import javax.validation.constraints.NotBlank
 
 
 @Entity
@@ -17,6 +18,7 @@ data class Person(
     @Column(name = "account_id")
     val accountId: UUID,
 
+    @NotBlank
     val name: String,
 
     @Column(name = "group_id")

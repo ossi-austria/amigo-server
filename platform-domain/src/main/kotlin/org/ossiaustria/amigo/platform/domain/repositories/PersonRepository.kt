@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface PersonRepository : CrudRepository<Person, UUID> {
+internal interface PersonRepository : CrudRepository<Person, UUID> {
     fun findByName(name: String): Person?
     fun findByGroupId(id: UUID): List<Person>
     fun findByAccountId(id: UUID): List<Person>

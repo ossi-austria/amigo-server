@@ -1,86 +1,60 @@
 package org.ossiaustria.amigo.platform.domain.repositories
 
-import org.junit.jupiter.api.assertThrows
-import org.ossiaustria.amigo.platform.domain.ApplicationProfiles
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.ComponentScan
-import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.TestPropertySource
-import org.springframework.test.context.transaction.TestTransaction
-import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
-import javax.sql.DataSource
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.springframework.data.repository.CrudRepository
+import org.springframework.data.repository.findByIdOrNull
+import java.util.*
+import java.util.UUID.randomUUID
 
-@TestPropertySource("classpath:application-test.yml")
-@SpringBootTest
-@ActiveProfiles(ApplicationProfiles.TEST)
-@ComponentScan("org.ossiaustria.amigo.platform.domain")
-@AutoConfigureTestDatabase(connection = org.springframework.boot.jdbc.EmbeddedDatabaseConnection.H2)
-class AbstractRepositoryTest {
+internal abstract class AbstractRepositoryTest<T, R : CrudRepository<T, UUID>> : AbstractWithJpaTest() {
 
-    @Autowired
-    val dataSource: DataSource? = null
+    abstract val repository: R
 
-    @Autowired
-    val jdbcTemplate: JdbcTemplate? = null
+    fun createDefaultEntity(): T = createDefaultEntityPair(randomUUID()).second
+    abstract fun createDefaultEntityPair(id: UUID = randomUUID()): Pair<UUID, T>
+    abstract fun changeEntity(entity: T): T
+    abstract fun initTest()
 
-    @Autowired
-    val entityManager: EntityManager? = null
-
-
-    protected fun truncateAllTables() {
-        truncateDbTables(
-            listOf(
-                "account",
-                "person",
-            ), cascade = true
-        )
+    @BeforeEach
+    fun beforeEach() {
+        cleanTables()
+        initTest()
     }
 
-    @Transactional
-    protected fun truncateDbTables(tables: List<String>, cascade: Boolean = true) {
-        println("Truncating tables: $tables")
-        println("Truncating tables: $tables")
-        val joinToString = tables.joinToString("\", \"", "\"", "\"")
-
-        try {
-            val createNativeQuery = if (cascade) {
-                entityManager!!.createNativeQuery("truncate table $joinToString CASCADE ")
-            } else {
-                entityManager!!.createNativeQuery("truncate table $joinToString ")
-            }
-            entityManager!!.joinTransaction()
-            createNativeQuery.executeUpdate()
-        } catch (e: Exception) {
-            println(e)
-        }
-
+    @Test
+    fun `save should store an entity`() {
+        val (id, entity) = createDefaultEntityPair()
+        assertThat(repository.findByIdOrNull(id)).isNull()
+        repository.save(entity)
+        assertThat(repository.findByIdOrNull(id)).isNotNull
     }
 
-    fun commitAndFail(f: () -> Unit) {
-        assertThrows<Exception> {
-            withinTransaction {
-                f.invoke()
-            }
-        }
+    @Test
+    fun `save should return a stored entity`() {
+        val (id, entity) = createDefaultEntityPair()
+        assertThat(repository.findByIdOrNull(id)).isNull()
+        val saved = repository.save(entity)
+        assertThat(saved).isNotNull
+        assertThat(repository.findByIdOrNull(id)).isNotNull
     }
 
-    fun <T> withinTransaction(commit: Boolean = true, func: () -> T): T {
-        if (!TestTransaction.isActive()) TestTransaction.start()
-        val result = func.invoke()
-        if (commit) {
-            TestTransaction.flagForCommit()
-        } else {
-            TestTransaction.flagForRollback()
-        }
-        try {
-            TestTransaction.end()
-        } catch (e: Exception) {
-            throw e
-        }
-        return result
+    @Test
+    fun `update should store the changed entity`() {
+        val (_, entity) = createDefaultEntityPair()
+        val saved = repository.save(entity)
+        val copy = changeEntity(saved)
+        val updated = repository.save(copy)
+        assertThat(updated).isNotNull
     }
+
+    @Test
+    fun `delete should remove an entity from database`() {
+        val (_, entity) = createDefaultEntityPair()
+        val saved = repository.save(entity)
+        repository.delete(saved)
+        assertThat(saved).isNotNull
+    }
+
 }
