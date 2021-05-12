@@ -3,11 +3,14 @@ package org.ossiaustria.amigo.platform.domain.models
 import java.time.ZonedDateTime
 import java.util.*
 
-interface Sendable {
+interface Sendable<S> {
     val id: UUID
     val createdAt: ZonedDateTime
     val sendAt: ZonedDateTime?
     val retrievedAt: ZonedDateTime?
     val senderId: UUID
     val receiverId: UUID
+
+    fun withSentAt(time: ZonedDateTime): S
+    fun withRetrievedAt(time: ZonedDateTime): S
 }

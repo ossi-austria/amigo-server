@@ -33,4 +33,8 @@ data class AlbumShare(
     @Column(name = "album_id", insertable = false, updatable = false)
     val albumId: UUID = album.id
 
-) : Sendable
+) : Sendable<AlbumShare> {
+    override fun withSentAt(time: ZonedDateTime) = this.copy(sendAt = time)
+
+    override fun withRetrievedAt(time: ZonedDateTime) = this.copy(retrievedAt = time)
+}

@@ -25,6 +25,11 @@ data class Call(
 
     val startedAt: ZonedDateTime? = null,
 
-    val finishedAt: ZonedDateTime? = null,
+    val finishedAt: ZonedDateTime? = null
 
-    ) : Sendable
+) : Sendable<Call> {
+
+    override fun withSentAt(time: ZonedDateTime) = this.copy(sendAt = time)
+
+    override fun withRetrievedAt(time: ZonedDateTime) = this.copy(retrievedAt = time)
+}

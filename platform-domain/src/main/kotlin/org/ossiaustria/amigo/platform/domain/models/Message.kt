@@ -22,4 +22,9 @@ data class Message(
     override val receiverId: UUID,
 
     val text: String
-) : Sendable
+) : Sendable<Message> {
+
+    override fun withSentAt(time: ZonedDateTime) = this.copy(sendAt = time)
+
+    override fun withRetrievedAt(time: ZonedDateTime) = this.copy(retrievedAt = time)
+}
