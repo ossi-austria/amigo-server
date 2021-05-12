@@ -3,7 +3,41 @@ package org.ossiaustria.amigo.platform.domain.testcommons
 import org.assertj.core.api.AssertionsForClassTypes
 import org.assertj.core.api.ObjectAssert
 import org.hamcrest.Matcher
+import org.ossiaustria.amigo.platform.domain.models.Account
+import org.ossiaustria.amigo.platform.domain.models.Group
+import org.ossiaustria.amigo.platform.domain.models.Person
+import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
+import java.util.*
+import java.util.UUID.randomUUID
 
 
 internal fun <T> then(actual: T, matcher: Matcher<T>) = org.hamcrest.MatcherAssert.assertThat(actual, matcher)
 internal fun <T> then(actual: T): ObjectAssert<T> = AssertionsForClassTypes.assertThat(actual)
+
+
+object Models {
+
+    private var groups: Int = 1
+    private var accounts: Int = 1
+    private var persons: Int = 1
+
+    fun group(id: UUID = randomUUID(), name: String = "Group $groups") = Group(id, name).also {
+        groups++
+    }
+
+    fun account(id: UUID = randomUUID(), email: String = "user-${accounts}@example.com") =
+        Account(id, email, "password").also {
+            accounts++
+        }
+
+    fun persons(
+        id: UUID = randomUUID(),
+        accountId: UUID = randomUUID(),
+        groupId: UUID = randomUUID(),
+        name: String = "Person $persons",
+        memberType: MembershipType = MembershipType.MEMBER,
+    ) =
+        Person(id, accountId, name, groupId, memberType).also {
+            persons++
+        }
+}

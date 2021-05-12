@@ -1,7 +1,9 @@
 package org.ossiaustria.amigo.platform.domain.services
 
 import org.ossiaustria.amigo.platform.domain.models.Message
+import org.ossiaustria.amigo.platform.domain.models.StringValidator
 import org.ossiaustria.amigo.platform.domain.repositories.MessageRepository
+import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -13,15 +15,22 @@ interface MessageService : SendableService<Message> {
     fun createMessage(senderId: UUID, receiverId: UUID, text: String): Message
 }
 
+
 @Service
 class MessageServiceImpl : MessageService {
 
     @Autowired
     private lateinit var repository: MessageRepository
 
-    private val wrapper = SendableServiceMixin(repository)
+    @Autowired
+    private lateinit var personRepository: PersonRepository
+
+
+    private val wrapper: SendableServiceMixin<Message> by lazy { SendableServiceMixin(repository, personRepository) }
 
     override fun createMessage(senderId: UUID, receiverId: UUID, text: String): Message {
+        StringValidator.validateNotBlank(text)
+        wrapper.validateSenderReceiver(senderId, receiverId)
         val message = Message(
             id = randomUUID(),
             senderId = senderId,
@@ -36,12 +45,12 @@ class MessageServiceImpl : MessageService {
         }
     }
 
-    override fun getOne(id: UUID): Message? = wrapper.getOne(id)
+    override fun getOne(id: UUID): Message = wrapper.getOne(id)
 
     override fun getAll(): List<Message> = wrapper.getAll()
 
-    override fun findWithPersons(receiverId: UUID?, senderId: UUID?) =
-        wrapper.findWithPersons(receiverId, senderId)
+    override fun findWithPersons(senderId: UUID?, receiverId: UUID?) =
+        wrapper.findWithPersons(senderId, receiverId)
 
     override fun findWithSender(senderId: UUID) = wrapper.findWithSender(senderId)
 
