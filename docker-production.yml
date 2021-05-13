@@ -4,6 +4,17 @@ version: '3.5'
 # please research https://docs.docker.com/compose/environment-variables/ for howto setup your environment
 services:
 
+  amigo-platform:
+    container_name: amigo-platform
+    image: registry.gitlab.com/ossi-austria/amigo-server:develop #6b866cc86ae9
+    #restart: always
+    depends_on:
+      - postgres
+    ports: [ "8080:8080" ]
+    env_file: system.env
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+
   postgres:
     container_name: postgres
     restart: always
@@ -18,5 +29,4 @@ services:
 volumes:
   sock:
   amigo-db:
-
 

@@ -5,7 +5,7 @@ spring:
     add-properties: true
   jpa:
     hibernate:
-      ddl-auto: create-drop # USE for dev only
+      ddl-auto: update # USE for dev only
   flyway:
     enabled: false # USE for dev only
 
