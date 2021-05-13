@@ -43,4 +43,5 @@ class SimpleCurrentUserService(
             ?: throw UserNotFoundException()
     }
 
+
 }

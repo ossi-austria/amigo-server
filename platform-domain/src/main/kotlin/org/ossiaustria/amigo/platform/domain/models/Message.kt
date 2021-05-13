@@ -20,12 +20,12 @@ data class Message(
 
     @CreatedDate
     override val createdAt: ZonedDateTime = ZonedDateTime.now(),
-    override val sendAt: ZonedDateTime? = null,
-    override val retrievedAt: ZonedDateTime? = null,
+    override val sentAt: ZonedDateTime? = null,
+    override val retrievedAt: ZonedDateTime? = null
 
-    ) : Sendable<Message> {
+) : Sendable<Message> {
 
-    override fun withSentAt(time: ZonedDateTime) = this.copy(sendAt = time)
+    override fun withSentAt(time: ZonedDateTime) = this.copy(sentAt = time)
 
     override fun withRetrievedAt(time: ZonedDateTime) = this.copy(retrievedAt = time)
 }

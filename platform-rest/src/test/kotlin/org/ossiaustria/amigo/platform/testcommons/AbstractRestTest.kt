@@ -48,6 +48,10 @@ abstract class AbstractRestTest {
         generateRequestBuilder(url, accessToken, body, HttpMethod.POST)
     )
 
+    protected fun performPatch(url: String, accessToken: String? = null, body: Any? = null) = mockMvc.perform(
+        generateRequestBuilder(url, accessToken, body, HttpMethod.PATCH)
+    )
+
     protected fun performPut(url: String, accessToken: String? = null, body: Any? = null) = mockMvc.perform(
         generateRequestBuilder(url, accessToken, body, HttpMethod.PUT)
     )
@@ -71,6 +75,7 @@ abstract class AbstractRestTest {
             HttpMethod.POST -> RestDocumentationRequestBuilders.post(url)
             HttpMethod.PUT -> RestDocumentationRequestBuilders.put(url)
             HttpMethod.DELETE -> RestDocumentationRequestBuilders.delete(url)
+            HttpMethod.PATCH -> RestDocumentationRequestBuilders.patch(url)
             else -> throw RuntimeException("Method not implemented")
         }
 

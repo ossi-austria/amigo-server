@@ -14,11 +14,6 @@ data class Multimedia(
     @Column(length = 16, unique = true, nullable = false)
     override val id: UUID,
 
-    @CreatedDate
-    override val createdAt: ZonedDateTime = ZonedDateTime.now(),
-    override val sendAt: ZonedDateTime? = null,
-    override val retrievedAt: ZonedDateTime? = null,
-
     override val senderId: UUID,
     override val receiverId: UUID,
 
@@ -41,10 +36,16 @@ data class Multimedia(
     val album: Album?,
 
     @Column(name = "album_id", insertable = false, updatable = false)
-    val albumId: UUID? = album?.id
+    val albumId: UUID? = album?.id,
 
-) : Sendable<Multimedia> {
-    override fun withSentAt(time: ZonedDateTime) = this.copy(sendAt = time)
+    @CreatedDate
+    override val createdAt: ZonedDateTime = ZonedDateTime.now(),
+    override val sentAt: ZonedDateTime? = null,
+    override val retrievedAt: ZonedDateTime? = null,
+
+
+    ) : Sendable<Multimedia> {
+    override fun withSentAt(time: ZonedDateTime) = this.copy(sentAt = time)
 
     override fun withRetrievedAt(time: ZonedDateTime) = this.copy(retrievedAt = time)
 }

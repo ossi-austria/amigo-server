@@ -40,7 +40,6 @@ data class Account(
 
     fun person() = persons.first()
 
-    fun validate() {
-        email
-    }
+    fun hasPersonId(personId: UUID?): Boolean = this.persons.map { it.id }.contains(personId)
+
 }

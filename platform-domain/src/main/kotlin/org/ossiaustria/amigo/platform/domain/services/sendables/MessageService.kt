@@ -1,4 +1,4 @@
-package org.ossiaustria.amigo.platform.domain.services
+package org.ossiaustria.amigo.platform.domain.services.sendables
 
 import org.ossiaustria.amigo.platform.domain.models.Message
 import org.ossiaustria.amigo.platform.domain.models.StringValidator
@@ -15,7 +15,6 @@ interface MessageService : SendableService<Message> {
     fun createMessage(senderId: UUID, receiverId: UUID, text: String): Message
 }
 
-
 @Service
 class MessageServiceImpl : MessageService {
 
@@ -24,7 +23,6 @@ class MessageServiceImpl : MessageService {
 
     @Autowired
     private lateinit var personRepository: PersonRepository
-
 
     private val wrapper: SendableServiceMixin<Message> by lazy { SendableServiceMixin(repository, personRepository) }
 
@@ -38,7 +36,7 @@ class MessageServiceImpl : MessageService {
             text = text,
             createdAt = ZonedDateTime.now(),
             retrievedAt = null,
-            sendAt = null,
+            sentAt = null,
         )
         return repository.save(message).also {
             Log.info("createMessage: senderId=$senderId receiverId=$receiverId -> $text")

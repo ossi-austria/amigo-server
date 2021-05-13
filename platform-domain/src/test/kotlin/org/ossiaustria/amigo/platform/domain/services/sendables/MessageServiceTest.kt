@@ -1,4 +1,4 @@
-package org.ossiaustria.amigo.platform.domain.services
+package org.ossiaustria.amigo.platform.domain.services.sendables
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -7,9 +7,8 @@ import org.junit.jupiter.api.assertThrows
 import org.ossiaustria.amigo.platform.domain.models.Message
 import org.ossiaustria.amigo.platform.domain.models.ValidationException
 import org.ossiaustria.amigo.platform.domain.repositories.MessageRepository
-import org.ossiaustria.amigo.platform.domain.services.sendables.SendableServiceTest
 import org.springframework.beans.factory.annotation.Autowired
-import java.util.*
+import java.util.UUID.randomUUID
 
 internal class MessageServiceTest : SendableServiceTest<Message, MessageService>() {
 
@@ -19,7 +18,6 @@ internal class MessageServiceTest : SendableServiceTest<Message, MessageService>
     @Autowired
     private lateinit var messageRepository: MessageRepository
 
-
     @BeforeEach
     fun beforeEach() {
         cleanTables()
@@ -28,8 +26,7 @@ internal class MessageServiceTest : SendableServiceTest<Message, MessageService>
         mockPersons()
 
         messageRepository.save(Message(existingId, personId1, personId2, "text"))
-        messageRepository.save(Message(UUID.randomUUID(), personId2, personId1, "text"))
-
+        messageRepository.save(Message(randomUUID(), personId2, personId1, "text"))
     }
 
     @Test

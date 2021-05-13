@@ -5,10 +5,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.ossiaustria.amigo.platform.domain.models.Sendable
 import org.ossiaustria.amigo.platform.domain.services.AbstractServiceTest
-import org.ossiaustria.amigo.platform.domain.services.SendableError
-import org.ossiaustria.amigo.platform.domain.services.SendableService
 import org.ossiaustria.amigo.platform.domain.testcommons.Models
 import org.ossiaustria.amigo.platform.exceptions.NotFoundException
+import java.time.ZonedDateTime
 import java.util.*
 import java.util.UUID.randomUUID
 
@@ -106,27 +105,27 @@ internal abstract class SendableServiceTest<S : Sendable<S>, T : SendableService
     @Test
     fun `markAsSent should throw when id does not exist`() {
         assertThrows<NotFoundException> {
-            service.markAsSent(randomUUID())
+            service.markAsSent(randomUUID(), ZonedDateTime.now())
         }
     }
 
     @Test
     fun `markAsSent should succeed for existing id`() {
-        val result = service.markAsSent(existingId)
+        val result = service.markAsSent(existingId, ZonedDateTime.now())
         assertThat(result).isNotNull
-        assertThat(result.sendAt).isNotNull
+        assertThat(result.sentAt).isNotNull
     }
 
     @Test
     fun `markAsRetrieved should throw when id does not exist`() {
         assertThrows<NotFoundException> {
-            service.markAsRetrieved(randomUUID())
+            service.markAsRetrieved(randomUUID(), ZonedDateTime.now())
         }
     }
 
     @Test
     fun `markAsRetrieved should succeed for existing id`() {
-        val result = service.markAsRetrieved(existingId)
+        val result = service.markAsRetrieved(existingId, ZonedDateTime.now())
         assertThat(result).isNotNull
         assertThat(result.retrievedAt).isNotNull
     }

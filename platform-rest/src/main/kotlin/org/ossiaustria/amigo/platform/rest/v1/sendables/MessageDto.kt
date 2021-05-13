@@ -6,31 +6,31 @@ import java.util.*
 
 internal interface SendableDto {
     val id: UUID
-    val createdAt: ZonedDateTime
-    val sendAt: ZonedDateTime?
-    val retrievedAt: ZonedDateTime?
     val senderId: UUID
     val receiverId: UUID
+    val createdAt: ZonedDateTime
+    val sentAt: ZonedDateTime?
+    val retrievedAt: ZonedDateTime?
 }
 
 
 internal data class MessageDto(
     override val id: UUID,
-    override val createdAt: ZonedDateTime = ZonedDateTime.now(),
-    override val sendAt: ZonedDateTime? = null,
-    override val retrievedAt: ZonedDateTime? = null,
     override val senderId: UUID,
     override val receiverId: UUID,
-    val text: String
+    val text: String,
+    override val createdAt: ZonedDateTime = ZonedDateTime.now(),
+    override val sentAt: ZonedDateTime? = null,
+    override val retrievedAt: ZonedDateTime? = null
 ) : SendableDto
 
 
 internal fun Message.toDto() = MessageDto(
     id = id,
-    createdAt = createdAt,
-    sendAt = sendAt,
-    retrievedAt = retrievedAt,
     senderId = senderId,
     receiverId = receiverId,
     text = text,
+    createdAt = createdAt,
+    sentAt = sentAt,
+    retrievedAt = retrievedAt,
 )

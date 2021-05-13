@@ -1,4 +1,4 @@
-package org.ossiaustria.amigo.platform.domain.services
+package org.ossiaustria.amigo.platform.domain.services.sendables
 
 import org.ossiaustria.amigo.platform.domain.models.Sendable
 import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
@@ -10,25 +10,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import java.time.ZonedDateTime
 import java.util.*
-
-
-interface SendableService<S : Sendable<S>> {
-    fun getOne(id: UUID): S
-    fun getAll(): List<S>
-    fun findWithPersons(senderId: UUID?, receiverId: UUID?): List<S>
-    fun findWithSender(senderId: UUID): List<S>
-    fun findWithReceiver(receiverId: UUID): List<S>
-
-    // operations for marking
-    fun markAsSent(id: UUID, time: ZonedDateTime = ZonedDateTime.now()): S
-    fun markAsRetrieved(id: UUID, time: ZonedDateTime = ZonedDateTime.now()): S
-}
-
-sealed class SendableError(message: String?) : Exception(message) {
-    class PersonsAreTheSame : SendableError("Persons are the same")
-    class PersonsNotInSameGroup : SendableError("Persons are not in the same group")
-    class PersonsNotProvided : SendableError("Persons are not given")
-}
 
 internal class SendableServiceMixin<S : Sendable<S>>(
     private val repository: SendableRepository<S>,
@@ -81,7 +62,8 @@ internal class SendableServiceMixin<S : Sendable<S>>(
     }
 
     override fun markAsRetrieved(id: UUID, time: ZonedDateTime): S {
-        return repository.save(getOne(id).withRetrievedAt(time)).also {
+        val sendable = getOne(id)
+        return repository.save(sendable.withRetrievedAt(time)).also {
             Log.info("markAsRetrieved: ${it::class.java.simpleName} $id at $time")
         }
     }

@@ -12,11 +12,6 @@ data class Call(
     @Column(length = 16, unique = true, nullable = false)
     override val id: UUID,
 
-    @CreatedDate
-    override val createdAt: ZonedDateTime = ZonedDateTime.now(),
-    override val sendAt: ZonedDateTime? = null,
-    override val retrievedAt: ZonedDateTime? = null,
-
     override val senderId: UUID,
     override val receiverId: UUID,
 
@@ -25,11 +20,16 @@ data class Call(
 
     val startedAt: ZonedDateTime? = null,
 
-    val finishedAt: ZonedDateTime? = null
+    val finishedAt: ZonedDateTime? = null,
+
+    @CreatedDate
+    override val createdAt: ZonedDateTime = ZonedDateTime.now(),
+    override val sentAt: ZonedDateTime? = null,
+    override val retrievedAt: ZonedDateTime? = null
 
 ) : Sendable<Call> {
 
-    override fun withSentAt(time: ZonedDateTime) = this.copy(sendAt = time)
+    override fun withSentAt(time: ZonedDateTime) = this.copy(sentAt = time)
 
     override fun withRetrievedAt(time: ZonedDateTime) = this.copy(retrievedAt = time)
 }

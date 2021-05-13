@@ -163,10 +163,10 @@ Get user short profile info
 
 operation::who-am-i[snippets='curl-request,http-response,response-fields']
 
-= Resources
+= Common Resources
 
 [[groups]]
-== Groups & Persons - /groups
+== Groups - /groups
 
 Groups contain all necessary Person profiles inside them.
 A User can just access the Groups where they have a Person profile and is at least MEMBER (default).
@@ -192,3 +192,32 @@ operation::groups-one-success[snippets='curl-request,http-response,response-fiel
 Filter accessible Groups for *own* Person and/or Group name
 
 operation::groups-filtered-success[snippets='curl-request,request-parameters,http-response,response-fields']
+
+= Sendables
+
+All Sendables behave similar and share a big amount of code.
+See the first example of Sendable endpoints used on Message for further informatio.
+
+[[messages]]
+== Messages
+
+=== Filter Messages - GET /messages/filter?receiverId=<UUID>
+
+operation::messages-filter[snippets='curl-request,http-response,response-fields']
+
+=== GET /messages/received - All my retrieved
+
+operation::messages-received[snippets='curl-request,http-response,response-fields']
+
+=== GET /messages/sent - All my sent
+
+operation::messages-sent[snippets='curl-request,http-response,response-fields']
+
+=== GET /messages/:id
+
+operation::messages-one[snippets='curl-request,http-response,response-fields']
+
+=== PATCH /messages/:id/set-retrieved - Set Message as "retrieved"
+
+operation::messages-set-retrieved[snippets='curl-request,http-response,response-fields']
+
