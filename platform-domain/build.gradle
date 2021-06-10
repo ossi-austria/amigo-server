@@ -24,6 +24,8 @@ dependencies {
 
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
 
+    implementation "com.google.firebase:firebase-admin:$firebaseAdminVersion"
+
     // testing
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 

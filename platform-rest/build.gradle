@@ -30,6 +30,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
+    implementation "com.google.firebase:firebase-admin:$firebaseAdminVersion"
 
     testImplementation "org.junit.jupiter:junit-jupiter:$jupiterVersion"
     // DO NOT USE:   testImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter"
