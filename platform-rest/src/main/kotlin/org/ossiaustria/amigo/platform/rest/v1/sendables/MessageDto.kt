@@ -4,15 +4,6 @@ import org.ossiaustria.amigo.platform.domain.models.Message
 import java.time.ZonedDateTime
 import java.util.*
 
-internal interface SendableDto {
-    val id: UUID
-    val senderId: UUID
-    val receiverId: UUID
-    val createdAt: ZonedDateTime
-    val sentAt: ZonedDateTime?
-    val retrievedAt: ZonedDateTime?
-}
-
 
 internal data class MessageDto(
     override val id: UUID,

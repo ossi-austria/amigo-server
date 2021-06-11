@@ -19,12 +19,12 @@ data class Multimedia(
 
     val ownerId: UUID,
     val remoteUrl: String,
-    val localUrl: String,
 
     @Enumerated(EnumType.STRING)
     val type: MultimediaType,
     val size: Long? = null,
 
+    val localUrl: String? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @Cascade(org.hibernate.annotations.CascadeType.DETACH)
@@ -33,7 +33,7 @@ data class Multimedia(
         referencedColumnName = "id",
         foreignKey = ForeignKey(name = "multimedias_album_id_id_fkey")
     )
-    val album: Album?,
+    val album: Album? = null,
 
     @Column(name = "album_id", insertable = false, updatable = false)
     val albumId: UUID? = album?.id,
@@ -43,9 +43,8 @@ data class Multimedia(
     override val sentAt: ZonedDateTime? = null,
     override val retrievedAt: ZonedDateTime? = null,
 
-
     ) : Sendable<Multimedia> {
-    override fun withSentAt(time: ZonedDateTime) = this.copy(sentAt = time)
 
+    override fun withSentAt(time: ZonedDateTime) = this.copy(sentAt = time)
     override fun withRetrievedAt(time: ZonedDateTime) = this.copy(retrievedAt = time)
 }

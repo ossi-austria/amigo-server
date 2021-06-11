@@ -26,6 +26,5 @@ data class Message(
 ) : Sendable<Message> {
 
     override fun withSentAt(time: ZonedDateTime) = this.copy(sentAt = time)
-
     override fun withRetrievedAt(time: ZonedDateTime) = this.copy(retrievedAt = time)
 }
