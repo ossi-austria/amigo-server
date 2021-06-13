@@ -1,6 +1,7 @@
 package org.ossiaustria.amigo.platform.rest.v1
 
 import org.hibernate.exception.ConstraintViolationException
+import org.ossiaustria.amigo.platform.domain.services.ServiceError
 import org.ossiaustria.amigo.platform.exceptions.*
 import org.ossiaustria.amigo.platform.rest.v1.common.RestExceptionDto
 import org.ossiaustria.amigo.platform.rest.v1.common.ValidationFailureDto
@@ -38,6 +39,12 @@ class RestExceptionHandler {
 
     @ExceptionHandler(RestException::class)
     fun handleException(exception: RestException): ResponseEntity<RestExceptionDto> {
+        val error = RestExceptionDto(exception)
+        return ResponseEntity(error, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(ServiceError::class)
+    fun handleException(exception: ServiceError): ResponseEntity<RestExceptionDto> {
         val error = RestExceptionDto(exception)
         return ResponseEntity(error, HttpStatus.BAD_REQUEST)
     }

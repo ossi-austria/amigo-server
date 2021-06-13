@@ -12,7 +12,6 @@ import org.ossiaustria.amigo.platform.rest.v1.sendables.MessageDto
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
-import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import org.springframework.restdocs.request.RequestDocumentation.requestParameters
 import java.time.ZonedDateTime
 import java.util.*
@@ -44,35 +43,78 @@ internal class MessagesApiTest : AbstractRestApiTest() {
 
     @Test
     @Tag(TestTags.RESTDOC)
+    fun `createMessage should return messages via receiverId`() {
+
+        val senderId = randomUUID()
+        val receiverId = randomUUID()
+        val text = "expected"
+
+        // cannot mock RequestBody "text"
+        every { messageService.createMessage(eq(senderId), eq(receiverId), any()) } returns
+                mockMessage(senderId = senderId, receiverId = receiverId, text = text)
+
+        val url = "$baseUrl?receiverId=$receiverId&senderId=$senderId"
+
+        val result = this.performPost(url, accessToken.token, body = text)
+            .expectOk()
+            .document(
+                "messages-create",
+                requestParameters(
+                    param("receiverId", "UUID of receiver"),
+                    param("senderId", "UUID of sender - must be your id"),
+//                    param("text", "Text to send in message"),
+                ),
+                responseFields(messageResponseFields())
+            )
+            .returns(MessageDto::class.java)
+
+        assertThat(result).isNotNull
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
     fun `filter should return messages via receiverId`() {
 
-        val id = account.person().id
-        val url = "$baseUrl/filter?receiverId=${id}"
+        val receiverId = account.person().id
+        val senderId = randomUUID()
 
-        every { messageService.findWithPersons(any(), eq(id)) } returns listOf(
-            mockMessage(senderId = randomUUID(), receiverId = id),
-            mockMessage(senderId = randomUUID(), receiverId = id),
+        val url = "$baseUrl/filter?receiverId=$receiverId&senderId=$senderId"
+
+        every { messageService.findWithPersons(any(), eq(receiverId)) } returns listOf(
+            mockMessage(senderId = senderId, receiverId = receiverId),
+            mockMessage(senderId = senderId, receiverId = receiverId),
         )
 
         val returnsList = this.performGet(url, accessToken.token)
             .expectOk()
             .document(
                 "messages-filter",
-                requestParameters(parameterWithName("receiverId").optional().description("Internal User id - UUID")),
+                requestParameters(
+                    param("receiverId", "Filter for UUID of receiver").optional(),
+                    param("senderId", "Filter for UUID of sender").optional()
+                ),
                 responseFields(messageResponseFields("[]."))
             )
             .returnsList(MessageDto::class.java)
 
         assertThat(returnsList).isNotNull
         assertThat(returnsList).isNotEmpty
-        returnsList.forEach { assertThat(it.receiverId).isEqualTo(id) }
+        returnsList.forEach {
+            assertThat(it.receiverId).isEqualTo(receiverId)
+            assertThat(it.senderId).isEqualTo(senderId)
+        }
     }
 
     @Test
     @Tag(TestTags.RESTDOC)
     fun `filter should return error when called with arbitrary persons`() {
-        val url = "$baseUrl/filter?receiverId=${randomUUID()}"
-        this.performGet(url, accessToken.token).expect4xx()
+        this.performGet("$baseUrl/filter?receiverId=${randomUUID()}", accessToken.token)
+            .expect4xx()
+
+        this.performGet("$baseUrl/filter?senderId=${randomUUID()}", accessToken.token)
+            .expect4xx()
+
+        this.performGet("$baseUrl/filter", accessToken.token).expect4xx()
     }
 
     @Test
@@ -151,8 +193,8 @@ internal class MessagesApiTest : AbstractRestApiTest() {
         assertThat(result.sentAt).isNull()
     }
 
-    private fun mockMessage(id: UUID = randomUUID(), senderId: UUID, receiverId: UUID): Message {
-        return Message(id, senderId = senderId, receiverId = receiverId, text = "text")
+    private fun mockMessage(id: UUID = randomUUID(), senderId: UUID, receiverId: UUID, text: String = "text"): Message {
+        return Message(id, senderId = senderId, receiverId = receiverId, text = text)
     }
 
     private fun messageResponseFields(prefix: String = ""): List<FieldDescriptor> {

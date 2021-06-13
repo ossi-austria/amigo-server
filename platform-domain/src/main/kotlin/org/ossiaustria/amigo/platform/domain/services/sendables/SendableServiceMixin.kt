@@ -72,7 +72,6 @@ internal class SendableServiceMixin<S : Sendable<S>>(
         if (senderId == receiverId) throw SendableError.PersonsAreTheSame()
         val sender = personRepository.findByIdOrNull(senderId) ?: throw DefaultNotFoundException()
         val receiver = personRepository.findByIdOrNull(receiverId) ?: throw DefaultNotFoundException()
-        if (senderId == receiverId) throw SendableError.PersonsAreTheSame()
         if (sender.groupId != receiver.groupId) throw SendableError.PersonsNotInSameGroup()
     }
 

@@ -6,6 +6,7 @@ import org.springframework.restdocs.payload.JsonFieldType.STRING
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import org.springframework.restdocs.request.ParameterDescriptor
 import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
+import org.springframework.restdocs.request.RequestDocumentation.partWithName
 
 object TestTags {
     const val SLOW = "slow"
@@ -19,6 +20,9 @@ internal fun field(path: String, type: JsonFieldType, description: String = "des
 
 internal fun param(path: String, description: String = "descr") =
     parameterWithName(path).description(description)
+
+internal fun part(path: String, description: String = "descr") =
+    partWithName(path).description(description)
 
 
 internal fun personFields(prefix: String = ""): MutableList<FieldDescriptor> {

@@ -10,11 +10,11 @@ import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.models.enums.MultimediaType
 import org.ossiaustria.amigo.platform.domain.services.sendables.MultimediaService
 import org.ossiaustria.amigo.platform.rest.v1.sendables.MultimediaDto
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType.NUMBER
 import org.springframework.restdocs.payload.JsonFieldType.STRING
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
-import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import org.springframework.restdocs.request.RequestDocumentation.requestParameters
 import java.time.ZonedDateTime
 import java.util.*
@@ -44,30 +44,71 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
         mockUserAuthentication()
     }
 
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `createMultimedia should handle MultipartFile and upload it`() {
+
+        val senderId = randomUUID()
+        val receiverId = randomUUID()
+        val name = "newname"
+        val file = MockMultipartFile("file", "content".toByteArray())
+
+        // Cannot mock "RequestPart" name and file
+        every { multimediaService.createMultimedia(eq(senderId), eq(receiverId), any(), any(), any()) } returns
+                mockMultimedia(senderId = senderId, receiverId = receiverId, filename = name)
+
+        val url = "$baseUrl?receiverId=$receiverId&senderId=$senderId"
+
+        val result = this.performPartPost(url, accessToken.token, file = file)
+            .expectOk()
+            .document(
+                "multimedias-create",
+                requestParameters(
+                    param("receiverId", "UUID of receiver"),
+                    param("senderId", "UUID of sender - must be your id"),
+                    param("albumId", "Text to send in message").optional(),
+                ),
+                responseFields(multimediasResponseFields())
+            )
+            .returns(MultimediaDto::class.java)
+
+        assertThat(result).isNotNull
+    }
+
     @Test
     @Tag(TestTags.RESTDOC)
     fun `filter should return multimedias via receiverId`() {
 
-        val id = account.person().id
-        val url = "$baseUrl/filter?receiverId=${id}"
+        val receiverId = account.person().id
+        val senderId = randomUUID()
 
-        every { multimediaService.findWithPersons(any(), eq(id)) } returns listOf(
-            mockMultimedia(senderId = randomUUID(), receiverId = id),
-            mockMultimedia(senderId = randomUUID(), receiverId = id),
+        val url = "$baseUrl/filter?receiverId=$receiverId&senderId=$senderId"
+
+        every { multimediaService.findWithPersons(any(), eq(receiverId)) } returns listOf(
+            mockMultimedia(senderId = senderId, receiverId = receiverId),
+            mockMultimedia(senderId = senderId, receiverId = receiverId),
         )
+
 
         val returnsList = this.performGet(url, accessToken.token)
             .expectOk()
             .document(
                 "multimedias-filter",
-                requestParameters(parameterWithName("receiverId").optional().description("Internal User id - UUID")),
+                requestParameters(
+                    param("receiverId", "Filter for UUID of receiver").optional(),
+                    param("senderId", "Filter for UUID of sender").optional()
+                ),
                 responseFields(multimediasResponseFields("[]."))
             )
             .returnsList(MultimediaDto::class.java)
 
         assertThat(returnsList).isNotNull
         assertThat(returnsList).isNotEmpty
-        returnsList.forEach { assertThat(it.receiverId).isEqualTo(id) }
+        returnsList.forEach {
+            assertThat(it.receiverId).isEqualTo(receiverId)
+            assertThat(it.senderId).isEqualTo(senderId)
+        }
     }
 
     @Test
@@ -159,14 +200,18 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
         receiverId: UUID,
         sentAt: ZonedDateTime? = null,
         retrievedAt: ZonedDateTime? = null,
+        filename: String = "filename",
     ): Multimedia {
         return Multimedia(
-            id, senderId = senderId, receiverId = receiverId, ownerId = senderId,
-            remoteUrl = "http://orf.at",
+            id, senderId = senderId,
+            receiverId = receiverId,
+            ownerId = senderId,
+            filename = filename,
             type = MultimediaType.IMAGE,
             sentAt = sentAt,
             retrievedAt = retrievedAt,
-        )
+
+            )
     }
 
     private fun multimediasResponseFields(prefix: String = ""): List<FieldDescriptor> {
@@ -180,9 +225,9 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
                 prefix + "retrievedAt", STRING, "LocalDateTime of Multimedia marked as retrieved"
             ).optional(),
             field(prefix + "ownerId", STRING, "UUID of Owner"),
-            field(prefix + "remoteUrl", STRING, "Url to download/view the file"),
+            field(prefix + "filename", STRING, "File to name that file locally"),
             field(prefix + "type", STRING, "MultimediaType: IMAGE, VIDEO, AUDIO"),
-            field(prefix + "localUrl", STRING, "UUID of sending Person").optional(),
+            field(prefix + "contentType", STRING, "ContentType / MIME type of that file").optional(),
             field(prefix + "size", NUMBER, "Size of file in bytes").optional(),
             field(prefix + "albumId", STRING, "UUID of parent Album").optional(),
 
