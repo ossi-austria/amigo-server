@@ -44,7 +44,7 @@ push docker:
 update server:
   stage: deploy
   when: manual
-  allow_failure: false
+  allow_failure: true
   variables:
     SSH_PRIV_DEV: $SSH_PRIV_DEV
 
