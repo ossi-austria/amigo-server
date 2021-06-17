@@ -65,4 +65,8 @@ we can live with this, but you should not.
 
 Please be patient.
 
+docker build --build-arg DEPENDENCY=build/dependency -t springio/gs-spring-boot-docker .
+
+docker run -e "SPRING_PROFILES_ACTIVE=dev" -p 8080:8080 -t springio/gs-spring-boot-docker
+
 

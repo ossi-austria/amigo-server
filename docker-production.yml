@@ -6,7 +6,7 @@ services:
 
   amigo-platform:
     container_name: amigo-platform
-    image: registry.gitlab.com/ossi-austria/amigo-server:develop #6b866cc86ae9
+    image: registry.gitlab.com/ossi-austria/amigo-server:develop
     #restart: always
     depends_on:
       - postgres

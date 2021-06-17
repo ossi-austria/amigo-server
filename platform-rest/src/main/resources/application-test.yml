@@ -1,3 +1,5 @@
+amigo-platform:
+
 spring:
   devtools:
     add-properties: true

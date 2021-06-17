@@ -31,7 +31,7 @@ class DiskFileStorage : FileStorage {
 
     override fun saveFile(
         multimedia: Multimedia,
-        file: MultipartFile,
+        multipartFile: MultipartFile,
         overwrite: Boolean
     ): FileInfo {
         val ownerPath = getOwnerPath(multimedia.ownerId)
@@ -46,7 +46,7 @@ class DiskFileStorage : FileStorage {
         } else if (overwrite && exists && !writable) {
             throw FileStorageError.FileNotOverwritable(multimediaPath)
         } else {
-            Files.copy(file.inputStream, multimediaPath)
+            Files.copy(multipartFile.inputStream, multimediaPath)
             val file = File(multimediaPath.toUri())
             return FileInfo(size = file.length(), absolutePath = file.absolutePath)
         }
