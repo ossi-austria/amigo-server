@@ -8,10 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
 
@@ -29,12 +32,13 @@ abstract class AbstractRestTest {
 
     protected fun acceptContentAuth(
         requestBuilder: MockHttpServletRequestBuilder,
-        jwtToken: String
+        jwtToken: String,
+        mediaType: MediaType = MediaType.APPLICATION_JSON
     ): MockHttpServletRequestBuilder {
         return requestBuilder
             .accept(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN)
             .header(HEADER_PRIVATE_TOKEN, "Bearer $jwtToken")
-            .contentType(MediaType.APPLICATION_JSON)
+            .contentType(mediaType)
     }
 
     protected fun acceptAnonymousAuth(requestBuilder: MockHttpServletRequestBuilder): MockHttpServletRequestBuilder {
@@ -46,6 +50,13 @@ abstract class AbstractRestTest {
 
     protected fun performPost(url: String, accessToken: String? = null, body: Any? = null) = mockMvc.perform(
         generateRequestBuilder(url, accessToken, body, HttpMethod.POST)
+    )
+
+    protected fun performPartPost(url: String, accessToken: String, file: MockMultipartFile, body: Any? = null) =
+        mockMvc.perform(generatePartRequestBuilder(url, accessToken, file, body))
+
+    protected fun performPatch(url: String, accessToken: String? = null, body: Any? = null) = mockMvc.perform(
+        generateRequestBuilder(url, accessToken, body, HttpMethod.PATCH)
     )
 
     protected fun performPut(url: String, accessToken: String? = null, body: Any? = null) = mockMvc.perform(
@@ -71,6 +82,7 @@ abstract class AbstractRestTest {
             HttpMethod.POST -> RestDocumentationRequestBuilders.post(url)
             HttpMethod.PUT -> RestDocumentationRequestBuilders.put(url)
             HttpMethod.DELETE -> RestDocumentationRequestBuilders.delete(url)
+            HttpMethod.PATCH -> RestDocumentationRequestBuilders.patch(url)
             else -> throw RuntimeException("Method not implemented")
         }
 
@@ -83,6 +95,25 @@ abstract class AbstractRestTest {
         } else {
             acceptContentAuth(builder, jwtToken)
         }
+    }
+
+    private fun generatePartRequestBuilder(
+        url: String,
+        jwtToken: String,
+        file: MockMultipartFile,
+        body: Any?,
+    ): MockMultipartHttpServletRequestBuilder {
+//        val builder = multipart(url).part(MockPart(file.name, file.originalFilename, file.bytes))
+        val builder = multipart(url).file(file)
+
+        if (body != null) {
+            builder.content(objectMapper.writeValueAsString(body))
+        }
+        return acceptContentAuth(
+            builder,
+            jwtToken,
+            mediaType = MediaType.MULTIPART_FORM_DATA
+        ) as MockMultipartHttpServletRequestBuilder
     }
 
     fun ResultActions.checkStatus(status: HttpStatus): ResultActions {

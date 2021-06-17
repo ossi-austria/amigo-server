@@ -2,8 +2,8 @@ amigo-platform:
   security:
     accessTokenSecret: ${AMIGO_ACCESS_TOKEN_SECRET:asdf1234}
     refreshTokenSecret: ${AMIGO_REFRESH_TOKEN_SECRET:asdf1234asdf}
-    accessTokenExpirationSec: 360000
-    refreshTokenExpirationSec: 360000
+    accessTokenExpirationSec: 36000
+    refreshTokenExpirationSec: 3600000
 
 spring:
   devtools:
@@ -21,6 +21,7 @@ spring:
     username: ${DB_USER:amigo}
     password: ${DB_PASSWORD:password}
   jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
     generate-ddl: false
     properties:
@@ -31,7 +32,10 @@ spring:
       ddl-auto: none
   flyway:
     baseline-on-migrate: true
-
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
 
 logging:
   pattern:

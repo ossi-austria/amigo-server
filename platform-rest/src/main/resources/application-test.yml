@@ -1,3 +1,5 @@
+amigo-platform:
+
 spring:
   devtools:
     add-properties: true
@@ -13,3 +15,15 @@ spring:
       ddl-auto: create-drop
   flyway:
     enabled: false # USE for dev only
+
+logging:
+  level:
+    root: INFO
+    org.ossiaustria.platform: DEBUG
+    web: INFO
+    org.springframework.security: DEBUG
+    org.springframework.orm: WARN
+    org.hibernate: WARN
+    org.springframework.boot.autoconfigure: ERROR
+    org.springframework.security.web.FilterChainProxy: INFO
+    org.apache.http: DEBUG

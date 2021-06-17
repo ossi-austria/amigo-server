@@ -41,6 +41,17 @@ push docker:
     - docker build -t $IMAGE_TAG .
     - docker push $IMAGE_TAG
 
+update server:
+  stage: deploy
+  when: manual
+  allow_failure: true
+  variables:
+    SSH_PRIV_DEV: $SSH_PRIV_DEV
+
+  script:
+    - cat $SSH_PRIV_DEV > ssh.priv
+    - ssh amigo@$SERVER_DEV -i ssh.priv 'sh /home/amigo/update.sh'
+
 pages:
   stage: deploy
   cache:

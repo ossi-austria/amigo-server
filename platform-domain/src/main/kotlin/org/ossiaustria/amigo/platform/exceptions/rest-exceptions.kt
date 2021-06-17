@@ -80,9 +80,6 @@ class ForbiddenContentException(errorCode: ErrorCode, message: String) : RestExc
 class ConflictException(errorCode: ErrorCode, message: String) : RestException(errorCode, message)
 
 @ResponseStatus(code = HttpStatus.CONFLICT, reason = "The state of internal db is inconsistent")
-class NotConsistentInternalDb(message: String) : RestException(ErrorCode.Conflict, message)
-
-@ResponseStatus(code = HttpStatus.CONFLICT, reason = "The state of internal db is inconsistent")
 class UserAlreadyExistsException(username: String, email: String) : RestException(ErrorCode.UserCreationFailedEmailOrUsernameUsed, "'$username' or '$email' is already in use!")
 
 @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "User not found")
@@ -93,13 +90,8 @@ open class UnknownUserException(message: String? = null)
 open class UserNotFoundException(message: String = "User is unknown and or not exist")
     : NotFoundException(ErrorCode.UserNotExisting, message)
 
-
-@ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Group not found")
-open class UnknownGroupException(message: String? = null)
-    : NotFoundException(ErrorCode.GroupNotExisting, message ?: "Group is unknown and does not exist")
-
-@ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Project not found")
-open class UnknownProjectException(message: String? = null)
-    : NotFoundException(ErrorCode.ProjectNotExisting, message ?: "Project is unknown and does not exist")
+@ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Entity not found")
+class DefaultNotFoundException(message: String = "Entity does not exist") :
+    NotFoundException(ErrorCode.UserNotExisting, message)
 
 

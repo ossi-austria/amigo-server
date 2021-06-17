@@ -13,13 +13,18 @@ data class Message(
     @Column(length = 16, unique = true, nullable = false)
     override val id: UUID,
 
-    @CreatedDate
-    override val createdAt: ZonedDateTime = ZonedDateTime.now(),
-    override val sendAt: ZonedDateTime? = null,
-    override val retrievedAt: ZonedDateTime? = null,
-
     override val senderId: UUID,
     override val receiverId: UUID,
 
-    val text: String
-) : Sendable
+    val text: String,
+
+    @CreatedDate
+    override val createdAt: ZonedDateTime = ZonedDateTime.now(),
+    override val sentAt: ZonedDateTime? = null,
+    override val retrievedAt: ZonedDateTime? = null
+
+) : Sendable<Message> {
+
+    override fun withSentAt(time: ZonedDateTime) = this.copy(sentAt = time)
+    override fun withRetrievedAt(time: ZonedDateTime) = this.copy(retrievedAt = time)
+}

@@ -31,26 +31,30 @@ RESTful notes tries to adhere as closely as possible to standard HTTP and REST c
 | Verb | Usage
 
 | `GET`
-| Used to retrieve a resource.Will return 200.
+| Used to retrieve a resource.
+Will return 200.
 
 | `POST`
-| Used to create a new resource.Will return 201 for success.
+| Used to create a new resource.
+Will return 201 for success.
 
 | `PUT`
-| Used to update an existing resource as an idempotent call.May also create the resource in rare cases, e.g. if it a singleton resource.Will return 200 with Content, 204 without Content
+| Used to update an existing resource as an idempotent call.
+May also create the resource in rare cases, e.g. if it a singleton resource.Will return 200 with Content, 204 without Content
 
 | `PATCH`
-| Used to update an existing resource, including partial updates.Will return 200 with Content, 204 without Content
+| Used to update an existing resource, including partial updates.
+Will return 200 with Content, 204 without Content
 
 | `DELETE`
-| Used to delete an existing resource.Will return 204
+| Used to delete an existing resource.
+Will return 204
 |===
 
 [[overview-http-status-codes]]
 == HTTP status codes
 
-RESTful notes tries to adhere as closely as possible to standard HTTP and REST conventions in its
-use of HTTP status codes.
+RESTful notes tries to adhere as closely as possible to standard HTTP and REST conventions in its use of HTTP status codes.
 
 |===
 | Status code | Usage
@@ -60,14 +64,16 @@ use of HTTP status codes.
 An update to an existing resource has been applied successfully
 
 | `201 Created`
-| A new resource has been created successfully.The resource's URI is available from the response's
+| A new resource has been created successfully.
+The resource's URI is available from the response's
 `Location` header
 
 | `204 No Content`
 | An update to an existing resource has been applied successfully
 
 | `400 Bad Request`
-| The request was malformed.The response body will include an error providing further information.
+| The request was malformed.
+The response body will include an error providing further information.
 
 | `401 Unauthorized`
 | User is not logged in and Authorization is necessary
@@ -163,10 +169,10 @@ Get user short profile info
 
 operation::who-am-i[snippets='curl-request,http-response,response-fields']
 
-= Resources
+= Common Resources
 
 [[groups]]
-== Groups & Persons - /groups
+== Groups - /groups
 
 Groups contain all necessary Person profiles inside them.
 A User can just access the Groups where they have a Person profile and is at least MEMBER (default).
@@ -192,3 +198,62 @@ operation::groups-one-success[snippets='curl-request,http-response,response-fiel
 Filter accessible Groups for *own* Person and/or Group name
 
 operation::groups-filtered-success[snippets='curl-request,request-parameters,http-response,response-fields']
+
+= Sendables
+
+All Sendables behave similar and share a big amount of code.
+See the first example of Sendable endpoints used on Message for further informatio.
+
+[[messages]]
+== Messages
+
+=== Create new Message - POST /messages
+
+operation::messages-create[snippets='curl-request,http-response,response-fields']
+
+=== Filter Messages - GET /messages/filter?receiverId=<UUID>&senderId=<UUID>
+
+operation::messages-filter[snippets='curl-request,http-response,response-fields']
+
+=== GET /messages/received - All my retrieved
+
+operation::messages-received[snippets='curl-request,http-response,response-fields']
+
+=== GET /messages/sent - All my sent
+
+operation::messages-sent[snippets='curl-request,http-response,response-fields']
+
+=== GET /messages/:id
+
+operation::messages-one[snippets='curl-request,http-response,response-fields']
+
+=== PATCH /messages/:id/set-retrieved - Set Message as "retrieved"
+
+operation::messages-set-retrieved[snippets='curl-request,http-response,response-fields']
+
+[[multimedias]]
+== multimedias
+
+=== Create & upload new Multimedia - POST /multimedias
+
+operation::multimedias-create[snippets='curl-request,http-response,response-fields']
+
+=== Filter multimedias - GET /multimedias/filter?receiverId=<UUID>&senderId=<UUID>
+
+operation::multimedias-filter[snippets='curl-request,http-response,response-fields']
+
+=== GET /multimedias/received - All my retrieved Multimedia
+
+operation::multimedias-received[snippets='curl-request,http-response,response-fields']
+
+=== GET /multimedias/sent - All my sent
+
+operation::multimedias-sent[snippets='curl-request,http-response,response-fields']
+
+=== GET /multimedias/:id
+
+operation::multimedias-one[snippets='curl-request,http-response,response-fields']
+
+=== PATCH /multimedias/:id/set-retrieved - Set Multimedia as "retrieved"
+
+operation::multimedias-set-retrieved[snippets='curl-request,http-response,response-fields']
