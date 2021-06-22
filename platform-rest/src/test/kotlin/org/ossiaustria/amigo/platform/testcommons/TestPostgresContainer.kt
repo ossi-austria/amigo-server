@@ -1,6 +1,6 @@
 package org.ossiaustria.amigo.platform.testcommons
 
-import org.ossiaustria.amigo.platform.ApplicationProfiles
+import org.ossiaustria.amigo.platform.domain.config.ApplicationProfiles
 import org.slf4j.LoggerFactory
 import org.springframework.boot.test.util.TestPropertyValues
 import org.springframework.context.ApplicationContextInitializer

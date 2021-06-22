@@ -1,5 +1,6 @@
 package org.ossiaustria.amigo.platform.domain.services.sendables
 
+import com.ninjasquad.springmockk.MockkBean
 import com.ninjasquad.springmockk.SpykBean
 import io.mockk.every
 import org.assertj.core.api.Assertions.assertThat
@@ -12,6 +13,7 @@ import org.ossiaustria.amigo.platform.domain.repositories.MultimediaRepository
 import org.ossiaustria.amigo.platform.domain.services.files.DiskFileStorage
 import org.ossiaustria.amigo.platform.domain.services.files.FileInfo
 import org.ossiaustria.amigo.platform.domain.services.files.FileStorageError
+import org.ossiaustria.amigo.platform.domain.services.messaging.NotificationService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.mock.web.MockMultipartFile
 import java.util.UUID.randomUUID
@@ -27,15 +29,17 @@ internal class MultimediaServiceTest : SendableServiceTest<Multimedia, Multimedi
     @Autowired
     private lateinit var repository: MultimediaRepository
 
+    @MockkBean
+    private lateinit var notificationService: NotificationService
+
     private val toTypedArray: ByteArray = "content ".repeat(1024).toByteArray()
 
     val multipartFile: MockMultipartFile = mockMultipartFile("image/png", content = toTypedArray)
 
-    val bigFile: MockMultipartFile =
-        MockMultipartFile(
-            "name", "name", "image/png",
-            "content ".repeat(1024 * 1024).toByteArray()
-        )
+    val bigFile: MockMultipartFile = MockMultipartFile(
+        "name", "name", "image/png",
+        "content ".repeat(1024 * 1024).toByteArray()
+    )
 
     @BeforeEach
     fun beforeEach() {
@@ -43,18 +47,11 @@ internal class MultimediaServiceTest : SendableServiceTest<Multimedia, Multimedi
         repository.deleteAll()
 
         mockPersons()
+        every { notificationService.multimediaSent(eq(personId2), any()) } returns true
 
         repository.save(Multimedia(existingId, personId1, personId2, personId1, MultimediaType.IMAGE, "filename"))
-        repository.save(
-            Multimedia(
-                randomUUID(),
-                personId2,
-                personId1,
-                personId2,
-                MultimediaType.IMAGE,
-                "filename2"
-            )
-        )
+        val multimedia = Multimedia(randomUUID(), personId2, personId1, personId2, MultimediaType.IMAGE, "filename2")
+        repository.save(multimedia)
 
         every {
             fileStorage.saveFile(any(), any(), any())
@@ -64,13 +61,18 @@ internal class MultimediaServiceTest : SendableServiceTest<Multimedia, Multimedi
     }
 
     @Test
-    fun `createMultimedia should save a Multimedia with text`() {
+    fun `createMultimedia should save a Multimedia with a file`() {
         val result = service.createMultimedia(personId1, personId2, null, "name", multipartFile)
         assertThat(result).isNotNull
+        assertThat(result.senderId).isEqualTo(personId1)
+        assertThat(result.receiverId).isEqualTo(personId2)
+        assertThat(result.createdAt).isNotNull
+        assertThat(result.retrievedAt).isNull()
     }
 
     @Test
     fun `createMultimedia should allow when sender and receiver are the same`() {
+        every { notificationService.multimediaSent(eq(personId1), any()) } returns true
         val result = service.createMultimedia(personId1, personId1, null, "name", multipartFile)
         assertThat(result).isNotNull
     }
@@ -158,6 +160,24 @@ internal class MultimediaServiceTest : SendableServiceTest<Multimedia, Multimedi
                 )
             )
         }
+    }
+
+    @Test
+    fun `createMultimedia should sent notification and update Multimedia with sentAt `() {
+        every { notificationService.multimediaSent(eq(personId2), any()) } returns true
+
+        val result = service.createMultimedia(personId1, personId2, null, null, multipartFile)
+        assertThat(result).isNotNull
+        assertThat(result.sentAt).isNotNull
+    }
+
+    @Test
+    fun `createMultimedia should sent notification and update Multimedia without sentAt`() {
+        every { notificationService.multimediaSent(eq(personId2), any()) } returns false
+
+        val result = service.createMultimedia(personId1, personId2, null, null, multipartFile)
+        assertThat(result).isNotNull
+        assertThat(result.sentAt).isNull()
     }
 
     @Test

@@ -2,7 +2,7 @@ package org.ossiaustria.amigo.platform.rest.v1.notifications
 
 
 import com.google.firebase.messaging.AndroidConfig
-import org.ossiaustria.amigo.platform.domain.services.messaging.MessagingService
+import org.ossiaustria.amigo.platform.domain.services.messaging.NotificationService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -11,11 +11,12 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/v1/notifications", produces = ["application/json"], consumes = ["application/json"])
 class NotificationsController(
-    val messagingService: MessagingService,
+    val notificationService: NotificationService,
 ) {
 
+    @Deprecated("Use only on development servers")
     @PostMapping("/test-send")
-    fun sendNotification(@RequestBody notificationRequest: NotificationRequest) = messagingService
+    fun sendNotification(@RequestBody notificationRequest: NotificationRequest) = notificationService
         .sendNotification(
             data = notificationRequest.data,
             token = notificationRequest.token,
@@ -23,7 +24,6 @@ class NotificationsController(
             prio = notificationRequest.prio,
         )
 }
-
 
 data class NotificationRequest(
     val token: String,

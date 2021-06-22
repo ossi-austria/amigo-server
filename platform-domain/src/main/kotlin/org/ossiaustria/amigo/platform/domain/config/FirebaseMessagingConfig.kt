@@ -4,10 +4,11 @@ import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.FirebaseMessaging
-import org.ossiaustria.amigo.platform.ApplicationProfiles
-import org.ossiaustria.amigo.platform.domain.services.messaging.MessagingService
-import org.ossiaustria.amigo.platform.domain.services.messaging.NoopMessagingService
-import org.ossiaustria.amigo.platform.services.messaging.FirebaseMessagingService
+import org.ossiaustria.amigo.platform.domain.config.ApplicationProfiles
+import org.ossiaustria.amigo.platform.domain.services.AccountService
+import org.ossiaustria.amigo.platform.domain.services.messaging.FirebaseNotificationService
+import org.ossiaustria.amigo.platform.domain.services.messaging.NoopNotificationService
+import org.ossiaustria.amigo.platform.domain.services.messaging.NotificationService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -19,7 +20,7 @@ import java.util.logging.Logger
 class FirebaseMessagingConfig {
 
     @Bean
-    fun messagingService(): MessagingService =
+    fun messagingService(accountService: AccountService): NotificationService =
         try {
             val googleCredentials = GoogleCredentials
                 .fromStream(FileUrlResource(FIREBASE_CONFIG_FILE).inputStream)
@@ -29,11 +30,11 @@ class FirebaseMessagingConfig {
                 .build()
             val app = FirebaseApp.initializeApp(firebaseOptions, "my-app")
             val firebaseMessaging = FirebaseMessaging.getInstance(app)
-            FirebaseMessagingService(firebaseMessaging)
+            FirebaseNotificationService(firebaseMessaging, accountService)
         } catch (e: Exception) {
             log.warning("# MISSING CONFIG: $FIREBASE_CONFIG_FILE")
             log.warning("# Cannot use Firebase messaging for this server instance")
-            NoopMessagingService()
+            NoopNotificationService()
         }
 
 
@@ -48,8 +49,8 @@ class FirebaseMessagingConfig {
 class NoopMessagingConfig {
 
     @Bean
-    fun noopMessagingService(): MessagingService {
-        return NoopMessagingService()
+    fun noopMessagingService(): NotificationService {
+        return NoopNotificationService()
     }
 
 }

@@ -2,8 +2,8 @@ amigo-platform:
   security:
     accessTokenSecret: ${AMIGO_ACCESS_TOKEN_SECRET:asdf1234}
     refreshTokenSecret: ${AMIGO_REFRESH_TOKEN_SECRET:asdf1234asdf}
-    accessTokenExpirationSec: 36000
-    refreshTokenExpirationSec: 3600000
+    accessTokenExpirationSec: 3600000 # reduce in prod
+    refreshTokenExpirationSec: 3600000 # reduce in prod
 
 spring:
   devtools:

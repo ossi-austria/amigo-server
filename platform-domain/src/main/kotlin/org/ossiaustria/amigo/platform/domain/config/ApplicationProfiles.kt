@@ -1,4 +1,4 @@
-package org.ossiaustria.amigo.platform
+package org.ossiaustria.amigo.platform.domain.config
 
 object ApplicationProfiles {
     const val TEST = "test"

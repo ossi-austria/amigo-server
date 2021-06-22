@@ -7,6 +7,7 @@ import org.ossiaustria.amigo.platform.domain.repositories.MultimediaRepository
 import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.ossiaustria.amigo.platform.domain.services.ServiceError
 import org.ossiaustria.amigo.platform.domain.services.files.FileStorage
+import org.ossiaustria.amigo.platform.domain.services.messaging.NotificationService
 import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -58,6 +59,9 @@ class MultimediaServiceImpl : MultimediaService {
     @Autowired
     private lateinit var personRepository: PersonRepository
 
+    @Autowired
+    private lateinit var notificationService: NotificationService
+
     private val wrapper: SendableServiceMixin<Multimedia> by lazy { SendableServiceMixin(repository, personRepository) }
 
     override fun createMultimedia(
@@ -75,8 +79,17 @@ class MultimediaServiceImpl : MultimediaService {
         val newMultimedia = createNew(senderId, receiverId, filename, albumId)
         val multimedia = this.uploadFile(newMultimedia, file)
 
-        return repository.save(multimedia).also {
-            Log.info("createMessage: senderId=$senderId receiverId=$receiverId -> $filename")
+        Log.info("createMultimedia: senderId=$senderId receiverId=$receiverId -> $filename")
+
+        val success = notificationService.multimediaSent(receiverId, multimedia)
+        return if (success) {
+            repository.save(multimedia.copy(sentAt = ZonedDateTime.now())).also {
+                Log.info("sent Multimedia: senderId=$senderId receiverId=$receiverId -> $filename")
+            }
+        } else {
+            repository.save(multimedia).also {
+                Log.warn("could not send Multimedia: senderId=$senderId receiverId=$receiverId -> $filename")
+            }
         }
     }
 

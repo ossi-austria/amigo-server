@@ -33,12 +33,15 @@ class AccountService {
     fun findById(id: UUID) = accountRepository.findByIdOrNull(id)
 
     fun findOneByEmail(email: String) = accountRepository.findOneByEmail(email)
+    fun findOneByPersonId(id: UUID) = personRepository.findByIdOrNull(id)?.let {
+        accountRepository.findByIdOrNull(it.accountId)
+    }
 
 
     @Transactional
     fun createAccountAndPerson(email: String, plainPassword: String, group: Group, fullName: String): Account {
         val account = createAccount(email, plainPassword)
-        val person = createPersonForGroup(account, group, fullName)
+        createPersonForGroup(account, group, fullName)
         return accountRepository.findByIdOrNull(account.id)!!
     }
 

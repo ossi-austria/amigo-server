@@ -10,6 +10,7 @@ import org.ossiaustria.amigo.platform.exceptions.UnauthorizedException
 import org.ossiaustria.amigo.platform.exceptions.UserAlreadyExistsException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -165,5 +166,14 @@ class AuthService(
         return true
     }
 
+    @Transactional
+    fun setFcmToken(accountId: UUID, fcmToken: String): Account {
+        val account = accountRepository.findByIdOrNull(accountId)
+            ?: throw UnauthorizedException("Cannot update fcm token without account")
+        return accountRepository.save(account.copy(fcmToken = fcmToken)).also {
+            log.info("Set FCM token for account ${accountId} : $fcmToken")
+        }
+
+    }
 }
 

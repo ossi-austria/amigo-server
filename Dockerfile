@@ -13,8 +13,8 @@ RUN gradle -x test :platform-domain:jar :platform-rest:bootJar -x :platform-rest
 
 # Start a new docker stage here, and only copy the finished build artefacts.
 FROM openjdk:8-jdk-alpine
-RUN addgroup -S spring && adduser -S spring -G spring
-USER spring:spring
+RUN addgroup -S amigo && adduser -S amigo -G amigo
+USER amigo:amigo
 COPY --from=BUILDER /workdir/platform-rest/build/libs/*.jar /app.jar
 
 # start app

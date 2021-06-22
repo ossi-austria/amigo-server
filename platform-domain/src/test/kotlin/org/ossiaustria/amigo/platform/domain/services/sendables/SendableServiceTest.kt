@@ -5,38 +5,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.ossiaustria.amigo.platform.domain.models.Sendable
 import org.ossiaustria.amigo.platform.domain.services.AbstractServiceTest
-import org.ossiaustria.amigo.platform.domain.testcommons.Models
 import org.ossiaustria.amigo.platform.exceptions.NotFoundException
 import java.time.ZonedDateTime
-import java.util.*
 import java.util.UUID.randomUUID
 
 internal abstract class SendableServiceTest<S : Sendable<S>, T : SendableService<S>> : AbstractServiceTest() {
 
     protected abstract var service: T
-
-    val existingId: UUID = randomUUID()
-
-    val personId1: UUID = randomUUID()
-    val personId2: UUID = randomUUID()
-    val personId3: UUID = randomUUID()
-
-    val groupId1: UUID = randomUUID()
-    val groupId2: UUID = randomUUID()
-
-    protected fun mockPersons() {
-        groups.save(Models.group(groupId1))
-        groups.save(Models.group(groupId2))
-        accounts.save(Models.account()).also {
-            persons.save(Models.persons(personId1, it.id, groupId1))
-        }
-        accounts.save(Models.account()).also {
-            persons.save(Models.persons(personId2, it.id, groupId1))
-        }
-        accounts.save(Models.account()).also {
-            persons.save(Models.persons(personId3, it.id, groupId2))
-        }
-    }
 
     @Test
     fun `getOne should throw when id does not exist`() {
