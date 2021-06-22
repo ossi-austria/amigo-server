@@ -4,6 +4,7 @@ import org.ossiaustria.amigo.platform.domain.models.Message
 import org.ossiaustria.amigo.platform.domain.models.StringValidator
 import org.ossiaustria.amigo.platform.domain.repositories.MessageRepository
 import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
+import org.ossiaustria.amigo.platform.domain.services.messaging.NotificationService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -24,6 +25,9 @@ class MessageServiceImpl : MessageService {
     @Autowired
     private lateinit var personRepository: PersonRepository
 
+    @Autowired
+    private lateinit var notificationService: NotificationService
+
     private val wrapper: SendableServiceMixin<Message> by lazy { SendableServiceMixin(repository, personRepository) }
 
     override fun createMessage(senderId: UUID, receiverId: UUID, text: String): Message {
@@ -38,9 +42,20 @@ class MessageServiceImpl : MessageService {
             retrievedAt = null,
             sentAt = null,
         )
-        return repository.save(message).also {
-            Log.info("createMessage: senderId=$senderId receiverId=$receiverId -> $text")
+
+        Log.info("createMessage: senderId=$senderId receiverId=$receiverId -> $text")
+
+        val success = notificationService.messageSent(receiverId, message)
+        return if (success) {
+            repository.save(message.copy(sentAt = ZonedDateTime.now())).also {
+                Log.info("sent Message: senderId=$senderId receiverId=$receiverId -> $text")
+            }
+        } else {
+            repository.save(message).also {
+                Log.warn("could not send Message: senderId=$senderId receiverId=$receiverId -> $text")
+            }
         }
+
     }
 
     override fun getOne(id: UUID): Message = wrapper.getOne(id)

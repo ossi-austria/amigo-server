@@ -46,9 +46,7 @@ data class LoginRequest(
     @get:NotEmpty val password: String
 )
 
-data class RefreshAccessTokenRequest(
-    val refreshToken: String
-)
+data class RefreshAccessTokenRequest(val refreshToken: String)
 
 data class RegisterRequest(
     @get:Email @get:NotEmpty val email: String,

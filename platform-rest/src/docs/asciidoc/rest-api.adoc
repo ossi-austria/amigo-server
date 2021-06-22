@@ -153,13 +153,9 @@ operation::login-success[snippets='curl-request,request-fields,http-response,res
 [[update-profile]]
 === PUT /auth/register
 
-register
-
 operation::register-success[snippets='curl-request,request-fields,http-response,response-fields']
 
 === GET /auth/refresh-token
-
-refresh-token-success
 
 operation::refresh-token-success[snippets='curl-request,request-fields,http-response,response-fields']
 
@@ -170,6 +166,18 @@ Get user short profile info
 operation::who-am-i[snippets='curl-request,http-response,response-fields']
 
 = Common Resources
+
+[[account]]
+== Account - /account
+
+Account endpoint is a singular endpoint just for the current user.
+
+[[account-set-fcm-token]]
+=== POST /account/set-fcm-token
+
+Set the new Firebase Cloud Messaging (FCM) token for the current user.
+
+operation::account-set-fcm-token[snippets='curl-request,http-response']
 
 [[groups]]
 == Groups - /groups
@@ -232,9 +240,12 @@ operation::messages-one[snippets='curl-request,http-response,response-fields']
 operation::messages-set-retrieved[snippets='curl-request,http-response,response-fields']
 
 [[multimedias]]
-== multimedias
+== Multimedias
 
 === Create & upload new Multimedia - POST /multimedias
+
+File Content must be provided as a MultiPart file in the "form-data" body.
+ReceiverId and SenderId can be provided as URL request param or also as fields.
 
 operation::multimedias-create[snippets='curl-request,http-response,response-fields']
 

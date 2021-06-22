@@ -33,7 +33,7 @@ class SimpleCurrentUserService(
 
     override fun person(): Person {
         val tokenUserDetails: TokenUserDetails = authentication().principal as TokenUserDetails
-        return personService.findById(tokenUserDetails.accountId)
+        return personService.findById(tokenUserDetails.personsIds.first())
             ?: throw UserNotFoundException()
     }
 

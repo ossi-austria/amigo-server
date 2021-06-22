@@ -14,6 +14,9 @@ services:
     env_file: system.env
     environment:
       - SPRING_PROFILES_ACTIVE=dev
+    volumes:
+      - ./configs:/configs
+      - ./files:/files
 
   postgres:
     container_name: postgres

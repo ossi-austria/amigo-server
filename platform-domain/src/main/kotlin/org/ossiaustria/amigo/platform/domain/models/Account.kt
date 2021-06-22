@@ -36,6 +36,8 @@ data class Account(
 
     val changeAccountToken: String? = null,
     val changeAccountTokenCreatedAt: ZonedDateTime? = null,
+
+    val fcmToken: String? = null,
 ) {
 
     fun person() = persons.first()
