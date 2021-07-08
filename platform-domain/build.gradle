@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.4.3'
+    id 'org.springframework.boot' version '2.5.2'
     id 'io.spring.dependency-management'
 }
 
@@ -48,21 +48,3 @@ jar {
 bootJar {
     enabled = false
 }
-
-task explodeJar(type: Copy) {
-    dependsOn ":platform-domain:jar"
-    mustRunAfter ":platform-domain:jar"
-    from(zipTree(tasks.jar.outputs.files.singleFile))
-    into("build/dependency")
-}
-
-task prepareDocker {
-    dependsOn ":platform-domain:jar"
-    dependsOn ":platform-domain:explodeJar"
-    mustRunAfter ":platform-domain:explodeJar"
-    doLast {
-        print("Exploded platform-domain Jar for docker")
-    }
-}
-
-

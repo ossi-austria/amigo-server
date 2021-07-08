@@ -15,7 +15,7 @@ RUN gradle -x test :platform-domain:jar :platform-rest:bootJar -x :platform-rest
 FROM openjdk:8-jdk-alpine
 RUN addgroup -S amigo && adduser -S amigo -G amigo
 USER amigo:amigo
-COPY --from=BUILDER /workdir/platform-rest/build/libs/*.jar /app.jar
+COPY --from=BUILDER /workdir/platform-rest/build/libs/platform-rest-*.jar /app.jar
 
 # start app
 ENTRYPOINT ["java","-jar","/app.jar"]

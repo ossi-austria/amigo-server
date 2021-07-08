@@ -9,7 +9,7 @@ import java.nio.file.Path
 
 interface FileStorage {
 
-    fun saveFile(multimedia: Multimedia, file: MultipartFile, overwrite: Boolean = false): FileInfo
+    fun saveFile(multimedia: Multimedia, multipartFile: MultipartFile, overwrite: Boolean = false): FileInfo
     fun loadFile(multimedia: Multimedia): Resource
     fun deleteFile(multimedia: Multimedia): Boolean
     fun getUrl(multimedia: Multimedia): URI

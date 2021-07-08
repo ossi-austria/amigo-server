@@ -104,10 +104,10 @@ class APEmailService(
         val messageBodyHtml = generateHtmlFromTemplate(template, variables)
         val messageBodyText = generateTextFromTemplate(template, variables)
 
-        messageHelper.setFrom("Amigo", "Amigo");
-        messageHelper.setTo(email.recipientEmail);
-        messageHelper.setSubject(email.subject);
-        messageHelper.setText(messageBodyText, messageBodyHtml);
+        messageHelper.setFrom("Amigo", "Amigo")
+        messageHelper.setTo(email.recipientEmail)
+        messageHelper.setSubject(email.subject)
+        messageHelper.setText(messageBodyText, messageBodyHtml)
 
         return Pair(mailMessage, messageBodyHtml)
     }
@@ -117,7 +117,7 @@ class APEmailService(
         simpleMessage.setTo(email.recipientEmail)
         simpleMessage.subject = email.subject
         simpleMessage.text = generateTextFromTemplate(template, variables)
-        return Pair(simpleMessage, simpleMessage.text)
+        return Pair(simpleMessage, simpleMessage.text!!)
     }
 
     private fun generateHtmlFromTemplate(template: TemplateType, variables: Map<EmailVariables, Any>): String {

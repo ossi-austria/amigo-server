@@ -3,6 +3,7 @@ package org.ossiaustria.amigo.platform.domain.services.messaging
 import com.google.firebase.messaging.AndroidConfig
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.Message
+import org.ossiaustria.amigo.platform.domain.models.Call
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.models.Sendable
 import org.ossiaustria.amigo.platform.domain.services.AccountService
@@ -17,15 +18,18 @@ class FirebaseNotificationService(
     override fun messageSent(
         receiverId: UUID,
         message: org.ossiaustria.amigo.platform.domain.models.Message
-    ) = sendableSent(receiverId, message)
+    ) = sendableChanged(receiverId, message)
+
+    override fun callChanged(receiverId: UUID, call: Call): Boolean =
+        sendableChanged(receiverId, call)
 
     override fun multimediaSent(receiverId: UUID, multimedia: Multimedia) =
-        sendableSent(receiverId, multimedia)
+        sendableChanged(receiverId, multimedia)
 
-    private fun <S> sendableSent(receiverId: UUID, sendable: Sendable<S>): Boolean {
+    private fun <S> sendableChanged(receiverId: UUID, sendable: Sendable<S>): Boolean {
         val receiver = accountService.findOneByPersonId(receiverId)
         val data = NotificationBuilder.buildSendableSent(sendable)
-        val notification: Message? = buildMessagePush(data, receiver?.fcmToken)
+        val notification: Message? = buildSendablePush(data, receiver?.fcmToken)
         return if (notification != null) sendNotification(notification) else false
     }
 
@@ -35,7 +39,7 @@ class FirebaseNotificationService(
         topic: String?,
         prio: AndroidConfig.Priority
     ): Boolean {
-        val notification: Message? = buildCallPush(data, token)
+        val notification: Message? = buildSendablePush(data, token)
         return if (notification != null) sendNotification(notification) else false
     }
 
@@ -47,24 +51,19 @@ class FirebaseNotificationService(
         false
     }
 
-    private fun buildCallPush(data: Map<String, String>, token: String?): Message? =
-        buildPush(data, token, AndroidConfig.Priority.HIGH, 10)
 
-    private fun buildMessagePush(data: Map<String, String>, token: String?): Message? =
-        buildPush(data, token, AndroidConfig.Priority.HIGH, 60 * 5L)
-
-    private fun buildPush(
+    private fun buildSendablePush(
         data: Map<String, String>,
         token: String?,
-        prio: AndroidConfig.Priority,
-        ttl: Long = 15
+        priority: AndroidConfig.Priority = AndroidConfig.Priority.HIGH,
+        ttl: Long = 60 * 5L
     ): Message? {
         if (token.isNullOrBlank()) {
             Log.error("Cannot create FCM message without valid token: '$token'")
             return null
         }
         val builder = Message.builder()
-        builder.putAllData(data).setAndroidConfig(androidConfig(prio, ttl))
+        builder.putAllData(data).setAndroidConfig(androidConfig(priority, ttl))
         builder.setToken(token)
         return builder.build()
     }

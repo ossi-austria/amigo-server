@@ -13,6 +13,5 @@ interface SendableService<S : Sendable<S>> {
     fun findWithReceiver(receiverId: UUID): List<S>
 
     // operations for marking
-    fun markAsSent(id: UUID, time: ZonedDateTime): S
     fun markAsRetrieved(id: UUID, time: ZonedDateTime): S
 }

@@ -3,6 +3,7 @@ package org.ossiaustria.amigo.platform.domain.services.auth
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import org.ossiaustria.amigo.platform.domain.config.Constants
 import org.ossiaustria.amigo.platform.domain.services.AbstractServiceTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.annotation.Rollback
@@ -74,7 +75,7 @@ internal class JwtServiceTest : AbstractServiceTest() {
         val token = jwtService.generateAccessToken(randomUUID(), email, personsIds = listOf())
 
         val claims = jwtService.getAccessClaims(token.token)
-        assertEquals("AMIGO-PLATFORM", claims.issuer)
+        assertEquals(Constants.JWT_ISSUER, claims.issuer)
         assertEquals("test@example.org", claims.subject)
         assertEquals(token.issuedAt, claims.issuedAt)
         assertEquals(token.expiration, claims.expiration)
@@ -87,7 +88,7 @@ internal class JwtServiceTest : AbstractServiceTest() {
         val token = jwtService.generateRefreshToken(randomUUID(), email)
 
         val claims = jwtService.getRefreshClaims(token.token)
-        assertEquals("AMIGO-PLATFORM", claims.issuer)
+        assertEquals(Constants.JWT_ISSUER, claims.issuer)
         assertEquals("test@example.org", claims.subject)
         assertEquals(token.issuedAt, claims.issuedAt)
         assertEquals(token.expiration, claims.expiration)

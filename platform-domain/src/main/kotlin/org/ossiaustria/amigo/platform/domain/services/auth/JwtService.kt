@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.impl.DefaultClaims
+import org.ossiaustria.amigo.platform.domain.config.Constants
 import org.ossiaustria.amigo.platform.exceptions.UnauthorizedException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -52,7 +53,7 @@ class JwtService {
             subject = email
             issuedAt = ZonedDateTime.now().toDate()
             expiration = ZonedDateTime.now().plusSeconds(lifeTimeSec).toDate()
-            issuer = "AMIGO-PLATFORM"
+            issuer = Constants.JWT_ISSUER
         }
 
         tokenClaims[CLAIM_ACCOUNT_ID] = accountId

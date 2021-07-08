@@ -1,5 +1,6 @@
 package org.ossiaustria.amigo.platform.domain.services.auth
 
+import org.ossiaustria.amigo.platform.domain.config.Constants
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
@@ -11,7 +12,7 @@ data class TokenUserDetails(
     val personsIds: List<UUID> = listOf(),
     val expiration: Date = Date(),
     val issuedAt: Date = Date(),
-    val issuer: String? = "AMIGO-PLATFORM",
+    val issuer: String? = Constants.JWT_ISSUER,
 ) : UserDetails {
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> = arrayListOf<GrantedAuthority>(
@@ -29,5 +30,7 @@ data class TokenUserDetails(
     override fun isCredentialsNonExpired(): Boolean = expiration.after(Date())
 
     override fun isEnabled(): Boolean = true
+
+    fun personId() = personsIds.first()
 
 }

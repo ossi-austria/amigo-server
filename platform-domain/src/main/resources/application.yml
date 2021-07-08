@@ -4,6 +4,10 @@ amigo-platform:
     refreshTokenSecret: ${AMIGO_REFRESH_TOKEN_SECRET:asdf1234asdf}
     accessTokenExpirationSec: 3600000 # reduce in prod
     refreshTokenExpirationSec: 3600000 # reduce in prod
+  jitsi:
+    jwtAppId: ${JITSI_JWT_APP_ID}
+    jwtAppSecret: ${JITSI_JWT_APP_SECRET}
+    rootUrl: ${JITSI_ROOT_URL}
 
 spring:
   devtools:

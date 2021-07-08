@@ -16,6 +16,7 @@ import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
 
+
 @Configuration
 @EnableWebSecurity//(debug = true)
 class SecurityConfiguration(private val provider: AuthenticationProvider) : WebSecurityConfigurerAdapter() {
@@ -45,10 +46,11 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
     @Throws(Exception::class)
     public override fun configure(httpSecurity: HttpSecurity) {
         httpSecurity
-            .exceptionHandling().authenticationEntryPoint(forbiddenEntryPoint()).and()
+            .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint()).and()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
             .anonymous().and()
-            .authorizeRequests().antMatchers("/docs", "/docs/*", AUTH_URLS, AUTH_LOGIN_URLS, AUTH_PASSWORD_URLS)
+            .authorizeRequests()
+            .antMatchers("/error", "/docs", "/docs/*", AUTH_URLS, AUTH_LOGIN_URLS, AUTH_PASSWORD_URLS)
             .permitAll().and()
             .authorizeRequests().anyRequest().authenticated().and()
             .authenticationProvider(provider)
@@ -64,7 +66,7 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
     }
 
     @Bean
-    fun forbiddenEntryPoint(): AuthenticationEntryPoint = HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
+    fun authenticationEntryPoint(): AuthenticationEntryPoint = HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
 
     @Bean
     override fun authenticationManagerBean(): AuthenticationManager = super.authenticationManagerBean()

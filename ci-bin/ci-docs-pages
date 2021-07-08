@@ -7,9 +7,8 @@ ls public/develop public/feature/* -al || echo "Develop REST docs empty"
 mkdir public/$CI_COMMIT_BRANCH -p || echo "Specific Branch REST docs exists"
 rm public/$CI_COMMIT_BRANCH/* -R || echo "SKIP CLEANING:Specific Branch REST docs still empty"
 mkdir public/$CI_COMMIT_BRANCH/coverage -p
-mkdir public/$CI_COMMIT_BRANCH/rest-api -p
-cp -r platform-rest/build/reports/jacoco/test/html/* public/$CI_COMMIT_BRANCH/coverage || echo "No jacoco docs on this Pipeline"
-cp platform-rest/build/asciidoc/html5/rest-api.html public/$CI_COMMIT_BRANCH/rest-api/index.html || echo "No rest docs on this Pipeline"
-ls -al public/rest-api/$CI_COMMIT_BRANCH/
-echo "REST Doc URL is $CI_PAGES_URL/$CI_COMMIT_BRANCH/rest-api/index.html"
+cp -r platform-rest/build/reports/jacoco/test/html/* public/$CI_COMMIT_BRANCH/coverage || echo "No coverage docs on this Pipeline"
+cp platform-rest/build/docs/asciidoc/rest-api.html public/$CI_COMMIT_BRANCH/rest-api.html || (echo "No rest docs on this Pipeline" && exit 1)
+ls -al public/$CI_COMMIT_BRANCH/
+echo "REST Doc URL is $CI_PAGES_URL/$CI_COMMIT_BRANCH/rest-api.html"
 echo "Coverage URL is $CI_PAGES_URL/$CI_COMMIT_BRANCH/coverage"

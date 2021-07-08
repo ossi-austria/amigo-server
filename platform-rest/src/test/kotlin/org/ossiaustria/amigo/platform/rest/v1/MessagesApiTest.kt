@@ -108,12 +108,8 @@ internal class MessagesApiTest : AbstractRestApiTest() {
     @Test
     @Tag(TestTags.RESTDOC)
     fun `filter should return error when called with arbitrary persons`() {
-        this.performGet("$baseUrl/filter?receiverId=${randomUUID()}", accessToken.token)
-            .expect4xx()
-
-        this.performGet("$baseUrl/filter?senderId=${randomUUID()}", accessToken.token)
-            .expect4xx()
-
+        this.performGet("$baseUrl/filter?receiverId=${randomUUID()}", accessToken.token).expect4xx()
+        this.performGet("$baseUrl/filter?senderId=${randomUUID()}", accessToken.token).expect4xx()
         this.performGet("$baseUrl/filter", accessToken.token).expect4xx()
     }
 
@@ -164,7 +160,7 @@ internal class MessagesApiTest : AbstractRestApiTest() {
 
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `action=retrieved should mark message as retrievedAt=now`() {
+    fun `set-retrieved should mark message as retrievedAt=now`() {
         val msgId = randomUUID()
         val senderId = randomUUID()
 
@@ -178,10 +174,6 @@ internal class MessagesApiTest : AbstractRestApiTest() {
             retrievedAt = ZonedDateTime.now()
         )
 
-        every { messageService.markAsSent(eq(msgId), any()) } returns Message(
-            id = msgId, senderId = senderId, receiverId = account.person().id, text = "text",
-            sentAt = ZonedDateTime.now()
-        )
 
         val result: MessageDto = this.performPatch("$baseUrl/$msgId/set-retrieved", accessToken.token)
             .expectOk()

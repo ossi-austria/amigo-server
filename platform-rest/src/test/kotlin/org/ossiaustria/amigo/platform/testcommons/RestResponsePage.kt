@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_PARAMETER")
+
 package org.ossiaustria.amigo.platform.testcommons
 
 import com.fasterxml.jackson.annotation.JsonCreator
@@ -7,7 +9,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
-import java.util.ArrayList
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class RestResponsePage<T> : PageImpl<T> {
@@ -28,10 +29,9 @@ class RestResponsePage<T> : PageImpl<T> {
         @JsonProperty("last") last: Boolean?,
         @JsonProperty("empty") empty: Boolean?,
         @JsonProperty("number_of_elements") numberOfElements: Int?
-    ) : super(content, PageRequest.of(number, size), totalElements ?: 0L) {
-    }
+    ) : super(content, PageRequest.of(number, size), totalElements ?: 0L)
 
-    constructor(content: MutableList<T>, pageable: Pageable, total: Long) : super(content, pageable, total) {}
-    constructor(content: MutableList<T>) : super(content) {}
-    constructor() : super(ArrayList<T>()) {}
+    constructor(content: MutableList<T>, pageable: Pageable, total: Long) : super(content, pageable, total)
+    constructor(content: MutableList<T>) : super(content)
+    constructor() : super(ArrayList<T>())
 }

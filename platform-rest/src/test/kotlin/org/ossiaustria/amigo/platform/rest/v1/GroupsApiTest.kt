@@ -28,7 +28,7 @@ internal class GroupsApiTest : AbstractRestApiTest() {
 
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `should return all Groups where user is member of`() {
+    fun `group-my should return all Groups where user is member of`() {
 
         val groups = this.performGet("$rootUrl/my", accessToken = accessToken.token)
             .expectOk()
@@ -40,7 +40,14 @@ internal class GroupsApiTest : AbstractRestApiTest() {
 
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `should return all Groups where user is member of filtered by person`() {
+    fun `group-my needs authentication`() {
+        val url = "$rootUrl/my"
+        this.performPost(url).expectUnauthorized()
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `filtered should return all Groups where user is member of filtered by person`() {
 
         val person = account.persons.first()
 
@@ -62,6 +69,13 @@ internal class GroupsApiTest : AbstractRestApiTest() {
 
     @Test
     @Tag(TestTags.RESTDOC)
+    fun `filtered needs authentication`() {
+        val person = account.persons.first()
+        this.performPost("$rootUrl/filtered?personId=${person.id}").expectUnauthorized()
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
     fun `should return a specific Group which user belongs to`() {
         val mockGroup = groupService.update(createMockGroup().add(account.person()))
 
@@ -72,6 +86,7 @@ internal class GroupsApiTest : AbstractRestApiTest() {
 
         assertEquals(mockGroup.id, group.id)
     }
+
 
     @Test
     @Tag(TestTags.RESTDOC)
