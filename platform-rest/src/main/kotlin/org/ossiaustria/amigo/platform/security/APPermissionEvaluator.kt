@@ -9,14 +9,14 @@ class APPermissionEvaluator : PermissionEvaluator {
         if (auth == null || targetDomainObject == null || permission !is String) {
             return false
         }
-        val targetType = targetDomainObject.javaClass.simpleName.toUpperCase()
-        return hasPrivilege(auth, targetType, permission.toString().toUpperCase())
+        val targetType = targetDomainObject.javaClass.simpleName.uppercase()
+        return hasPrivilege(auth, targetType, permission.toString().uppercase())
     }
 
     override fun hasPermission(auth: Authentication?, targetId: Serializable?, targetType: String?, permission: Any): Boolean {
         return if (auth == null || targetType == null || permission !is String) {
             false
-        } else hasPrivilege(auth, targetType.toUpperCase(), permission.toString().toUpperCase())
+        } else hasPrivilege(auth, targetType.uppercase(), permission.toString().uppercase())
     }
 
     private fun hasPrivilege(auth: Authentication, targetType: String, permission: String): Boolean {

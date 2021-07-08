@@ -13,3 +13,14 @@ spring:
       ddl-auto: create-drop
   flyway:
     enabled: false # USE for dev only
+
+amigo-platform:
+  security:
+    accessTokenSecret: asdf1234
+    refreshTokenSecret: asdf1234asdf
+    accessTokenExpirationSec: 3600000
+    refreshTokenExpirationSec: 3600000
+  jitsi:
+    jwtAppId: ${JITSI_JWT_APP_ID:jitsi}
+    jwtAppSecret: ${JITSI_JWT_APP_SECRET:secret}
+    rootUrl: ${JITSI_ROOT_URL:https://localhost}

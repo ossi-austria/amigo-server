@@ -1,6 +1,7 @@
 package org.ossiaustria.amigo.platform.domain.services.messaging
 
 import com.google.firebase.messaging.AndroidConfig
+import org.ossiaustria.amigo.platform.domain.models.Call
 import org.ossiaustria.amigo.platform.domain.models.Message
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.slf4j.LoggerFactory
@@ -8,15 +9,11 @@ import java.util.*
 
 class NoopNotificationService : NotificationService {
 
-    override fun messageSent(receiverId: UUID, message: Message): Boolean {
-        Log.info("NOOP: messageSent")
-        return false
-    }
+    override fun messageSent(receiverId: UUID, message: Message) = doNothing("messageSent")
 
-    override fun multimediaSent(receiverId: UUID, multimedia: Multimedia): Boolean {
-        Log.info("NOOP: multimediaSent")
-        return false
-    }
+    override fun callChanged(receiverId: UUID, call: Call) = doNothing("callChanged")
+
+    override fun multimediaSent(receiverId: UUID, multimedia: Multimedia) = doNothing("multimediaSent")
 
     @Deprecated("Use only on development servers")
     override fun sendNotification(
@@ -24,8 +21,10 @@ class NoopNotificationService : NotificationService {
         token: String?,
         topic: String?,
         prio: AndroidConfig.Priority
-    ): Boolean {
-        Log.info("NOOP: sendNotification")
+    ) = doNothing("sendNotification")
+
+    private fun doNothing(text: String): Boolean {
+        Log.debug("NOOP: $text")
         return false
     }
 

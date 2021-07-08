@@ -128,12 +128,12 @@ Content-Length: $NUMBER
 Whenever an error response (status code >= 400) is returned, the body will contain a JSON object that describes the problem.
 The error object has the following structure:
 
-include::{snippets}/register-fail/response-fields.adoc[]
+operation::register-fail[snippets='response-fields']
 
 For example, a request that attempts to register a user with an existing username
 `400 Bad Request` response:
 
-include::{snippets}/register-fail/http-response.adoc[]
+operation::register-fail[snippets='http-response']
 
 [[authentication]]
 == Authentication - /auth
@@ -268,3 +268,59 @@ operation::multimedias-one[snippets='curl-request,http-response,response-fields'
 === PATCH /multimedias/:id/set-retrieved - Set Multimedia as "retrieved"
 
 operation::multimedias-set-retrieved[snippets='curl-request,http-response,response-fields']
+
+[[calls]]
+== Calls
+
+=== Create & start new Jitsi calls - POST /calls
+
+File Content must be provided as a MultiPart file in the "form-data" body.
+ReceiverId and SenderId can be provided as URL request param or also as fields.
+
+*Note*: The kind-of-secret JWT Jitsi token is only set by create, get-one, and accept.
+
+operation::calls-create[snippets='curl-request,http-response,response-fields']
+
+=== Filter calls - GET /calls/filter?receiverId=<UUID>&senderId=<UUID>
+
+operation::calls-filter[snippets='curl-request,http-response,response-fields']
+
+=== GET /calls/received - All my retrieved Calls
+
+operation::calls-received[snippets='curl-request,http-response,response-fields']
+
+=== GET /calls/sent - All my started Calls
+
+operation::calls-sent[snippets='curl-request,http-response,response-fields']
+
+=== GET /calls/:id
+
+*Note*: The kind-of-secret JWT Jitsi token is only set by create, get-one, and accept.
+
+operation::calls-one[snippets='curl-request,http-response,response-fields']
+
+=== PATCH /calls/:id/accept - Accept a call
+
+Can be called by callee to accept an incoming call.
+*Note*: The kind-of-secret JWT Jitsi token is only set by create, get-one, and accept.
+
+operation::calls-accept[snippets='curl-request,http-response,response-fields']
+
+=== PATCH /calls/:id/cancel - Cancel an outgoing own call
+
+Can be called by caller to cancel an outgoing own call.
+
+operation::calls-cancel[snippets='curl-request,http-response,response-fields']
+
+=== PATCH /calls/:id/deny - Denies an incoming call
+
+Can be called by callee to deny an incoming call.
+
+operation::calls-deny[snippets='curl-request,http-response,response-fields']
+
+=== PATCH /calls/:id/finish - Finishes an incoming/outgoing call
+
+Can be called by both parties to finish a running call.
+
+operation::calls-finish[snippets='curl-request,http-response,response-fields']
+

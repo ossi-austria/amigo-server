@@ -78,6 +78,13 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
     @Test
     @Tag(TestTags.RESTDOC)
+    fun `createMultimedia needs authentication`() {
+        val url = "$baseUrl?receiverId=${randomUUID()}&senderId=${randomUUID()}&callType=VIDEO"
+        this.performPost(url).expectUnauthorized()
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
     fun `filter should return multimedias via receiverId`() {
 
         val receiverId = account.person().id
@@ -120,6 +127,12 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
     @Test
     @Tag(TestTags.RESTDOC)
+    fun `filter needs authentication`() {
+        this.performGet("$baseUrl/filter?receiverId=${randomUUID()}").expectUnauthorized()
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
     fun `received should return multimedias received by current user`() {
 
         val result = this.performGet("$baseUrl/received", accessToken.token)
@@ -134,6 +147,12 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
     @Test
     @Tag(TestTags.RESTDOC)
+    fun `received needs authentication`() {
+        this.performPost("$baseUrl/received").expectUnauthorized()
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
     fun `sent should return multimedias sent by current user`() {
 
         val result = this.performGet("$baseUrl/sent", accessToken.token)
@@ -144,6 +163,12 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
         assertThat(result).isNotNull
         assertThat(result).isNotEmpty
         result.forEach { assertThat(it.senderId).isEqualTo(account.person().id) }
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `sent needs authentication`() {
+        this.performGet("$baseUrl/sent").expectUnauthorized()
     }
 
     @Test
@@ -165,6 +190,12 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
     @Test
     @Tag(TestTags.RESTDOC)
+    fun `getOne needs authentication`() {
+        this.performGet("$baseUrl/${randomUUID()}").expectUnauthorized()
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
     fun `action=retrieved should mark Multimedia as retrievedAt=now`() {
         val msgId = randomUUID()
         val senderId = randomUUID()
@@ -178,12 +209,6 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
             retrievedAt = ZonedDateTime.now()
         )
 
-        every { multimediaService.markAsSent(eq(msgId), any()) } returns mockMultimedia(
-            id = msgId, senderId = senderId, receiverId = account.person().id,
-            retrievedAt = ZonedDateTime.now(),
-            sentAt = ZonedDateTime.now(),
-        )
-
         val result: MultimediaDto = this.performPatch("$baseUrl/$msgId/set-retrieved", accessToken.token)
             .expectOk()
             .document("multimedias-set-retrieved", responseFields(multimediasResponseFields()))
@@ -192,6 +217,12 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
         assertThat(result).isNotNull
         assertThat(result.retrievedAt).isNotNull
         assertThat(result.sentAt).isNull()
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `accept needs authentication`() {
+        this.performPatch("$baseUrl/${randomUUID()}/set-retrieved").expectUnauthorized()
     }
 
     private fun mockMultimedia(

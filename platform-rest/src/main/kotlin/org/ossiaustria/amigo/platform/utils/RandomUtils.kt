@@ -19,7 +19,7 @@ object RandomUtils {
             .map { _ -> kotlin.random.Random.nextInt(0, charPool.size) }
             .map(charPool::get)
             .joinToString("")
-            .toLowerCase()
+            .lowercase()
     }
 
     fun randomGitlabId() = kotlin.random.Random.nextInt(1, 10000000).toLong()

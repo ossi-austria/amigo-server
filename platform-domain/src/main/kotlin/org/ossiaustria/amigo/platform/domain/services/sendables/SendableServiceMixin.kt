@@ -1,5 +1,6 @@
 package org.ossiaustria.amigo.platform.domain.services.sendables
 
+import org.ossiaustria.amigo.platform.domain.models.Person
 import org.ossiaustria.amigo.platform.domain.models.Sendable
 import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.ossiaustria.amigo.platform.domain.repositories.SendableRepository
@@ -55,12 +56,6 @@ internal class SendableServiceMixin<S : Sendable<S>>(
         }
     }
 
-    override fun markAsSent(id: UUID, time: ZonedDateTime): S {
-        return repository.save(getOne(id).withSentAt(time)).also {
-            Log.info("markAsSent: ${it::class.java.simpleName} $id at $time")
-        }
-    }
-
     override fun markAsRetrieved(id: UUID, time: ZonedDateTime): S {
         val sendable = getOne(id)
         return repository.save(sendable.withRetrievedAt(time)).also {
@@ -68,11 +63,12 @@ internal class SendableServiceMixin<S : Sendable<S>>(
         }
     }
 
-    fun validateSenderReceiver(senderId: UUID, receiverId: UUID) {
+    fun validateSenderReceiver(senderId: UUID, receiverId: UUID): Pair<Person, Person> {
         if (senderId == receiverId) throw SendableError.PersonsAreTheSame()
         val sender = personRepository.findByIdOrNull(senderId) ?: throw DefaultNotFoundException()
         val receiver = personRepository.findByIdOrNull(receiverId) ?: throw DefaultNotFoundException()
         if (sender.groupId != receiver.groupId) throw SendableError.PersonsNotInSameGroup()
+        return Pair(sender, receiver)
     }
 
     companion object {

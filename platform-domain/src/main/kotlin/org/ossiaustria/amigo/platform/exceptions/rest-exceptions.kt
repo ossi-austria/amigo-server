@@ -26,6 +26,8 @@ enum class ErrorCode(val errorCode: Int, val errorName: String) {
     UserCreationFailedEmailOrUsernameUsed(2007, "Email or username is already in use"),
     GroupNameInvalidReserved(2008, "Cannot save group with a reserved name/slug"),
 
+    CallChangeNotSenderError(3001, "Call can just be manipulated by sender for this request"),
+    CallChangeNotReceiverError(3002, "Call can just be manipulated by receiver for this request"),
 }
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Operation cannot be executed due to malformed input or invalid states.")

@@ -1,6 +1,6 @@
 plugins {
-    id 'org.springframework.boot' version '2.4.3'
-    id 'org.asciidoctor.jvm.convert' version '3.1.0'
+    id 'org.springframework.boot' version '2.5.2'
+    id 'org.asciidoctor.jvm.convert' version "2.4.0"
 }
 
 dependencies {
@@ -42,7 +42,6 @@ dependencies {
     testImplementation "org.springframework.restdocs:spring-restdocs-mockmvc"
     testImplementation "io.mockk:mockk:${mockkVersion}"
     testImplementation "com.ninja-squad:springmockk:$springmockkVersion"
-//    asciidoctorj 'org.springframework.restdocs:spring-restdocs-asciidoctor'
 
     // testcontainers
     testImplementation "org.testcontainers:testcontainers:$testcontainersVersion"
@@ -58,7 +57,8 @@ noArg {
 }
 
 ext {
-    snippetsDir = file('build/generated-snippets')
+    set('snippetsDir', file('build/generated-snippets'))
+    set('spring-restdocs.version', '2.0.4.RELEASE')
 }
 
 test {
@@ -66,48 +66,28 @@ test {
 }
 
 asciidoctor {
+    attributes 'snippets': snippetsDir
     inputs.dir snippetsDir
     dependsOn test
+    configurations 'asciidoctorExt'
 }
 
 bootJar {
     enabled = true
     mainClassName = 'org.ossiaustria.amigo.platform.RestApplicationKt'
     dependsOn asciidoctor
-    from("${asciidoctor.outputDir}/html5") {
+    from("${asciidoctor.outputDir}") {
         into 'static/docs'
     }
 }
 
 jar {
-    enabled = true
+    enabled = false
 }
 
-//task fatJar(type: Jar) {
-//    manifest.from jar.manifest
-//    from {
-//        configurations.testRuntime.collect { it.isDirectory() ? it : zipTree(it) }
-//    } {
-//        exclude "META-INF/*.SF"
-//        exclude "META-INF/*.DSA"
-//        exclude "META-INF/*.RSA"
-//    }
-//    with jar
-//}
-
-task explodeJar(type: Copy) {
-    dependsOn ":platform-rest:bootJar"
-    mustRunAfter ":platform-rest:bootJar"
-    from(zipTree(tasks.bootJar.outputs.files.singleFile))
-    into("build/dependency")
+configurations {
+    asciidoctorExt
 }
-
-task prepareDocker {
-    dependsOn ":platform-rest:bootJar"
-    dependsOn ":platform-rest:explodeJar"
-    mustRunAfter ":platform-rest:explodeJar"
-    doLast {
-        print("Exploded platform-rest bootJar for docker")
-    }
+dependencies {
+    asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
 }
-

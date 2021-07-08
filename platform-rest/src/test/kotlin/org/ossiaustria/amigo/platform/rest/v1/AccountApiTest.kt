@@ -36,6 +36,11 @@ internal class AccountApiTest : AbstractRestApiTest() {
             )
     }
 
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `setFcmToken needs authentication`() {
+        this.performPost("$baseUrl/set-fcm-token", body = SetFcmTokenRequest("fcm")).expectUnauthorized()
+    }
 
     private fun fcmTokenRequestFields(prefix: String = ""): List<FieldDescriptor> {
         return arrayListOf(

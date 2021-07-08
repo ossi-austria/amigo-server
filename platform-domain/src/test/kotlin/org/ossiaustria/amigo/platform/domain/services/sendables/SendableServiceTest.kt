@@ -78,20 +78,6 @@ internal abstract class SendableServiceTest<S : Sendable<S>, T : SendableService
     }
 
     @Test
-    fun `markAsSent should throw when id does not exist`() {
-        assertThrows<NotFoundException> {
-            service.markAsSent(randomUUID(), ZonedDateTime.now())
-        }
-    }
-
-    @Test
-    fun `markAsSent should succeed for existing id`() {
-        val result = service.markAsSent(existingId, ZonedDateTime.now())
-        assertThat(result).isNotNull
-        assertThat(result.sentAt).isNotNull
-    }
-
-    @Test
     fun `markAsRetrieved should throw when id does not exist`() {
         assertThrows<NotFoundException> {
             service.markAsRetrieved(randomUUID(), ZonedDateTime.now())

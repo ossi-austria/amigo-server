@@ -13,6 +13,6 @@ object Slugs {
 
     fun toSlug(string: String): String {
         return replacePatternRegexDash
-            .replace(string.toLowerCase(), "-")
+            .replace(string.lowercase(), "-")
     }
 }

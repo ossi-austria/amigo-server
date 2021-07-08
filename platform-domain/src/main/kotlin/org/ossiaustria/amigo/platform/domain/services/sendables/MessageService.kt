@@ -69,8 +69,6 @@ class MessageServiceImpl : MessageService {
 
     override fun findWithReceiver(receiverId: UUID) = wrapper.findWithReceiver(receiverId)
 
-    override fun markAsSent(id: UUID, time: ZonedDateTime) = wrapper.markAsSent(id, time)
-
     override fun markAsRetrieved(id: UUID, time: ZonedDateTime) = wrapper.markAsRetrieved(id, time)
 
     companion object {

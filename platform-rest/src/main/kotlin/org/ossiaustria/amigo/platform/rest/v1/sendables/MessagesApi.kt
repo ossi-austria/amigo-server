@@ -5,7 +5,6 @@ import org.ossiaustria.amigo.platform.domain.models.Message
 import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.ossiaustria.amigo.platform.domain.services.sendables.MessageService
 import org.springframework.web.bind.annotation.*
-import java.time.ZonedDateTime
 import java.util.*
 
 @RestController
@@ -20,16 +19,6 @@ internal class MessagesApi(private val messageService: MessageService) {
         @RequestParam(value = "receiverId") receiverId: UUID,
         @RequestBody text: String,
     ): MessageDto {
-        val message = Message(
-            id = UUID.randomUUID(),
-            senderId = senderId,
-            receiverId = receiverId,
-            text = text,
-            createdAt = ZonedDateTime.now(),
-            retrievedAt = null,
-            sentAt = null,
-        )
-//        return message.toDto()
         return messageService.createMessage(senderId, receiverId, text).toDto()
     }
 
