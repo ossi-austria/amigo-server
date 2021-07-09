@@ -7,8 +7,8 @@ import org.ossiaustria.amigo.platform.domain.repositories.MultimediaRepository
 import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.ossiaustria.amigo.platform.domain.services.ServiceError
 import org.ossiaustria.amigo.platform.domain.services.files.FileStorage
-import org.ossiaustria.amigo.platform.domain.services.messaging.NotificationService
-import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
+import org.ossiaustria.amigo.platform.exceptions.ErrorCode
+import org.ossiaustria.amigo.platform.exceptions.NotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
@@ -19,14 +19,18 @@ import java.time.ZonedDateTime
 import java.util.*
 import java.util.UUID.randomUUID
 
-interface MultimediaService : SendableService<Multimedia> {
+interface MultimediaService {
+
+    fun getOne(id: UUID): Multimedia
+    fun getAll(): List<Multimedia>
+    fun findWithOwner(ownerId: UUID): List<Multimedia>
+
     /**
      * Creates a new Multimedia with an optional uploaded MultipartFile.
      * SenderId and ReceiverId might be the same, to indicate an non-shared creation in an album.
      */
     fun createMultimedia(
-        senderId: UUID,
-        receiverId: UUID,
+        ownerId: UUID,
         albumId: UUID?,
         name: String? = null,
         file: MultipartFile
@@ -59,63 +63,32 @@ class MultimediaServiceImpl : MultimediaService {
     @Autowired
     private lateinit var personRepository: PersonRepository
 
-    @Autowired
-    private lateinit var notificationService: NotificationService
-
-    private val wrapper: SendableServiceMixin<Multimedia> by lazy { SendableServiceMixin(repository, personRepository) }
-
     override fun createMultimedia(
-        senderId: UUID,
-        receiverId: UUID,
+        ownerId: UUID,
         albumId: UUID?,
         name: String?,
         file: MultipartFile
     ): Multimedia {
-        validateSenderReceiver(senderId, receiverId)
-
         val filename = name ?: file.originalFilename
         StringValidator.validateNotBlank(filename)
 
-        val newMultimedia = createNew(senderId, receiverId, filename, albumId)
-        val multimedia = this.uploadFile(newMultimedia, file)
-
-        Log.info("createMultimedia: senderId=$senderId receiverId=$receiverId -> $filename")
-
-        val success = notificationService.multimediaSent(receiverId, multimedia)
-        return if (success) {
-            repository.save(multimedia.copy(sentAt = ZonedDateTime.now())).also {
-                Log.info("sent Multimedia: senderId=$senderId receiverId=$receiverId -> $filename")
-            }
-        } else {
-            repository.save(multimedia).also {
-                Log.warn("could not send Multimedia: senderId=$senderId receiverId=$receiverId -> $filename")
-            }
-        }
+        val newMultimedia = createNew(ownerId, filename, albumId)
+        return uploadFile(newMultimedia, file)
     }
 
     private fun createNew(
-        senderId: UUID,
-        receiverId: UUID,
+        ownerId: UUID,
         filename: String,
         albumId: UUID?
     ) = Multimedia(
         id = randomUUID(),
-        senderId = senderId,
-        receiverId = receiverId,
+        ownerId = ownerId,
         createdAt = ZonedDateTime.now(),
-        retrievedAt = null,
         filename = filename,
-        sentAt = null,
         albumId = albumId,
-        ownerId = senderId,
         type = MultimediaType.IMAGE
     )
 
-    fun validateSenderReceiver(senderId: UUID, receiverId: UUID) {
-        val sender = personRepository.findByIdOrNull(senderId) ?: throw DefaultNotFoundException()
-        val receiver = personRepository.findByIdOrNull(receiverId) ?: throw DefaultNotFoundException()
-        if (sender.groupId != receiver.groupId) throw SendableError.PersonsNotInSameGroup()
-    }
 
     override fun loadFile(multimedia: Multimedia): Resource? {
         return fileStorage.loadFile(multimedia)
@@ -160,18 +133,16 @@ class MultimediaServiceImpl : MultimediaService {
         }
     }
 
-    override fun getOne(id: UUID): Multimedia = wrapper.getOne(id)
+    override fun getOne(id: UUID): Multimedia = repository.findByIdOrNull(id)
+        ?: throw NotFoundException(ErrorCode.NotFound, "Multimedia $id not found!")
 
-    override fun getAll(): List<Multimedia> = wrapper.getAll()
+    override fun getAll(): List<Multimedia> = repository.findAll().toList().also {
+        Log.info("getAll: -> ${it.size} results")
+    }
 
-    override fun findWithPersons(senderId: UUID?, receiverId: UUID?) =
-        wrapper.findWithPersons(senderId, receiverId)
-
-    override fun findWithSender(senderId: UUID) = wrapper.findWithSender(senderId)
-
-    override fun findWithReceiver(receiverId: UUID) = wrapper.findWithReceiver(receiverId)
-
-    override fun markAsRetrieved(id: UUID, time: ZonedDateTime) = wrapper.markAsRetrieved(id, time)
+    override fun findWithOwner(ownerId: UUID) = repository.findAllByOwnerIdOrderByCreatedAt(ownerId).also {
+        Log.info("findWithSender: ownerId=$ownerId -> ${it.size} results")
+    }
 
     companion object {
         private val Log = LoggerFactory.getLogger(this::class.java)

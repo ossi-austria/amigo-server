@@ -4,7 +4,6 @@ import com.google.firebase.messaging.AndroidConfig
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.Message
 import org.ossiaustria.amigo.platform.domain.models.Call
-import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.models.Sendable
 import org.ossiaustria.amigo.platform.domain.services.AccountService
 import org.slf4j.LoggerFactory
@@ -22,9 +21,6 @@ class FirebaseNotificationService(
 
     override fun callChanged(receiverId: UUID, call: Call): Boolean =
         sendableChanged(receiverId, call)
-
-    override fun multimediaSent(receiverId: UUID, multimedia: Multimedia) =
-        sendableChanged(receiverId, multimedia)
 
     private fun <S> sendableChanged(receiverId: UUID, sendable: Sendable<S>): Boolean {
         val receiver = accountService.findOneByPersonId(receiverId)

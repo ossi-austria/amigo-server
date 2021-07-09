@@ -266,9 +266,9 @@ internal class AuthApiTest : AbstractRestApiTest() {
 
     private fun loginResponseFields(prefix: String = ""): List<FieldDescriptor> {
         return listOf(
-            field(prefix + "account", OBJECT, "users account"),
-            field(prefix + "refreshToken", OBJECT, "long living refreshToken"),
-            field(prefix + "accessToken", OBJECT, "short living accessToken"),
+            field(prefix + "account", OBJECT, "The technical Account of this user"),
+            field(prefix + "refreshToken", OBJECT, "Long living refreshToken for token generation"),
+            field(prefix + "accessToken", OBJECT, "Short living accessToken for authentication and authorisation"),
 
             ).toMutableList().apply {
             addAll(userSecretDtoResponseFields("account."))
@@ -279,17 +279,21 @@ internal class AuthApiTest : AbstractRestApiTest() {
 
     private fun refreshTokenRequestFields(): List<FieldDescriptor> {
         return listOf(
-            field("refreshToken", STRING, "refreshToken"),
+            field(
+                "refreshToken",
+                STRING,
+                "Necessary refreshToken (obtained during login) for getting a new accessToken"
+            ),
         )
     }
 
     private fun tokenResultFields(prefix: String = ""): List<FieldDescriptor> {
         return listOf(
-            field(prefix + "token", STRING, "A valid email"),
-            field(prefix + "subject", STRING, "The fullname of the user"),
-            field(prefix + "issuedAt", STRING, "The fullname of the user"),
-            field(prefix + "expiration", STRING, "The fullname of the user"),
-            field(prefix + "issuer", STRING, "The fullname of the user"),
+            field(prefix + "token", STRING, "Effective signed JWT token for authentication "),
+            field(prefix + "subject", STRING, "Account's email for faster validations"),
+            field(prefix + "issuedAt", STRING, "DateTime of issuing"),
+            field(prefix + "expiration", STRING, "DateTime of expiration: token must be refreshed before"),
+            field(prefix + "issuer", STRING, "Authority which granted this JWT"),
         )
     }
 

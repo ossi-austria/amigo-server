@@ -11,13 +11,11 @@ data class Multimedia(
 
     @Id
     @Column(length = 16, unique = true, nullable = false)
-    override val id: UUID,
+    val id: UUID,
 
-    override val senderId: UUID,
-    override val receiverId: UUID,
-
+    @Column(length = 16, nullable = false)
+    @JoinColumn(name = "owner_id", nullable = false, foreignKey = ForeignKey(name = "multimedia_person_owner_id_fkey"))
     val ownerId: UUID,
-//    val remoteUrl: String,
 
     @Enumerated(EnumType.STRING)
     val type: MultimediaType,
@@ -25,41 +23,20 @@ data class Multimedia(
     val contentType: String? = null,
     val size: Long? = null,
 
-//    val localUrl: String? = null,
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @Cascade(org.hibernate.annotations.CascadeType.DETACH)
-//    @JoinColumn(
-//        name = "album_id",
-//        referencedColumnName = "id",
-//        foreignKey = ForeignKey(name = "multimedias_album_id_id_fkey")
-//    )
-//    val album: Album? = null,
-
-    @Column(name = "album_id")
+    @JoinColumn(name = "album_id", foreignKey = ForeignKey(name = "multimedias_album_id_id_fkey"))
     val albumId: UUID? = null,
 
     @CreatedDate
-    override val createdAt: ZonedDateTime = ZonedDateTime.now(),
-    override val sentAt: ZonedDateTime? = null,
-    override val retrievedAt: ZonedDateTime? = null,
+    val createdAt: ZonedDateTime = ZonedDateTime.now(),
 
-    ) : Sendable<Multimedia> {
-
-    override fun withSentAt(time: ZonedDateTime) = this.copy(sentAt = time)
-    override fun withRetrievedAt(time: ZonedDateTime) = this.copy(retrievedAt = time)
+    ) {
 
     fun filename(): String {
         return "$id.${type}"
     }
 
-    /**
-     * In one case, a multimedia is created, but has no receiver yet, e.g. when creating a multimedia for a new album
-     * We will just use owner/sender id for the receiver
-     */
-    fun isHidden() = this.senderId == this.receiverId
-
-    companion object {
-        const val URL_NONE = "NONE"
+    fun isViewableBy(personId: UUID): Boolean {
+        return this.ownerId == personId
     }
+
 }

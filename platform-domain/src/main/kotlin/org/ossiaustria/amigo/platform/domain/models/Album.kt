@@ -1,7 +1,5 @@
 package org.ossiaustria.amigo.platform.domain.models
 
-import org.hibernate.annotations.Fetch
-import org.hibernate.annotations.FetchMode
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import java.time.ZonedDateTime
@@ -12,7 +10,7 @@ import javax.persistence.*
 @Entity
 @Table(
     name = "album", uniqueConstraints = [
-        UniqueConstraint(name = "album_unique_email_per_owner", columnNames = ["name", "owner_id"])
+        UniqueConstraint(name = "album_unique_name_per_owner", columnNames = ["name", "ownerId"])
     ]
 )
 data class Album(
@@ -22,23 +20,10 @@ data class Album(
 
     val name: String,
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @Fetch(value = FetchMode.SELECT)
-    @JoinColumn(
-        name = "owner_id",
-        referencedColumnName = "id",
-        foreignKey = ForeignKey(name = "albums_user_owner_id_fkey")
-    )
-    val owner: Person,
+    @JoinColumn(name = "owner_id", foreignKey = ForeignKey(name = "albums_person_owner_id_fkey"))
+    val ownerId: UUID,
 
-    @Column(name = "owner_id", insertable = false, updatable = false)
-    val ownerId: UUID = owner.id,
-
-    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
-    @JoinColumn(
-        name = "album_id",
-        foreignKey = ForeignKey(name = "multimedias_album_id_id_fkey")
-    )
+    @OneToMany(mappedBy = "albumId", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     val items: List<Multimedia> = listOf(),
 
     @CreatedDate

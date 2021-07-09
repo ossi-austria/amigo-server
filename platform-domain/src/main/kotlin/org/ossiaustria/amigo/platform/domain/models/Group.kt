@@ -22,8 +22,7 @@ data class Group(
     val name: String,
 
     @Fetch(FetchMode.SUBSELECT)
-    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
-    @JoinColumn(name = "group_id", foreignKey = ForeignKey(name = "persons_group_group_id_fkey"))
+    @OneToMany(mappedBy = "groupId", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     val members: MutableList<Person> = mutableListOf()
 
 ) {

@@ -13,7 +13,10 @@ data class Call(
     @Column(length = 16, unique = true, nullable = false)
     override val id: UUID,
 
+    @JoinColumn(name = "sender_id", nullable = false, foreignKey = ForeignKey(name = "call_person_sender_id_fkey"))
     override val senderId: UUID,
+
+    @JoinColumn(name = "receiver_id", nullable = false, foreignKey = ForeignKey(name = "call_person_receiver_id_fkey"))
     override val receiverId: UUID,
 
     @Enumerated(EnumType.STRING)

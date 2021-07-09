@@ -6,13 +6,10 @@ spring:
     redis:
       repositories:
         enabled: false
-  jpa:
-    show-sql: false # true for debugging
-    generate-ddl: true
-    hibernate:
-      ddl-auto: create-drop
   flyway:
-    enabled: false # USE for dev only
+    schema: amigo_platform
+    username: amigo
+    password: password
 
 logging:
   level:

@@ -11,15 +11,18 @@ import java.util.*
 import java.util.UUID.randomUUID
 
 
-internal class GroupTest : AbstractRepositoryTest<Group, GroupRepository>() {
+internal class GroupRepositoryTest : AbstractRepositoryTest<Group, GroupRepository>() {
 
     @Autowired
     override lateinit var repository: GroupRepository
 
-    private lateinit var account: Account
-
     override fun initTest() {
         account = accounts.save(Account(randomUUID(), "email", "pass"))
+    }
+
+    override fun cleanTables() {
+        repository.deleteAll()
+        super.cleanTables()
     }
 
     override fun createDefaultEntityPair(id: UUID): Pair<UUID, Group> {
@@ -49,7 +52,7 @@ internal class GroupTest : AbstractRepositoryTest<Group, GroupRepository>() {
         repository.save(
             entity
                 .add(Person(randomUUID(), account.id, "name1"))
-                .add(Person(randomUUID(), account.id, "name1"))
+                .add(Person(randomUUID(), account.id, "name2"))
         )
         val actual = repository.findByIdOrNull(id)
         then(actual).isNotNull

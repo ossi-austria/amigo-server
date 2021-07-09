@@ -1,5 +1,6 @@
 package org.ossiaustria.amigo.platform.domain.repositories
 
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase
 import org.junit.jupiter.api.assertThrows
 import org.ossiaustria.amigo.platform.config.NoopMessagingConfig
 import org.ossiaustria.amigo.platform.domain.config.ApplicationProfiles
@@ -17,7 +18,8 @@ import org.springframework.test.context.TestPropertySource
 @SpringBootTest
 @ActiveProfiles(ApplicationProfiles.TEST)
 @ComponentScan("org.ossiaustria.amigo.platform.domain")
-@AutoConfigureTestDatabase(connection = org.springframework.boot.jdbc.EmbeddedDatabaseConnection.H2)
+@AutoConfigureEmbeddedDatabase
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ContextConfiguration(classes = [NoopMessagingConfig::class])
 internal abstract class AbstractWithJpaTest {

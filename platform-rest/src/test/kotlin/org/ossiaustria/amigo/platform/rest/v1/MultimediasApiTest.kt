@@ -10,13 +10,13 @@ import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.models.enums.MultimediaType
 import org.ossiaustria.amigo.platform.domain.services.sendables.MultimediaService
 import org.ossiaustria.amigo.platform.rest.v1.sendables.MultimediaDto
+import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType.NUMBER
 import org.springframework.restdocs.payload.JsonFieldType.STRING
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
 import org.springframework.restdocs.request.RequestDocumentation.requestParameters
-import java.time.ZonedDateTime
 import java.util.*
 import java.util.UUID.randomUUID
 
@@ -29,44 +29,35 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
     @BeforeEach
     fun before() {
-        val id = account.person().id
 
-        every { multimediaService.findWithReceiver(eq(id)) } returns listOf(
-            mockMultimedia(senderId = randomUUID(), receiverId = id),
-            mockMultimedia(senderId = randomUUID(), receiverId = id),
-        )
-
-        every { multimediaService.findWithSender(eq(id)) } returns listOf(
-            mockMultimedia(senderId = id, receiverId = randomUUID()),
-            mockMultimedia(senderId = id, receiverId = randomUUID()),
+        every { multimediaService.findWithOwner(eq(person1Id)) } returns listOf(
+            mockMultimedia(ownerId = person1Id),
+            mockMultimedia(ownerId = person1Id),
         )
 
         mockUserAuthentication()
     }
 
-
     @Test
     @Tag(TestTags.RESTDOC)
     fun `createMultimedia should handle MultipartFile and upload it`() {
 
-        val senderId = randomUUID()
-        val receiverId = randomUUID()
+        val ownerId = person1Id
         val name = "newname"
         val file = MockMultipartFile("file", "content".toByteArray())
 
         // Cannot mock "RequestPart" name and file
-        every { multimediaService.createMultimedia(eq(senderId), eq(receiverId), any(), any(), any()) } returns
-                mockMultimedia(senderId = senderId, receiverId = receiverId, filename = name)
+        every { multimediaService.createMultimedia(eq(ownerId), any(), any(), any()) } returns
+                mockMultimedia(ownerId = ownerId, filename = name)
 
-        val url = "$baseUrl?receiverId=$receiverId&senderId=$senderId"
+        val url = "$baseUrl?ownerId=$ownerId"
 
-        val result = this.performPartPost(url, accessToken.token, file = file)
+        val result = this.performPartPost(url, accessToken.token, filePart = file)
             .expectOk()
             .document(
                 "multimedias-create",
                 requestParameters(
-                    param("receiverId", "UUID of receiver"),
-                    param("senderId", "UUID of sender - must be your id"),
+                    param("ownerId", "UUID of owner - must be your person's id"),
                     param("albumId", "Text to send in message").optional(),
                 ),
                 responseFields(multimediasResponseFields())
@@ -78,97 +69,57 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
     @Test
     @Tag(TestTags.RESTDOC)
+    fun `update Multimedia with new file should handle MultipartFile and upload it`() {
+
+        val ownerId = person1Id
+        val name = "newname"
+        val file = MockMultipartFile("file", "content".toByteArray())
+
+        // Cannot mock "RequestPart" name and file
+        every { multimediaService.createMultimedia(eq(ownerId), any(), any(), any()) } returns
+                mockMultimedia(ownerId = ownerId, filename = name)
+
+        every { multimediaService.getOne(any()) } returns
+                mockMultimedia(ownerId = ownerId, filename = name)
+
+        every { multimediaService.uploadFile(any(), any()) } returns
+                mockMultimedia(ownerId = ownerId, filename = name)
+
+        val first = this.performPartPost("$baseUrl?ownerId=$ownerId", accessToken.token, filePart = file)
+            .returns(MultimediaDto::class.java)
+
+        val second = this.performPartPost("$baseUrl/${first.id}/file", accessToken.token, filePart = file)
+            .expectOk()
+            .document("multimedias-update-file", responseFields(multimediasResponseFields()))
+            .returns(MultimediaDto::class.java)
+        assertThat(second).isNotNull
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
     fun `createMultimedia needs authentication`() {
-        val url = "$baseUrl?receiverId=${randomUUID()}&senderId=${randomUUID()}&callType=VIDEO"
+        val url = "$baseUrl?receiverId=${randomUUID()}&ownerId=${randomUUID()}&callType=VIDEO"
         this.performPost(url).expectUnauthorized()
     }
 
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `filter should return multimedias via receiverId`() {
+    fun `own should return multimedias sent by current user`() {
 
-        val receiverId = account.person().id
-        val senderId = randomUUID()
-
-        val url = "$baseUrl/filter?receiverId=$receiverId&senderId=$senderId"
-
-        every { multimediaService.findWithPersons(any(), eq(receiverId)) } returns listOf(
-            mockMultimedia(senderId = senderId, receiverId = receiverId),
-            mockMultimedia(senderId = senderId, receiverId = receiverId),
-        )
-
-
-        val returnsList = this.performGet(url, accessToken.token)
+        val result = this.performGet("$baseUrl/own", accessToken.token)
             .expectOk()
-            .document(
-                "multimedias-filter",
-                requestParameters(
-                    param("receiverId", "Filter for UUID of receiver").optional(),
-                    param("senderId", "Filter for UUID of sender").optional()
-                ),
-                responseFields(multimediasResponseFields("[]."))
-            )
-            .returnsList(MultimediaDto::class.java)
-
-        assertThat(returnsList).isNotNull
-        assertThat(returnsList).isNotEmpty
-        returnsList.forEach {
-            assertThat(it.receiverId).isEqualTo(receiverId)
-            assertThat(it.senderId).isEqualTo(senderId)
-        }
-    }
-
-    @Test
-    @Tag(TestTags.RESTDOC)
-    fun `filter should return error when called with arbitrary persons`() {
-        val url = "$baseUrl/filter?receiverId=${randomUUID()}"
-        this.performGet(url, accessToken.token).expect4xx()
-    }
-
-    @Test
-    @Tag(TestTags.RESTDOC)
-    fun `filter needs authentication`() {
-        this.performGet("$baseUrl/filter?receiverId=${randomUUID()}").expectUnauthorized()
-    }
-
-    @Test
-    @Tag(TestTags.RESTDOC)
-    fun `received should return multimedias received by current user`() {
-
-        val result = this.performGet("$baseUrl/received", accessToken.token)
-            .expectOk()
-            .document("multimedias-received", responseFields(multimediasResponseFields("[].")))
+            .document("multimedias-own", responseFields(multimediasResponseFields("[].")))
             .returnsList(MultimediaDto::class.java)
 
         assertThat(result).isNotNull
         assertThat(result).isNotEmpty
-        result.forEach { assertThat(it.receiverId).isEqualTo(account.person().id) }
+        result.forEach { assertThat(it.ownerId).isEqualTo(account.person().id) }
     }
 
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `received needs authentication`() {
-        this.performPost("$baseUrl/received").expectUnauthorized()
-    }
-
-    @Test
-    @Tag(TestTags.RESTDOC)
-    fun `sent should return multimedias sent by current user`() {
-
-        val result = this.performGet("$baseUrl/sent", accessToken.token)
-            .expectOk()
-            .document("multimedias-sent", responseFields(multimediasResponseFields("[].")))
-            .returnsList(MultimediaDto::class.java)
-
-        assertThat(result).isNotNull
-        assertThat(result).isNotEmpty
-        result.forEach { assertThat(it.senderId).isEqualTo(account.person().id) }
-    }
-
-    @Test
-    @Tag(TestTags.RESTDOC)
-    fun `sent needs authentication`() {
-        this.performGet("$baseUrl/sent").expectUnauthorized()
+    fun `own needs authentication`() {
+        this.performGet("$baseUrl/own").expectUnauthorized()
     }
 
     @Test
@@ -177,15 +128,33 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
         val msgId = randomUUID()
 
         every { multimediaService.getOne(msgId) } returns mockMultimedia(
-            id = msgId, senderId = randomUUID(), receiverId = account.person().id
+            id = msgId, ownerId = person1Id,
         )
 
-        val result: Multimedia = this.performGet("$baseUrl/$msgId", accessToken.token)
+        val result: MultimediaDto = this.performGet("$baseUrl/$msgId", accessToken.token)
             .expectOk()
             .document("multimedias-one", responseFields(multimediasResponseFields()))
-            .returns(Multimedia::class.java)
+            .returns(MultimediaDto::class.java)
 
         assertThat(result).isNotNull
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `download file should return Multimedia's file`() {
+        val msgId = randomUUID()
+
+        every { multimediaService.getOne(msgId) } returns mockMultimedia(
+            id = msgId, ownerId = person1Id,
+        )
+
+        every { multimediaService.loadFile(any()) } returns
+                ClassPathResource("classpath:application-test.xml")
+
+        this.performGet("$baseUrl/$msgId/file", accessToken.token)
+            .expectOk()
+            .document("multimedias-get-file")
+
     }
 
     @Test
@@ -194,67 +163,19 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
         this.performGet("$baseUrl/${randomUUID()}").expectUnauthorized()
     }
 
-    @Test
-    @Tag(TestTags.RESTDOC)
-    fun `action=retrieved should mark Multimedia as retrievedAt=now`() {
-        val msgId = randomUUID()
-        val senderId = randomUUID()
-
-        every { multimediaService.getOne(eq(msgId)) } returns mockMultimedia(
-            id = msgId, senderId = senderId, receiverId = account.person().id,
-        )
-
-        every { multimediaService.markAsRetrieved(eq(msgId), any()) } returns mockMultimedia(
-            id = msgId, senderId = senderId, receiverId = account.person().id,
-            retrievedAt = ZonedDateTime.now()
-        )
-
-        val result: MultimediaDto = this.performPatch("$baseUrl/$msgId/set-retrieved", accessToken.token)
-            .expectOk()
-            .document("multimedias-set-retrieved", responseFields(multimediasResponseFields()))
-            .returns(MultimediaDto::class.java)
-
-        assertThat(result).isNotNull
-        assertThat(result.retrievedAt).isNotNull
-        assertThat(result.sentAt).isNull()
-    }
-
-    @Test
-    @Tag(TestTags.RESTDOC)
-    fun `accept needs authentication`() {
-        this.performPatch("$baseUrl/${randomUUID()}/set-retrieved").expectUnauthorized()
-    }
-
     private fun mockMultimedia(
         id: UUID = randomUUID(),
-        senderId: UUID,
-        receiverId: UUID,
-        sentAt: ZonedDateTime? = null,
-        retrievedAt: ZonedDateTime? = null,
+        ownerId: UUID,
         filename: String = "filename",
     ): Multimedia {
-        return Multimedia(
-            id, senderId = senderId,
-            receiverId = receiverId,
-            ownerId = senderId,
-            filename = filename,
-            type = MultimediaType.IMAGE,
-            sentAt = sentAt,
-            retrievedAt = retrievedAt,
-
-            )
+        return Multimedia(id, ownerId = ownerId, filename = filename, type = MultimediaType.IMAGE)
     }
 
     private fun multimediasResponseFields(prefix: String = ""): List<FieldDescriptor> {
         return arrayListOf(
             field(prefix + "id", STRING, "UUID"),
-            field(prefix + "senderId", STRING, "UUID of sending Person"),
-            field(prefix + "receiverId", STRING, "UUID of sending Person"),
+            field(prefix + "ownerId", STRING, "UUID of sending Person"),
             field(prefix + "createdAt", STRING, "LocalDateTime of Multimedia creation"),
-            field(prefix + "sentAt", STRING, "LocalDateTime of Multimedia sending process").optional(),
-            field(
-                prefix + "retrievedAt", STRING, "LocalDateTime of Multimedia marked as retrieved"
-            ).optional(),
             field(prefix + "ownerId", STRING, "UUID of Owner"),
             field(prefix + "filename", STRING, "File to name that file locally"),
             field(prefix + "type", STRING, "MultimediaType: IMAGE, VIDEO, AUDIO"),

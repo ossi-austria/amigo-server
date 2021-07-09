@@ -207,6 +207,32 @@ Filter accessible Groups for *own* Person and/or Group name
 
 operation::groups-filtered-success[snippets='curl-request,request-parameters,http-response,response-fields']
 
+[[multimedias]]
+== Multimedias
+
+=== Create & upload new Multimedia - POST /multimedias
+
+File Content must be provided as a MultiPart file in the "form-data" body.
+ReceiverId and SenderId can be provided as URL request param or also as fields.
+
+operation::multimedias-create[snippets='curl-request,http-response,response-fields']
+
+=== GET /multimedias/own - All my Multimedia
+
+operation::multimedias-own[snippets='curl-request,http-response,response-fields']
+
+=== GET /multimedias/:id
+
+operation::multimedias-one[snippets='curl-request,http-response,response-fields']
+
+=== GET /multimedias/:id/file
+
+operation::multimedias-get-file[snippets='curl-request,http-response']
+
+=== POST /multimedias/:id/file
+
+operation::multimedias-update-file[snippets='curl-request,http-response,response-fields']
+
 = Sendables
 
 All Sendables behave similar and share a big amount of code.
@@ -239,35 +265,6 @@ operation::messages-one[snippets='curl-request,http-response,response-fields']
 
 operation::messages-set-retrieved[snippets='curl-request,http-response,response-fields']
 
-[[multimedias]]
-== Multimedias
-
-=== Create & upload new Multimedia - POST /multimedias
-
-File Content must be provided as a MultiPart file in the "form-data" body.
-ReceiverId and SenderId can be provided as URL request param or also as fields.
-
-operation::multimedias-create[snippets='curl-request,http-response,response-fields']
-
-=== Filter multimedias - GET /multimedias/filter?receiverId=<UUID>&senderId=<UUID>
-
-operation::multimedias-filter[snippets='curl-request,http-response,response-fields']
-
-=== GET /multimedias/received - All my retrieved Multimedia
-
-operation::multimedias-received[snippets='curl-request,http-response,response-fields']
-
-=== GET /multimedias/sent - All my sent
-
-operation::multimedias-sent[snippets='curl-request,http-response,response-fields']
-
-=== GET /multimedias/:id
-
-operation::multimedias-one[snippets='curl-request,http-response,response-fields']
-
-=== PATCH /multimedias/:id/set-retrieved - Set Multimedia as "retrieved"
-
-operation::multimedias-set-retrieved[snippets='curl-request,http-response,response-fields']
 
 [[calls]]
 == Calls

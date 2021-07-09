@@ -8,20 +8,24 @@ import javax.validation.constraints.NotBlank
 
 
 @Entity
-@Table(name = "person")
+@Table(
+    name = "person", uniqueConstraints = [
+        UniqueConstraint(name = "person_unique_name_group", columnNames = ["name", "groupId"])
+    ]
+)
 data class Person(
 
     @Id
     @Column(length = 16, unique = true, nullable = false)
     val id: UUID,
 
-    @Column(name = "account_id")
+    @JoinColumn(name = "account_id", foreignKey = ForeignKey(name = "person_account_account_id_fkey"))
     val accountId: UUID,
 
     @NotBlank
     val name: String,
 
-    @Column(name = "group_id")
+    @JoinColumn(name = "group_id", foreignKey = ForeignKey(name = "persons_group_group_id_fkey"))
     val groupId: UUID = randomUUID(),
 
     @Enumerated(EnumType.STRING)

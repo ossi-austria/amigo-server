@@ -7,7 +7,7 @@ import java.util.*
 import java.util.UUID.randomUUID
 
 
-internal class AlbumRepositoryTest : AbstractRepositoryTest<Album, AlbumRepository>() {
+internal class AlbumShareRepositoryTest : AbstractRepositoryTest<Album, AlbumRepository>() {
 
     @Autowired
     override lateinit var repository: AlbumRepository

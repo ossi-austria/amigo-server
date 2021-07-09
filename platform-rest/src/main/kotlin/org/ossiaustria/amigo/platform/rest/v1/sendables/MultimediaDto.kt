@@ -7,30 +7,20 @@ import java.util.*
 
 
 internal data class MultimediaDto(
-    override val id: UUID,
-    override val senderId: UUID,
-    override val receiverId: UUID,
+    val id: UUID,
     val ownerId: UUID,
     val filename: String,
     val contentType: String? = null,
-    override val createdAt: ZonedDateTime = ZonedDateTime.now(),
-    override val sentAt: ZonedDateTime? = null,
-    override val retrievedAt: ZonedDateTime? = null,
-
+    val createdAt: ZonedDateTime = ZonedDateTime.now(),
     val type: MultimediaType = MultimediaType.IMAGE,
     val size: Long? = 0,
     val albumId: UUID? = null,
-
-    ) : SendableDto
+)
 
 
 internal fun Multimedia.toDto() = MultimediaDto(
     id = id,
-    senderId = senderId,
-    receiverId = receiverId,
     createdAt = createdAt,
-    sentAt = sentAt,
-    retrievedAt = retrievedAt,
     ownerId = ownerId,
     filename = filename,
     contentType = contentType,

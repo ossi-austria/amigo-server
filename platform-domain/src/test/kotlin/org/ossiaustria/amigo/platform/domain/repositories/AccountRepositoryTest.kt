@@ -9,15 +9,19 @@ import java.util.*
 import java.util.UUID.randomUUID
 
 
-internal class AccountTest : AbstractRepositoryTest<Account, AccountRepository>() {
+internal class AccountRepositoryTest : AbstractRepositoryTest<Account, AccountRepository>() {
 
     @Autowired
     override lateinit var repository: AccountRepository
 
-    private lateinit var group: Group
 
     override fun initTest() {
         group = groups.save(Group(randomUUID(), "group"))
+    }
+
+    override fun cleanTables() {
+        repository.deleteAll()
+        super.cleanTables()
     }
 
     override fun createDefaultEntityPair(id: UUID): Pair<UUID, Account> {

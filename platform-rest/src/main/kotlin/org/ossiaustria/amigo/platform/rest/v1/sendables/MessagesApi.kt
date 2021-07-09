@@ -4,22 +4,41 @@ import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Message
 import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.ossiaustria.amigo.platform.domain.services.sendables.MessageService
+import org.ossiaustria.amigo.platform.domain.services.sendables.MultimediaService
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
 @RestController
 @RequestMapping("/v1/messages", produces = ["application/json"], consumes = ["application/json"])
-internal class MessagesApi(private val messageService: MessageService) {
+internal class MessagesApi(
+    private val messageService: MessageService,
+    private val multimediaService: MultimediaService
+) {
 
     private val serviceWrapper = SendableApiWrapper(messageService)
 
-    @PostMapping("")
-    fun createMessage(
+    @PostMapping(
+        "", consumes = [
+            MediaType.IMAGE_GIF_VALUE,
+            MediaType.APPLICATION_JSON_VALUE,
+            MediaType.IMAGE_PNG_VALUE,
+            MediaType.APPLICATION_OCTET_STREAM_VALUE,
+            MediaType.MULTIPART_FORM_DATA_VALUE]
+    )
+    fun createMultimediaMessage(
         @RequestParam(value = "senderId") senderId: UUID,
         @RequestParam(value = "receiverId") receiverId: UUID,
-        @RequestBody text: String,
-    ): MessageDto {
-        return messageService.createMessage(senderId, receiverId, text).toDto()
+        @RequestPart("text") text: String,
+        @RequestPart("file", required = false) file: MultipartFile? = null,
+    ): MultiMessageDto {
+//        return MultimediaDto(randomUUID(),randomUUID(),randomUUID(),randomUUID(), "file", "MultimediaType.IMAGE")
+        val multimedia = file?.let {
+            multimediaService.createMultimedia(senderId, null, System.currentTimeMillis().toString(), it)
+        }
+        return messageService.createMessage(senderId, receiverId, text, multimedia).toMultimediaDto()
+
     }
 
     /**
@@ -45,10 +64,10 @@ internal class MessagesApi(private val messageService: MessageService) {
     fun getOne(
         tokenUserDetails: TokenUserDetails,
         @PathVariable(value = "id") id: UUID,
-    ) = serviceWrapper.getOne(tokenUserDetails, id).toDto()
+    ) = serviceWrapper.getOne(tokenUserDetails, id).toMultimediaDto()
 
     @PatchMapping("/{id}/set-retrieved")
     fun markAsRetrieved(tokenUserDetails: TokenUserDetails, @PathVariable(value = "id") id: UUID) =
-        serviceWrapper.markAsRetrieved(tokenUserDetails, id).toDto()
+        serviceWrapper.markAsRetrieved(tokenUserDetails, id).toMultimediaDto()
 
 }

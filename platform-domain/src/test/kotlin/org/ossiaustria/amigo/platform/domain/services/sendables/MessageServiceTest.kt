@@ -40,7 +40,7 @@ internal class MessageServiceTest : SendableServiceTest<Message, MessageService>
 
         every { notificationService.messageSent(eq(personId2), any()) } returns true
 
-        val result = service.createMessage(personId1, personId2, "text")
+        val result = service.createMessage(personId1, personId2, "text", null)
         assertThat(result).isNotNull
         assertThat(result.text).isEqualTo("text")
         assertThat(result.senderId).isEqualTo(personId1)
@@ -53,7 +53,7 @@ internal class MessageServiceTest : SendableServiceTest<Message, MessageService>
     fun `createMessage should sent notification and update Message with sentAt `() {
         every { notificationService.messageSent(eq(personId2), any()) } returns true
 
-        val result = service.createMessage(personId1, personId2, "text")
+        val result = service.createMessage(personId1, personId2, "text", null)
         assertThat(result).isNotNull
         assertThat(result.sentAt).isNotNull
     }
@@ -62,7 +62,7 @@ internal class MessageServiceTest : SendableServiceTest<Message, MessageService>
     fun `createMessage should sent notification and update Message without sentAt`() {
         every { notificationService.messageSent(eq(personId2), any()) } returns false
 
-        val result = service.createMessage(personId1, personId2, "text")
+        val result = service.createMessage(personId1, personId2, "text", null)
         assertThat(result).isNotNull
         assertThat(result.sentAt).isNull()
     }
@@ -70,21 +70,21 @@ internal class MessageServiceTest : SendableServiceTest<Message, MessageService>
     @Test
     fun `createMessage should throw when sender and receiver are the same`() {
         assertThrows<SendableError.PersonsAreTheSame> {
-            service.createMessage(personId1, personId1, "text")
+            service.createMessage(personId1, personId1, "text", null)
         }
     }
 
     @Test
     fun `createMessage should throw when text is empty`() {
         assertThrows<ValidationException> {
-            service.createMessage(personId1, personId2, "")
+            service.createMessage(personId1, personId2, "", null)
         }
     }
 
     @Test
     fun `createMessage should throw when send and receiver are not in same group`() {
         assertThrows<SendableError.PersonsNotInSameGroup> {
-            service.createMessage(personId1, personId3, "text")
+            service.createMessage(personId1, personId3, "text", null)
         }
     }
 }
