@@ -2,6 +2,7 @@ package org.ossiaustria.amigo.platform.rest.v1
 
 import com.ninjasquad.springmockk.MockkBean
 import io.mockk.every
+import io.zonky.test.db.AutoConfigureEmbeddedDatabase
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import org.ossiaustria.amigo.platform.domain.config.ApplicationProfiles
@@ -36,6 +37,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
+import java.util.*
 import javax.transaction.Transactional
 
 @TestPropertySource("classpath:application-test.yml")
@@ -43,7 +45,8 @@ import javax.transaction.Transactional
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(ApplicationProfiles.TEST)
 @ComponentScan("org.ossiaustria.amigo.platform")
-@AutoConfigureTestDatabase(connection = org.springframework.boot.jdbc.EmbeddedDatabaseConnection.H2)
+@AutoConfigureEmbeddedDatabase
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 internal abstract class AbstractRestApiTest : AbstractRestTest() {
 
@@ -57,12 +60,14 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
     protected lateinit var accountService: AccountService
 
     @Autowired
-    private lateinit var accountSubjectPreparationTrait: AccountSubjectPreparationTrait
+    protected lateinit var accountSubjectPreparationTrait: AccountSubjectPreparationTrait
 
     protected lateinit var accessToken: TokenResult
     protected lateinit var account: Account
     protected lateinit var group: Group
     protected lateinit var refreshToken: TokenResult
+    protected lateinit var person1Id: UUID
+    protected lateinit var person2Id: UUID
 
     protected fun defaultAcceptContentAuth(
         builder: MockHttpServletRequestBuilder,
@@ -97,6 +102,9 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
         group = accountSubjectPreparationTrait.group
 //        every { currentUserService.person() } answers { personRepository.findAll().first() }
         every { currentUserService.account() } answers { account }
+
+        person1Id = account.person().id
+        person2Id = accountSubjectPreparationTrait.subject2.id
     }
 
 

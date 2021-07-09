@@ -19,12 +19,11 @@ export GRADLE_USER_HOME=$(pwd)/.gradle
 # ensure that there exists a gradle configuration
 if [ ! -e build.gradle ]; then exit 1; fi
 
-./gradlew build test :platform-rest:test
-./gradlew :platform-rest:asciidoctor
-./gradlew :platform-rest:bootJar
+./gradlew :platform-domain:test :platform-rest:test
 
 mkdir platform-rest/build/test-results/test/platform-domain
 cp platform-domain/build/test-results/test/TEST-*.xml platform-rest/build/test-results/test/platform-domain/
-./gradlew jacocoTestReport coverageReport
+./gradlew :platform-rest:asciidoctor :platform-rest:bootJar jacocoTestReport coverageReport
+
 
 ls -lisa platform-rest/build/

@@ -13,7 +13,10 @@ data class AlbumShare(
     @Column(length = 16, unique = true, nullable = false)
     override val id: UUID,
 
+    @Column(length = 16, nullable = false)
     override val senderId: UUID,
+
+    @Column(length = 16, nullable = false)
     override val receiverId: UUID,
 
     @OneToOne(fetch = FetchType.EAGER)
@@ -21,7 +24,7 @@ data class AlbumShare(
     @JoinColumn(
         name = "album_id",
         referencedColumnName = "id",
-        foreignKey = ForeignKey(name = "account_subject_person_id_fk")
+        foreignKey = ForeignKey(name = "album_share_album_album_id_fk")
     )
     val album: Album,
 

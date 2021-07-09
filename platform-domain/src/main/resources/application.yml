@@ -10,6 +10,14 @@ amigo-platform:
     rootUrl: ${JITSI_ROOT_URL}
 
 spring:
+  flyway:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:amigo_platform}
+    schema: public
+    user: ${DB_USER:amigo}
+    password: ${DB_PASSWORD:password}
+    baseline-on-migrate: true
+    enabled: true
   devtools:
     add-properties: false
   data:
@@ -34,8 +42,6 @@ spring:
         temp.use_jdbc_metadata_defaults: false
     hibernate:
       ddl-auto: none
-  flyway:
-    baseline-on-migrate: true
   servlet:
     multipart:
       max-file-size: 2MB

@@ -15,7 +15,7 @@ data class NfcTag(
     @Column(length = 16, unique = true, nullable = false)
     val id: UUID,
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     @Fetch(value = FetchMode.JOIN)
     @JoinColumn(
         name = "creator_id",
@@ -28,21 +28,18 @@ data class NfcTag(
 //    val creatorId: UUID = creator.id,
 
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = [CascadeType.ALL])
     @Fetch(value = FetchMode.JOIN)
     @JoinColumn(
         name = "owner_id",
         referencedColumnName = "id",
-        foreignKey = ForeignKey(name = "nfcs_person_owner_id_fk")
+        foreignKey = ForeignKey(name = "nfcs_person_owner_id_fk"),
     )
     val owner: Person,
 
 //    @Column(name = "owner_id", insertable = false, updatable = false)
 //    val ownerId: UUID = owner.id,
 //
-    @CreatedDate
-    val createdAt: ZonedDateTime = ZonedDateTime.now(),
-
     @Enumerated(EnumType.STRING)
     val type: NfcTagType,
 
@@ -75,7 +72,11 @@ data class NfcTag(
         referencedColumnName = "id",
         foreignKey = ForeignKey(name = "nfcs_album_linked_album_id_fk")
     )
-    val linkedAlbum: Album?=null,
+    val linkedAlbum: Album? = null,
     @Column(name = "linked_album_id", insertable = false, updatable = false)
     val linkedAlbumId: UUID? = linkedAlbum?.id,
-)
+
+    @CreatedDate
+    val createdAt: ZonedDateTime = ZonedDateTime.now(),
+
+    )

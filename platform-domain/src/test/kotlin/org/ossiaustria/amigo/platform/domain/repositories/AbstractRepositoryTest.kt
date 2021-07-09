@@ -3,6 +3,9 @@ package org.ossiaustria.amigo.platform.domain.repositories
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.ossiaustria.amigo.platform.domain.models.Account
+import org.ossiaustria.amigo.platform.domain.models.Group
+import org.ossiaustria.amigo.platform.domain.models.Person
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.findByIdOrNull
 import java.util.*
@@ -12,7 +15,12 @@ internal abstract class AbstractRepositoryTest<T, R : CrudRepository<T, UUID>> :
 
     abstract val repository: R
 
+    protected lateinit var account: Account
+    protected lateinit var person: Person
+    protected lateinit var group: Group
+
     fun createDefaultEntity(): T = createDefaultEntityPair(randomUUID()).second
+
     abstract fun createDefaultEntityPair(id: UUID = randomUUID()): Pair<UUID, T>
     abstract fun changeEntity(entity: T): T
     abstract fun initTest()
@@ -57,4 +65,9 @@ internal abstract class AbstractRepositoryTest<T, R : CrudRepository<T, UUID>> :
         assertThat(saved).isNotNull
     }
 
+    protected fun initGroupAccountPerson() {
+        account = accounts.save(Account(randomUUID(), "email", "pass"))
+        group = groups.save(Group(randomUUID(), "group"))
+        person = persons.save(Person(randomUUID(), account.id, "person", group.id))
+    }
 }

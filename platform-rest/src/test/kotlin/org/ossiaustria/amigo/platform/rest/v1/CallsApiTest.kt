@@ -27,27 +27,23 @@ internal class CallsApiTest : AbstractRestApiTest() {
     lateinit var callService: CallService
 
     val msgId = randomUUID()
-    val senderId = randomUUID()
 
     @BeforeEach
     fun before() {
-        val id = account.person().id
-
-        every { callService.findWithReceiver(eq(id)) } returns listOf(
-            mockCall(senderId = randomUUID(), receiverId = id),
-            mockCall(senderId = randomUUID(), receiverId = id),
+        every { callService.findWithReceiver(eq(person1Id)) } returns listOf(
+            mockCall(senderId = person2Id, receiverId = person1Id),
+            mockCall(senderId = person2Id, receiverId = person1Id),
         )
 
-        every { callService.findWithSender(eq(id)) } returns listOf(
-            mockCall(senderId = id, receiverId = randomUUID()),
-            mockCall(senderId = id, receiverId = randomUUID()),
+        every { callService.findWithSender(eq(person1Id)) } returns listOf(
+            mockCall(senderId = person1Id, receiverId = person2Id),
+            mockCall(senderId = person1Id, receiverId = person2Id),
         )
-
 
         every { callService.getOne(eq(msgId)) } returns Call(
             id = msgId,
-            senderId = senderId,
-            receiverId = account.person().id,
+            senderId = person2Id,
+            receiverId = person1Id,
             callType = CallType.VIDEO,
             senderToken = "sender",
             receiverToken = "receiver"
@@ -217,7 +213,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
         assertThat(result.retrievedAt).isNotNull
         assertThat(result.startedAt).isNotNull
         assertThat(result.callState).isEqualTo(CallState.ACCEPTED)
-        assertThat(result.senderId).isEqualTo(senderId)
+        assertThat(result.senderId).isEqualTo(person2Id)
 //        assertThat(result.token).isNotNull
     }
 
@@ -234,7 +230,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
         every { callService.getOne(eq(msgId)) } returns Call(
             id = msgId,
             senderId = account.person().id,
-            receiverId = senderId,
+            receiverId = person2Id,
             callType = CallType.VIDEO,
         )
 
@@ -267,7 +263,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
         assertThat(result.retrievedAt).isNotNull
         assertThat(result.startedAt).isNull()
         assertThat(result.callState).isEqualTo(CallState.DENIED)
-        assertThat(result.senderId).isEqualTo(senderId)
+        assertThat(result.senderId).isEqualTo(person2Id)
     }
 
     @Test
@@ -289,7 +285,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
         assertThat(result.retrievedAt).isNotNull
         assertThat(result.finishedAt).isNotNull
         assertThat(result.callState).isEqualTo(CallState.FINISHED)
-        assertThat(result.senderId).isEqualTo(senderId)
+        assertThat(result.senderId).isEqualTo(person2Id)
     }
 
     @Test
@@ -313,7 +309,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
         return arrayListOf(
             field(prefix + "id", JsonFieldType.STRING, "UUID"),
             field(prefix + "senderId", JsonFieldType.STRING, "UUID of sending Person"),
-            field(prefix + "receiverId", JsonFieldType.STRING, "UUID of sending Person"),
+            field(prefix + "receiverId", JsonFieldType.STRING, "UUID of receiving Person"),
             field(prefix + "callType", JsonFieldType.STRING, "VIDEO or AUDIO"),
             field(
                 prefix + "callState", JsonFieldType.STRING,

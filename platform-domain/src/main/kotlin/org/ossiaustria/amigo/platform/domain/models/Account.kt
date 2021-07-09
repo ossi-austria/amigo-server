@@ -19,14 +19,14 @@ data class Account(
     val id: UUID,
 
     @NotBlank
+    @Column(length = 16, unique = true, nullable = false)
     val email: String,
 
     @NotBlank
     val passwordEncrypted: String,
 
     @Fetch(FetchMode.SUBSELECT)
-    @OneToMany(fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
-    @JoinColumn(name = "account_id", foreignKey = ForeignKey(name = "person_account_account_id_fkey"))
+    @OneToMany(mappedBy = "accountId", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     val persons: List<Person> = listOf(),
 
     val lastLogin: ZonedDateTime? = null,

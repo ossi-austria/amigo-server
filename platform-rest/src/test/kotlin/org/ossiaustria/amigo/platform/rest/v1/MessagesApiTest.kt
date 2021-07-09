@@ -7,8 +7,14 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.domain.models.Message
+import org.ossiaustria.amigo.platform.domain.models.Multimedia
+import org.ossiaustria.amigo.platform.domain.models.enums.MultimediaType
 import org.ossiaustria.amigo.platform.domain.services.sendables.MessageService
+import org.ossiaustria.amigo.platform.domain.services.sendables.MultimediaService
 import org.ossiaustria.amigo.platform.rest.v1.sendables.MessageDto
+import org.ossiaustria.amigo.platform.rest.v1.sendables.MultiMessageDto
+import org.springframework.mock.web.MockMultipartFile
+import org.springframework.mock.web.MockPart
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
@@ -23,6 +29,9 @@ internal class MessagesApiTest : AbstractRestApiTest() {
 
     @SpykBean
     lateinit var messageService: MessageService
+
+    @SpykBean
+    lateinit var multimediaService: MultimediaService
 
     @BeforeEach
     fun before() {
@@ -45,30 +54,72 @@ internal class MessagesApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `createMessage should return messages via receiverId`() {
 
-        val senderId = randomUUID()
-        val receiverId = randomUUID()
+        val senderId = person1Id
+        val receiverId = person2Id
         val text = "expected"
 
         // cannot mock RequestBody "text"
-        every { messageService.createMessage(eq(senderId), eq(receiverId), any()) } returns
+        every { messageService.createMessage(eq(senderId), eq(receiverId), any(), any()) } returns
                 mockMessage(senderId = senderId, receiverId = receiverId, text = text)
 
         val url = "$baseUrl?receiverId=$receiverId&senderId=$senderId"
 
-        val result = this.performPost(url, accessToken.token, body = text)
+        val result = this.performPartPost(url, accessToken.token, bodyPart = MockPart("text", text.toByteArray()))
             .expectOk()
             .document(
                 "messages-create",
                 requestParameters(
                     param("receiverId", "UUID of receiver"),
                     param("senderId", "UUID of sender - must be your id"),
-//                    param("text", "Text to send in message"),
+                    param("text", "message text"),
                 ),
                 responseFields(messageResponseFields())
             )
-            .returns(MessageDto::class.java)
+            .returns(MultiMessageDto::class.java)
 
         assertThat(result).isNotNull
+        assertThat(result.text).isEqualTo(text)
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `createMultimediaMessage should handle MultipartFile and upload it`() {
+
+        val senderId = person1Id
+        val receiverId = person2Id
+        val text = "expected"
+
+        // cannot mock RequestBody "text"
+        every { messageService.createMessage(eq(person1Id), eq(person2Id), any(), any()) } returns
+                mockMessage(senderId = senderId, receiverId = receiverId, text = text)
+
+        // Cannot mock "RequestPart" name and file
+        every { multimediaService.createMultimedia(eq(person1Id), any(), any(), any()) } returns
+                Multimedia(randomUUID(), ownerId = senderId, filename = "newname", type = MultimediaType.IMAGE)
+
+        val url = "$baseUrl?receiverId=$receiverId&senderId=$senderId"
+
+        val result = this.performPartPost(
+            url,
+            accessToken.token,
+            bodyPart = MockPart("text", text.toByteArray()),
+            filePart = MockMultipartFile("file", "content".toByteArray())
+        )
+            .expectOk()
+            .document(
+                "messages-create-file",
+                requestParameters(
+                    param("receiverId", "UUID of receiver"),
+                    param("senderId", "UUID of sender - must be your id"),
+                    param("text", "message text"),
+                ),
+                responseFields(messageResponseFields())
+            )
+            .returns(MultiMessageDto::class.java)
+
+        assertThat(result).isNotNull
+        assertThat(result.text).isEqualTo(text)
+        assertThat(result.text).isEqualTo(text)
     }
 
     @Test
@@ -150,10 +201,10 @@ internal class MessagesApiTest : AbstractRestApiTest() {
             id = msgId, senderId = randomUUID(), receiverId = account.person().id
         )
 
-        val result: Message = this.performGet("$baseUrl/$msgId", accessToken.token)
+        val result: MultiMessageDto = this.performGet("$baseUrl/$msgId", accessToken.token)
             .expectOk()
             .document("messages-one", responseFields(messageResponseFields()))
-            .returns(Message::class.java)
+            .returns(MultiMessageDto::class.java)
 
         assertThat(result).isNotNull
     }
@@ -175,10 +226,10 @@ internal class MessagesApiTest : AbstractRestApiTest() {
         )
 
 
-        val result: MessageDto = this.performPatch("$baseUrl/$msgId/set-retrieved", accessToken.token)
+        val result: MultiMessageDto = this.performPatch("$baseUrl/$msgId/set-retrieved", accessToken.token)
             .expectOk()
             .document("messages-set-retrieved", responseFields(messageResponseFields()))
-            .returns(MessageDto::class.java)
+            .returns(MultiMessageDto::class.java)
 
         assertThat(result).isNotNull
         assertThat(result.retrievedAt).isNotNull
@@ -193,8 +244,10 @@ internal class MessagesApiTest : AbstractRestApiTest() {
         return arrayListOf(
             field(prefix + "id", JsonFieldType.STRING, "UUID"),
             field(prefix + "senderId", JsonFieldType.STRING, "UUID of sending Person"),
-            field(prefix + "receiverId", JsonFieldType.STRING, "UUID of sending Person"),
+            field(prefix + "receiverId", JsonFieldType.STRING, "UUID of receiving Person"),
             field(prefix + "text", JsonFieldType.STRING, "Text of this message"),
+            field(prefix + "multimediaId", JsonFieldType.STRING, "Optional UUID of appended Multimedia").optional(),
+            field(prefix + "multimedia", JsonFieldType.OBJECT, "Optional appended Multimedia").optional(),
             field(prefix + "createdAt", JsonFieldType.STRING, "LocalDateTime of message creation"),
             field(prefix + "sentAt", JsonFieldType.STRING, "LocalDateTime of message sending process").optional(),
             field(

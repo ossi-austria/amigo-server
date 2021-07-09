@@ -9,6 +9,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
+import org.springframework.mock.web.MockPart
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultActions
@@ -36,7 +37,7 @@ abstract class AbstractRestTest {
         mediaType: MediaType = MediaType.APPLICATION_JSON
     ): MockHttpServletRequestBuilder {
         return requestBuilder
-            .accept(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN)
+            .accept(MediaType.APPLICATION_JSON, MediaType.ALL)
             .header(HEADER_PRIVATE_TOKEN, "Bearer $jwtToken")
             .contentType(mediaType)
     }
@@ -52,8 +53,13 @@ abstract class AbstractRestTest {
         generateRequestBuilder(url, accessToken, body, HttpMethod.POST)
     )
 
-    protected fun performPartPost(url: String, accessToken: String, file: MockMultipartFile, body: Any? = null) =
-        mockMvc.perform(generatePartRequestBuilder(url, accessToken, file, body))
+    protected fun performPartPost(
+        url: String,
+        accessToken: String,
+        filePart: MockMultipartFile? = null,
+        bodyPart: MockPart? = null
+    ) =
+        mockMvc.perform(generatePartRequestBuilder(url, accessToken, filePart, bodyPart))
 
     protected fun performPatch(url: String, accessToken: String? = null, body: Any? = null) = mockMvc.perform(
         generateRequestBuilder(url, accessToken, body, HttpMethod.PATCH)
@@ -100,14 +106,16 @@ abstract class AbstractRestTest {
     private fun generatePartRequestBuilder(
         url: String,
         jwtToken: String,
-        file: MockMultipartFile,
-        body: Any?,
+        filePart: MockMultipartFile?,
+        bodyPart: MockPart?,
     ): MockMultipartHttpServletRequestBuilder {
-//        val builder = multipart(url).part(MockPart(file.name, file.originalFilename, file.bytes))
-        val builder = multipart(url).file(file)
+        val builder = multipart(url)
 
-        if (body != null) {
-            builder.content(objectMapper.writeValueAsString(body))
+        if (filePart != null) {
+            builder.file(filePart)
+        }
+        if (bodyPart != null) {
+            builder.part(bodyPart)
         }
         return acceptContentAuth(
             builder,

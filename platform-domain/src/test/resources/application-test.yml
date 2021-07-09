@@ -6,13 +6,30 @@ spring:
     redis:
       repositories:
         enabled: false
-  jpa:
-    show-sql: false # true for debugging
-    generate-ddl: true
-    hibernate:
-      ddl-auto: create-drop
+  #  jpa:
+  #    show-sql: false # true for debugging
+  #    generate-ddl: true
+  #    hibernate:
+  #      ddl-auto: create-drop
+  #  flyway:
+  #    enabled: false # USE for dev only
   flyway:
-    enabled: false # USE for dev only
+    schema: public
+    user: amigo
+    password: password
+
+
+logging:
+  level:
+    root: INFO
+    org.ossiaustria.platform: DEBUG
+    web: INFO
+    org.springframework.security: DEBUG
+    org.springframework.orm: WARN
+    org.hibernate: WARN
+    org.springframework.boot.autoconfigure: ERROR
+    org.springframework.security.web.FilterChainProxy: INFO
+    org.apache.http: DEBUG
 
 amigo-platform:
   security:

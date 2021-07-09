@@ -3,7 +3,6 @@ package org.ossiaustria.amigo.platform.domain.services.messaging
 import com.google.firebase.messaging.AndroidConfig
 import org.ossiaustria.amigo.platform.domain.models.Call
 import org.ossiaustria.amigo.platform.domain.models.Message
-import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -12,8 +11,6 @@ class NoopNotificationService : NotificationService {
     override fun messageSent(receiverId: UUID, message: Message) = doNothing("messageSent")
 
     override fun callChanged(receiverId: UUID, call: Call) = doNothing("callChanged")
-
-    override fun multimediaSent(receiverId: UUID, multimedia: Multimedia) = doNothing("multimediaSent")
 
     @Deprecated("Use only on development servers")
     override fun sendNotification(

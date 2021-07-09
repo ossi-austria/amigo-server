@@ -1,6 +1,7 @@
 package org.ossiaustria.amigo.platform.domain.services.sendables
 
 import org.ossiaustria.amigo.platform.domain.models.Message
+import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.models.StringValidator
 import org.ossiaustria.amigo.platform.domain.repositories.MessageRepository
 import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
@@ -13,7 +14,7 @@ import java.util.*
 import java.util.UUID.randomUUID
 
 interface MessageService : SendableService<Message> {
-    fun createMessage(senderId: UUID, receiverId: UUID, text: String): Message
+    fun createMessage(senderId: UUID, receiverId: UUID, text: String, multimedia: Multimedia?): Message
 }
 
 @Service
@@ -30,20 +31,21 @@ class MessageServiceImpl : MessageService {
 
     private val wrapper: SendableServiceMixin<Message> by lazy { SendableServiceMixin(repository, personRepository) }
 
-    override fun createMessage(senderId: UUID, receiverId: UUID, text: String): Message {
+    override fun createMessage(senderId: UUID, receiverId: UUID, text: String, multimedia: Multimedia?): Message {
         StringValidator.validateNotBlank(text)
         wrapper.validateSenderReceiver(senderId, receiverId)
         val message = Message(
             id = randomUUID(),
             senderId = senderId,
             receiverId = receiverId,
+            multimediaId = multimedia?.id,
             text = text,
             createdAt = ZonedDateTime.now(),
             retrievedAt = null,
             sentAt = null,
         )
 
-        Log.info("createMessage: senderId=$senderId receiverId=$receiverId -> $text")
+        Log.info("createMessage: senderId=$senderId receiverId=$receiverId -> $text, multimediaId: ${multimedia?.id}")
 
         val success = notificationService.messageSent(receiverId, message)
         return if (success) {
