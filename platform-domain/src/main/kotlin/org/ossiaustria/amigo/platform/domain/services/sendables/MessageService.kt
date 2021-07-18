@@ -15,6 +15,7 @@ import java.util.UUID.randomUUID
 
 interface MessageService : SendableService<Message> {
     fun createMessage(senderId: UUID, receiverId: UUID, text: String, multimedia: Multimedia?): Message
+    fun count(): Long
 }
 
 @Service
@@ -59,6 +60,8 @@ class MessageServiceImpl : MessageService {
         }
 
     }
+
+    override fun count(): Long = repository.count()
 
     override fun getOne(id: UUID): Message = wrapper.getOne(id)
 

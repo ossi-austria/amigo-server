@@ -21,6 +21,7 @@ interface CallService : SendableService<Call> {
     fun acceptCall(call: Call): Call
     fun finishCall(call: Call): Call
     fun timeoutCall(call: Call): Call
+    fun count(): Long
 }
 
 @Service
@@ -122,6 +123,8 @@ class CallServiceImpl : CallService {
 
     @Deprecated("Use acceptCall() or denyCall() explicitly")
     override fun markAsRetrieved(id: UUID, time: ZonedDateTime) = wrapper.markAsRetrieved(id, time)
+
+    override fun count(): Long = repository.count()
 
     companion object {
         private val Log = LoggerFactory.getLogger(this::class.java)

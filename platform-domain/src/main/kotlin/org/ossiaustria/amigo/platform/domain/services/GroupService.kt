@@ -20,6 +20,7 @@ interface GroupService {
     fun create(id: UUID = randomUUID(), name: String): Group
     fun update(group: Group): Group
     fun findById(id: UUID): Group?
+    fun count(): Long
 }
 
 @Service
@@ -29,6 +30,7 @@ class GroupServiceImpl : GroupService {
     private lateinit var groupRepository: GroupRepository
 
     override fun findById(id: UUID) = groupRepository.findByIdOrNull(id)
+    override fun count() = groupRepository.count()
 
     @Transactional
     override fun findGroupsOfUser(account: Account): List<Group> {

@@ -1,5 +1,6 @@
 package org.ossiaustria.amigo.platform.rest.v1.sendables
 
+import io.micrometer.core.annotation.Timed
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.ossiaustria.amigo.platform.domain.services.sendables.MultimediaService
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
+@Timed
 @RestController
 @RequestMapping("/v1/multimedias", produces = ["application/json"], consumes = ["application/json"])
 internal class MultimediasApi(private val multimediaService: MultimediaService) {

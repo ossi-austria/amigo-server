@@ -76,4 +76,7 @@ class AccountService {
         )
     }
 
+    fun count(): Long = accountRepository.count()
+
+
 }

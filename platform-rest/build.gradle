@@ -32,6 +32,10 @@ dependencies {
 
     implementation "com.google.firebase:firebase-admin:$firebaseAdminVersion"
 
+    // actuator, prometheus, logging
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "io.micrometer:micrometer-registry-prometheus"
+
     testImplementation "org.junit.jupiter:junit-jupiter:$jupiterVersion"
     // DO NOT USE:   testImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter"
     // DO NOT USE:   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$jupiter"

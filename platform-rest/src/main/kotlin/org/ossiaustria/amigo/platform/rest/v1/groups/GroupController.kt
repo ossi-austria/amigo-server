@@ -1,6 +1,7 @@
 package org.ossiaustria.amigo.platform.rest.v1.groups
 
 
+import io.micrometer.core.annotation.Timed
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Group
 import org.ossiaustria.amigo.platform.domain.services.GroupService
@@ -8,6 +9,7 @@ import org.ossiaustria.amigo.platform.rest.CurrentUserService
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
+@Timed(value = "time.api.groups")
 @RestController
 @RequestMapping("/v1/groups", produces = ["application/json"], consumes = ["application/json"])
 class GroupsController(

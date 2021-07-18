@@ -32,15 +32,7 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
     override fun configure(webSecurity: WebSecurity) {
         webSecurity
             .ignoring()
-            .antMatchers(
-                "/",
-                "/docs",
-                "/docs/*",
-                AUTH_URLS,
-                AUTH_LOGIN_URLS,
-                AUTH_PASSWORD_URLS,
-                AUTH_PASSWORD_RESET_URLS,
-            )
+            .antMatchers("/docs", "/docs/*")
     }
 
     @Throws(Exception::class)
@@ -52,11 +44,14 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
             .authorizeRequests()
             .antMatchers("/error", "/docs", "/docs/*", AUTH_URLS, AUTH_LOGIN_URLS, AUTH_PASSWORD_URLS)
             .permitAll().and()
+            .authorizeRequests()
+            .antMatchers("/actuator/**")
+            .permitAll().and()
             .authorizeRequests().anyRequest().authenticated().and()
             .authenticationProvider(provider)
             .addFilterBefore(authenticationFilter(), AnonymousAuthenticationFilter::class.java)
             .csrf().disable()
-            .httpBasic().disable()
+            .httpBasic().and()
             .logout().disable()
     }
 

@@ -21,6 +21,7 @@ class PersonService {
     private lateinit var personRepository: PersonRepository
 
     fun findById(id: UUID) = personRepository.findByIdOrNull(id)
+    fun count() = personRepository.count()
 
 
     fun createPersonForGroup(account: Account, group: Group, fullName: String): Person {

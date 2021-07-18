@@ -22,7 +22,7 @@ services:
     container_name: postgres
     restart: always
     image: postgres:11.7
-    ports: [ "5432:5432" ]
+#    ports: [ "5432:5432" ]
     volumes:
       - amigo-db:/var/lib/postgresql:Z
     env_file: system.env
@@ -33,3 +33,7 @@ volumes:
   sock:
   amigo-db:
 
+networks:
+  default:
+    external: true
+    name: amigo-network
