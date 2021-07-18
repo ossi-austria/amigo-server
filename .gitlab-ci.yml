@@ -18,7 +18,9 @@ build & test:
     paths:
       - platform-rest/build/
     reports:
-      junit: platform-rest/build/test-results/test/**/TEST-*.xml
+      junit:
+        - platform-domain/build/test-results/test/**/TEST-*.xml
+        - platform-rest/build/test-results/test/**/TEST-*.xml
 
 
 push docker:
