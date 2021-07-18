@@ -42,7 +42,15 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
             .anonymous().and()
             .authorizeRequests()
-            .antMatchers("/error", "/docs", "/docs/*", AUTH_URLS, AUTH_LOGIN_URLS, AUTH_PASSWORD_URLS)
+            .antMatchers(
+                "/error",
+                "/docs",
+                "/docs/*",
+                AUTH_URLS,
+                AUTH_LOGIN_URLS,
+                AUTH_PASSWORD_URLS,
+                AUTH_PASSWORD_RESET_URLS
+            )
             .permitAll().and()
             .authorizeRequests()
             .antMatchers("/actuator/**")
