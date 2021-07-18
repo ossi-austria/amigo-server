@@ -6,13 +6,9 @@ spring:
     redis:
       repositories:
         enabled: false
-  #  jpa:
-  #    show-sql: false # true for debugging
-  #    generate-ddl: true
-  #    hibernate:
-  #      ddl-auto: create-drop
-  #  flyway:
-  #    enabled: false # USE for dev only
+    jpa:
+      show-sql: false # true for debugging
+      generate-ddl: true
   flyway:
     schema: public
     user: amigo
