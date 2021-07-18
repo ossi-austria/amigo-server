@@ -38,6 +38,7 @@ interface MultimediaService {
 
     fun uploadFile(multimedia: Multimedia, multipartFile: MultipartFile): Multimedia
     fun loadFile(multimedia: Multimedia): Resource?
+    fun count(): Long
 }
 
 sealed class MultimediaError(errorName: String, message: String, cause: Throwable? = null) :
@@ -93,6 +94,8 @@ class MultimediaServiceImpl : MultimediaService {
     override fun loadFile(multimedia: Multimedia): Resource? {
         return fileStorage.loadFile(multimedia)
     }
+
+    override fun count(): Long = repository.count()
 
     override fun uploadFile(multimedia: Multimedia, multipartFile: MultipartFile): Multimedia {
 

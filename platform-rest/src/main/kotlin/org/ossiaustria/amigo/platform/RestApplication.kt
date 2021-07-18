@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Import
+import org.springframework.scheduling.annotation.EnableScheduling
 
 @SpringBootApplication(
     scanBasePackages = ["org.ossiaustria.amigo.platform"],
@@ -20,7 +21,8 @@ fun main(args: Array<String>) {
 
 
 @ConfigurationProperties(prefix = "amigo-platform")
-class ApplicationConfiguration()
+@EnableScheduling
+class ApplicationConfiguration
 
 
 
