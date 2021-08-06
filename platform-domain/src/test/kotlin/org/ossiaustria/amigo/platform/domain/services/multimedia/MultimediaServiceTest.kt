@@ -1,4 +1,4 @@
-package org.ossiaustria.amigo.platform.domain.services.sendables
+package org.ossiaustria.amigo.platform.domain.services.multimedia
 
 import com.ninjasquad.springmockk.SpykBean
 import io.mockk.every

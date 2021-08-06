@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-internal interface AlbumShareRepository : CrudRepository<AlbumShare, UUID> {}
+internal interface AlbumShareRepository : CrudRepository<AlbumShare, UUID> {
+    fun findAllByReceiverIdOrderByCreatedAt(id: UUID): List<AlbumShare>
+}

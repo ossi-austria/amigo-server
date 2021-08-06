@@ -6,18 +6,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.ossiaustria.amigo.platform.domain.models.Multimedia
-import org.ossiaustria.amigo.platform.domain.models.enums.MultimediaType
-import org.ossiaustria.amigo.platform.domain.services.sendables.MultimediaService
-import org.ossiaustria.amigo.platform.rest.v1.sendables.MultimediaDto
+import org.ossiaustria.amigo.platform.domain.services.multimedia.MultimediaService
+import org.ossiaustria.amigo.platform.rest.v1.multimedias.MultimediaDto
+import org.ossiaustria.amigo.platform.testcommons.Mocks
 import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.MockMultipartFile
-import org.springframework.restdocs.payload.FieldDescriptor
-import org.springframework.restdocs.payload.JsonFieldType.NUMBER
-import org.springframework.restdocs.payload.JsonFieldType.STRING
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
 import org.springframework.restdocs.request.RequestDocumentation.requestParameters
-import java.util.*
 import java.util.UUID.randomUUID
 
 internal class MultimediasApiTest : AbstractRestApiTest() {
@@ -31,8 +26,8 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
     fun before() {
 
         every { multimediaService.findWithOwner(eq(person1Id)) } returns listOf(
-            mockMultimedia(ownerId = person1Id),
-            mockMultimedia(ownerId = person1Id),
+            Mocks.multimedia(ownerId = person1Id),
+            Mocks.multimedia(ownerId = person1Id),
         )
 
         mockUserAuthentication()
@@ -48,7 +43,7 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
         // Cannot mock "RequestPart" name and file
         every { multimediaService.createMultimedia(eq(ownerId), any(), any(), any()) } returns
-                mockMultimedia(ownerId = ownerId, filename = name)
+                Mocks.multimedia(ownerId = ownerId, filename = name)
 
         val url = "$baseUrl?ownerId=$ownerId"
 
@@ -77,13 +72,13 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
         // Cannot mock "RequestPart" name and file
         every { multimediaService.createMultimedia(eq(ownerId), any(), any(), any()) } returns
-                mockMultimedia(ownerId = ownerId, filename = name)
+                Mocks.multimedia(ownerId = ownerId, filename = name)
 
         every { multimediaService.getOne(any()) } returns
-                mockMultimedia(ownerId = ownerId, filename = name)
+                Mocks.multimedia(ownerId = ownerId, filename = name)
 
         every { multimediaService.uploadFile(any(), any()) } returns
-                mockMultimedia(ownerId = ownerId, filename = name)
+                Mocks.multimedia(ownerId = ownerId, filename = name)
 
         val first = this.performPartPost("$baseUrl?ownerId=$ownerId", accessToken.token, filePart = file)
             .returns(MultimediaDto::class.java)
@@ -127,7 +122,7 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
     fun `getOne should return Multimedia visible by current user`() {
         val msgId = randomUUID()
 
-        every { multimediaService.getOne(msgId) } returns mockMultimedia(
+        every { multimediaService.getOne(msgId) } returns Mocks.multimedia(
             id = msgId, ownerId = person1Id,
         )
 
@@ -144,7 +139,7 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
     fun `download file should return Multimedia's file`() {
         val msgId = randomUUID()
 
-        every { multimediaService.getOne(msgId) } returns mockMultimedia(
+        every { multimediaService.getOne(msgId) } returns Mocks.multimedia(
             id = msgId, ownerId = person1Id,
         )
 
@@ -163,26 +158,5 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
         this.performGet("$baseUrl/${randomUUID()}").expectUnauthorized()
     }
 
-    private fun mockMultimedia(
-        id: UUID = randomUUID(),
-        ownerId: UUID,
-        filename: String = "filename",
-    ): Multimedia {
-        return Multimedia(id, ownerId = ownerId, filename = filename, type = MultimediaType.IMAGE)
-    }
 
-    private fun multimediasResponseFields(prefix: String = ""): List<FieldDescriptor> {
-        return arrayListOf(
-            field(prefix + "id", STRING, "UUID"),
-            field(prefix + "ownerId", STRING, "UUID of sending Person"),
-            field(prefix + "createdAt", STRING, "LocalDateTime of Multimedia creation"),
-            field(prefix + "ownerId", STRING, "UUID of Owner"),
-            field(prefix + "filename", STRING, "File to name that file locally"),
-            field(prefix + "type", STRING, "MultimediaType: IMAGE, VIDEO, AUDIO"),
-            field(prefix + "contentType", STRING, "ContentType / MIME type of that file").optional(),
-            field(prefix + "size", NUMBER, "Size of file in bytes").optional(),
-            field(prefix + "albumId", STRING, "UUID of parent Album").optional(),
-
-            )
-    }
 }

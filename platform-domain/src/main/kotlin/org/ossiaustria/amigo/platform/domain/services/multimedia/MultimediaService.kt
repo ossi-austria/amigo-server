@@ -1,4 +1,4 @@
-package org.ossiaustria.amigo.platform.domain.services.sendables
+package org.ossiaustria.amigo.platform.domain.services.multimedia
 
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.models.StringValidator
@@ -7,8 +7,6 @@ import org.ossiaustria.amigo.platform.domain.repositories.MultimediaRepository
 import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.ossiaustria.amigo.platform.domain.services.ServiceError
 import org.ossiaustria.amigo.platform.domain.services.files.FileStorage
-import org.ossiaustria.amigo.platform.exceptions.ErrorCode
-import org.ossiaustria.amigo.platform.exceptions.NotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
@@ -21,7 +19,7 @@ import java.util.UUID.randomUUID
 
 interface MultimediaService {
 
-    fun getOne(id: UUID): Multimedia
+    fun getOne(id: UUID): Multimedia?
     fun getAll(): List<Multimedia>
     fun findWithOwner(ownerId: UUID): List<Multimedia>
 
@@ -136,8 +134,7 @@ class MultimediaServiceImpl : MultimediaService {
         }
     }
 
-    override fun getOne(id: UUID): Multimedia = repository.findByIdOrNull(id)
-        ?: throw NotFoundException(ErrorCode.NotFound, "Multimedia $id not found!")
+    override fun getOne(id: UUID): Multimedia? = repository.findByIdOrNull(id)
 
     override fun getAll(): List<Multimedia> = repository.findAll().toList().also {
         Log.info("getAll: -> ${it.size} results")

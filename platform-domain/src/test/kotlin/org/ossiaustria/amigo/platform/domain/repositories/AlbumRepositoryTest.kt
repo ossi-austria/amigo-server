@@ -1,7 +1,9 @@
 package org.ossiaustria.amigo.platform.domain.repositories
 
+import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.domain.models.Album
+import org.ossiaustria.amigo.platform.domain.testcommons.Mocks
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.*
 import java.util.UUID.randomUUID
@@ -26,12 +28,20 @@ internal class AlbumRepositoryTest : AbstractRepositoryTest<Album, AlbumReposito
             id = id,
             name = "Album/" + randomUUID(),
             ownerId = person.id,
+            items = listOf(Mocks.multimedia(ownerId = person.id))
         )
         return Pair(id, entity)
     }
 
     override fun changeEntity(entity: Album) = entity.copy(name = "changed")
 
+    @Test
+    fun `save should save Multimedia list`() {
+        val (id, entity) = createDefaultEntityPair()
+        val saved = repository.save(entity)
+        Assertions.assertThat(saved.items).isNotNull
+        Assertions.assertThat(saved.items).isNotEmpty
+    }
 
     @Test
     fun `must not save duplicate name for same owner`() {

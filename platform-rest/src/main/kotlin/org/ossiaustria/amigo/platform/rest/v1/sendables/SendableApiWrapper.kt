@@ -7,6 +7,7 @@ import org.ossiaustria.amigo.platform.domain.services.sendables.SendableService
 import org.ossiaustria.amigo.platform.exceptions.BadRequestException
 import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
 import org.ossiaustria.amigo.platform.exceptions.ErrorCode
+import org.ossiaustria.amigo.platform.exceptions.NotFoundException
 import java.time.ZonedDateTime
 import java.util.*
 
@@ -36,14 +37,15 @@ internal class SendableApiWrapper<T : Sendable<T>>(
 
     fun getOne(tokenUserDetails: TokenUserDetails, id: UUID): T {
         val personId = tokenUserDetails.personsIds.first()
-        val sendable = sendableService.getOne(id)
+        val sendable =
+            sendableService.getOne(id) ?: throw NotFoundException(ErrorCode.NotFound, "Sendable $id not found!")
         if (!sendable.isViewableBy(personId)) throw DefaultNotFoundException()
         return sendable
     }
 
     fun markAsRetrieved(tokenUserDetails: TokenUserDetails, id: UUID): T {
         val personId = tokenUserDetails.personsIds.first()
-        val item = sendableService.getOne(id)
+        val item = sendableService.getOne(id) ?: throw NotFoundException(ErrorCode.NotFound, "Sendable $id not found!")
         if (!item.isRetrievableBy(personId)) throw DefaultNotFoundException()
         return sendableService.markAsRetrieved(id, ZonedDateTime.now())
     }

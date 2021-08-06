@@ -110,7 +110,7 @@ class CallServiceImpl : CallService {
     }
 
 
-    override fun getOne(id: UUID): Call = wrapper.getOne(id)
+    override fun getOne(id: UUID): Call? = wrapper.getOne(id)
 
     override fun getAll(): List<Call> = wrapper.getAll()
 

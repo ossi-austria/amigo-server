@@ -15,16 +15,14 @@ internal abstract class SendableServiceTest<S : Sendable<S>, T : SendableService
 
     @Test
     fun `getOne should throw when id does not exist`() {
-        assertThrows<NotFoundException> {
-            service.getOne(randomUUID())
-        }
+        assertThat(service.getOne(randomUUID())).isNull()
     }
 
     @Test
     fun `getOne should succeed for existing id`() {
         val result = service.getOne(existingId)
         assertThat(result).isNotNull
-        assertThat(result.id).isEqualTo(existingId)
+        assertThat(result!!.id).isEqualTo(existingId)
     }
 
     @Test

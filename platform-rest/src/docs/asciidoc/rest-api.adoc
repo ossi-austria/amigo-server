@@ -207,7 +207,25 @@ Filter accessible Groups for *own* Person and/or Group name
 
 operation::groups-filtered-success[snippets='curl-request,request-parameters,http-response,response-fields']
 
-[[multimedias]]
+[[albums]]
+== Albums
+
+=== Create new Album - POST /albums
+
+operation::albums-create[snippets='curl-request,http-response,response-fields']
+
+=== GET /albums/own - All my Albums
+
+operation::albums-own[snippets='curl-request,http-response,response-fields']
+
+=== GET /albums/shared - All Albums shared with me
+
+operation::albums-shared[snippets='curl-request,http-response,response-fields']
+
+=== GET /albums/:id
+
+operation::albums-one[snippets='curl-request,http-response,response-fields']
+
 == Multimedias
 
 === Create & upload new Multimedia - POST /multimedias
