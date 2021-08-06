@@ -6,7 +6,7 @@ import java.util.*
 
 
 interface SendableService<S : Sendable<S>> {
-    fun getOne(id: UUID): S
+    fun getOne(id: UUID): S?
     fun getAll(): List<S>
     fun findWithPersons(senderId: UUID?, receiverId: UUID?): List<S>
     fun findWithSender(senderId: UUID): List<S>

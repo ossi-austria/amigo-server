@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.domain.models.Message
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.models.enums.MultimediaType
+import org.ossiaustria.amigo.platform.domain.services.multimedia.MultimediaService
 import org.ossiaustria.amigo.platform.domain.services.sendables.MessageService
-import org.ossiaustria.amigo.platform.domain.services.sendables.MultimediaService
 import org.ossiaustria.amigo.platform.rest.v1.sendables.MessageDto
 import org.ossiaustria.amigo.platform.rest.v1.sendables.MultiMessageDto
 import org.springframework.mock.web.MockMultipartFile

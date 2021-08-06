@@ -1,12 +1,13 @@
-package org.ossiaustria.amigo.platform.rest.v1.sendables
+package org.ossiaustria.amigo.platform.rest.v1.multimedias
 
 import io.micrometer.core.annotation.Timed
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
-import org.ossiaustria.amigo.platform.domain.services.sendables.MultimediaService
+import org.ossiaustria.amigo.platform.domain.services.multimedia.MultimediaService
 import org.ossiaustria.amigo.platform.exceptions.BadRequestException
 import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
 import org.ossiaustria.amigo.platform.exceptions.ErrorCode
+import org.ossiaustria.amigo.platform.exceptions.NotFoundException
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -96,6 +97,8 @@ internal class MultimediasApi(private val multimediaService: MultimediaService) 
     ): Multimedia {
         val personId = tokenUserDetails.personsIds.first()
         val multimedia = multimediaService.getOne(id)
+            ?: throw NotFoundException(ErrorCode.NotFound, "Multimedia $id not found!")
+
         if (!multimedia.isViewableBy(personId)) throw DefaultNotFoundException()
         return multimedia
     }

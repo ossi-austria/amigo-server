@@ -63,7 +63,7 @@ class MessageServiceImpl : MessageService {
 
     override fun count(): Long = repository.count()
 
-    override fun getOne(id: UUID): Message = wrapper.getOne(id)
+    override fun getOne(id: UUID): Message? = wrapper.getOne(id)
 
     override fun getAll(): List<Message> = wrapper.getAll()
 

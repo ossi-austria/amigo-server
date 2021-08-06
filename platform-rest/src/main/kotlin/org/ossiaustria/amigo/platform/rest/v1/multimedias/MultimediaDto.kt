@@ -1,4 +1,4 @@
-package org.ossiaustria.amigo.platform.rest.v1.sendables
+package org.ossiaustria.amigo.platform.rest.v1.multimedias
 
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.models.enums.MultimediaType

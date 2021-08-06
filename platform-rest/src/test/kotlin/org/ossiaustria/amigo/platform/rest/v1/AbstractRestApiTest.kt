@@ -77,7 +77,6 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
     }
 
 
-
     @BeforeEach
     fun setUp(
         webApplicationContext: WebApplicationContext,
@@ -151,14 +150,4 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
             fieldWithPath("time").type(JsonFieldType.STRING).description("Timestamp of error")
         )
     }
-
-}
-
-fun FieldDescriptor.copy(path: String? = null): FieldDescriptor {
-    return fieldWithPath(path ?: this.path)
-        .type(this.type)
-        .description(this.description)
-        .also {
-            if (this.isOptional) it.optional()
-        }
 }

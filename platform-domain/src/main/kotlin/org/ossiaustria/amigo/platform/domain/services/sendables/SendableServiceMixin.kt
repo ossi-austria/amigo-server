@@ -17,7 +17,6 @@ internal class SendableServiceMixin<S : Sendable<S>>(
     private val personRepository: PersonRepository
 ) : SendableService<S> {
 
-
     override fun findWithPersons(senderId: UUID?, receiverId: UUID?): List<S> {
         return when {
             (receiverId != null && senderId != null) ->
@@ -39,9 +38,8 @@ internal class SendableServiceMixin<S : Sendable<S>>(
         }
     }
 
-    override fun getOne(id: UUID): S {
+    override fun getOne(id: UUID): S? {
         return repository.findByIdOrNull(id)
-            ?: throw NotFoundException(ErrorCode.NotFound, "Sendable $id not found!")
     }
 
     override fun findWithSender(senderId: UUID): List<S> {
@@ -57,7 +55,7 @@ internal class SendableServiceMixin<S : Sendable<S>>(
     }
 
     override fun markAsRetrieved(id: UUID, time: ZonedDateTime): S {
-        val sendable = getOne(id)
+        val sendable = getOne(id) ?: throw NotFoundException(ErrorCode.NotFound, "Sendable $id not found!")
         return repository.save(sendable.withRetrievedAt(time)).also {
             Log.info("markAsRetrieved: ${it::class.java.simpleName} $id at $time")
         }

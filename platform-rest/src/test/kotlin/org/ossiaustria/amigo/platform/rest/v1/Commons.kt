@@ -30,6 +30,20 @@ internal fun personFields(prefix: String = ""): MutableList<FieldDescriptor> {
     )
 }
 
+internal fun multimediasResponseFields(prefix: String = ""): List<FieldDescriptor> {
+    return arrayListOf(
+        field(prefix + "id", STRING, "UUID"),
+        field(prefix + "ownerId", STRING, "UUID of sending Person"),
+        field(prefix + "createdAt", STRING, "LocalDateTime of Multimedia creation"),
+        field(prefix + "ownerId", STRING, "UUID of Owner"),
+        field(prefix + "filename", STRING, "File to name that file locally"),
+        field(prefix + "type", STRING, "MultimediaType: IMAGE, VIDEO, AUDIO"),
+        field(prefix + "contentType", STRING, "ContentType / MIME type of that file").optional(),
+        field(prefix + "size", JsonFieldType.NUMBER, "Size of file in bytes").optional(),
+        field(prefix + "albumId", STRING, "UUID of parent Album").optional(),
+    )
+}
+
 private fun sortFields(prefix: String = ""): List<FieldDescriptor> {
     return listOf(
         fieldWithPath(prefix + "sort.sorted").type(JsonFieldType.BOOLEAN)

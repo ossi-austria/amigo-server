@@ -3,8 +3,8 @@ package org.ossiaustria.amigo.platform.rest.v1.sendables
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Message
 import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
+import org.ossiaustria.amigo.platform.domain.services.multimedia.MultimediaService
 import org.ossiaustria.amigo.platform.domain.services.sendables.MessageService
-import org.ossiaustria.amigo.platform.domain.services.sendables.MultimediaService
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
