@@ -4,9 +4,8 @@ import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.models.StringValidator
 import org.ossiaustria.amigo.platform.domain.models.enums.MultimediaType
 import org.ossiaustria.amigo.platform.domain.repositories.MultimediaRepository
-import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.ossiaustria.amigo.platform.domain.services.ServiceError
-import org.ossiaustria.amigo.platform.domain.services.files.FileStorage
+import org.ossiaustria.amigo.platform.domain.services.files.MultimediaFileStorage
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
@@ -57,10 +56,7 @@ class MultimediaServiceImpl : MultimediaService {
     private lateinit var repository: MultimediaRepository
 
     @Autowired
-    private lateinit var fileStorage: FileStorage
-
-    @Autowired
-    private lateinit var personRepository: PersonRepository
+    private lateinit var multimediaFileStorage: MultimediaFileStorage
 
     override fun createMultimedia(
         ownerId: UUID,
@@ -90,7 +86,7 @@ class MultimediaServiceImpl : MultimediaService {
 
 
     override fun loadFile(multimedia: Multimedia): Resource? {
-        return fileStorage.loadFile(multimedia)
+        return multimediaFileStorage.loadFile(multimedia)
     }
 
     override fun count(): Long = repository.count()
@@ -99,7 +95,7 @@ class MultimediaServiceImpl : MultimediaService {
 
         val type = checkContentType(multipartFile.contentType)
         checkContent(multipartFile)
-        val savedFile = fileStorage.saveFile(multimedia, multipartFile, overwrite = true)
+        val savedFile = multimediaFileStorage.saveFile(multimedia, multipartFile, overwrite = true)
 
         val size = savedFile.size
         val localUrl = savedFile.absolutePath

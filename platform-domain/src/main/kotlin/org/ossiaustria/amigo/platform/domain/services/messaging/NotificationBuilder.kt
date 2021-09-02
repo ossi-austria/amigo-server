@@ -10,10 +10,6 @@ object NotificationBuilder {
     const val RECEIVER_ID = "receiver_id"
 
     const val ACTION_SENT = "sent"
-//    const val ACTION_CALL_REQUESTED = "call_requested"
-//    const val ACTION_CALL_ACCEPTED = "call_accepted"
-//    const val ACTION_CALL_DECLINED = "call_declined"
-
 
     const val TYPE_ALBUM_SHARE = "album_share"
     const val TYPE_MESSAGE = "message"

@@ -4,7 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.ossiaustria.amigo.platform.rest.v1.auth.*
+import org.ossiaustria.amigo.platform.rest.v1.user.*
 import org.ossiaustria.amigo.platform.utils.RandomUtils
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType.*

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.domain.services.auth.AuthService
-import org.ossiaustria.amigo.platform.rest.v1.auth.SetFcmTokenRequest
+import org.ossiaustria.amigo.platform.rest.v1.user.SetFcmTokenRequest
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation.requestFields

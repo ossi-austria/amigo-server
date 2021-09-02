@@ -6,7 +6,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.ossiaustria.amigo.platform.rest.v1.auth.PasswordResetRequest
+import org.ossiaustria.amigo.platform.rest.v1.user.PasswordResetRequest
 import org.ossiaustria.amigo.platform.services.email.TemplateService
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType

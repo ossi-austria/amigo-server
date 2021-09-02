@@ -5,7 +5,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.domain.services.GroupService
-import org.ossiaustria.amigo.platform.rest.v1.groups.GroupDto
+import org.ossiaustria.amigo.platform.rest.v1.user.GroupDto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType.ARRAY

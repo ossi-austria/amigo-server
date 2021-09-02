@@ -15,8 +15,8 @@ internal class AccountSubjectPreparationTrait {
     lateinit var group: Group
     lateinit var account: Account
     lateinit var account2: Account
-    lateinit var subject: Person
-    lateinit var subject2: Person
+    lateinit var person: Person
+    lateinit var person2: Person
 
     @Autowired
     protected lateinit var groupService: GroupService
@@ -28,8 +28,8 @@ internal class AccountSubjectPreparationTrait {
         group = createMockGroup()
         account = createMockAccount()
         account2 = createMockAccount(userOverrideSuffix = "0002")
-        subject = account.persons.first()
-        subject2 = account2.persons.first()
+        person = account.persons.first()
+        person2 = account2.persons.first()
     }
 
 

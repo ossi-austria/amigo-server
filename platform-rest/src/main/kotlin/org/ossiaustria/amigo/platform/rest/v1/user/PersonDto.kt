@@ -1,4 +1,4 @@
-package org.ossiaustria.amigo.platform.rest.v1.auth
+package org.ossiaustria.amigo.platform.rest.v1.user
 
 import org.ossiaustria.amigo.platform.domain.models.Person
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
@@ -10,6 +10,7 @@ data class PersonDto(
     val name: String,
     val groupId: UUID?,
     val memberType: MembershipType,
+    val avatarUrl: String? = null
 )
 
 internal fun Person.toDto() = PersonDto(
@@ -17,4 +18,5 @@ internal fun Person.toDto() = PersonDto(
     name = this.name,
     groupId = this.groupId,
     memberType = this.memberType,
+    avatarUrl = this.avatarUrl,
 )

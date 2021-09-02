@@ -135,6 +135,8 @@ For example, a request that attempts to register a user with an existing usernam
 
 operation::register-fail[snippets='http-response']
 
+= User & Groups
+
 [[authentication]]
 == Authentication - /auth
 
@@ -150,22 +152,18 @@ Login can be executed with the username or the email.
 
 operation::login-success[snippets='curl-request,request-fields,http-response,response-fields']
 
-[[update-profile]]
-=== PUT /auth/register
+=== POST /auth/refresh-token
 
-operation::register-success[snippets='curl-request,request-fields,http-response,response-fields']
-
-=== GET /auth/refresh-token
+When performing this action to "refresh a token" you get a new "access token".
+Naming is hard.
 
 operation::refresh-token-success[snippets='curl-request,request-fields,http-response,response-fields']
 
 === GET /auth/whoami
 
-Get user short profile info
+Get user short profile info, when already logged in.
 
 operation::who-am-i[snippets='curl-request,http-response,response-fields']
-
-= Common Resources
 
 [[account]]
 == Account - /account
@@ -176,8 +174,9 @@ Account endpoint is a singular endpoint just for the current user.
 === POST /account/set-fcm-token
 
 Set the new Firebase Cloud Messaging (FCM) token for the current user.
+No Data as response.
 
-operation::account-set-fcm-token[snippets='curl-request,http-response']
+operation::account-set-fcm-token[snippets='curl-request,request-fields,http-response']
 
 [[groups]]
 == Groups - /groups
@@ -187,61 +186,112 @@ A User can just access the Groups where they have a Person profile and is at lea
 
 A Group can contain at max 1 ANALOGUE Person.
 
+=== Group Model
+
+operation::groups-my-success[snippets='http-response,response-fields']
+
 [[groups-my]]
 === GET /groups/my
 
 Fetch all Groups of own User.
 
-operation::groups-my-success[snippets='curl-request,http-response,response-fields']
+operation::groups-my-success[snippets='curl-request,http-response']
 
+[[groups-one]]
 === GET /groups/:id
 
 Fetch one Group which own User can access.
 Endpoint will return 404 for Groups which cannot be found or accessed.
 
-operation::groups-one-success[snippets='curl-request,http-response,response-fields']
+operation::groups-one-success[snippets='curl-request,http-response']
 
+[[groups-filtered]]
 === GET /groups/filtered?personId=<UUID>&name=<String>
 
 Filter accessible Groups for *own* Person and/or Group name
 
-operation::groups-filtered-success[snippets='curl-request,request-parameters,http-response,response-fields']
+operation::groups-filtered-success[snippets='curl-request,request-parameters,http-response']
+
+[[persons]]
+== Persons - /persons
+
+=== GET /persons/:id/avatar.*
+
+Hint: Use Person.avatarUrl to get the suffix.
+
+it will react in three different ways:
+
+* respond with the Image as content, watch out for content-type and length
+* redirect to another URL, which should be an image
+* respond with a 404 when no usable avatar is found
+
+operation::persons-avatar-success[snippets='curl-request']
+
+=== Example for Redirect of external URL:
+
+operation::persons-avatar-success[snippets='http-response']
+
+[[profile]]
+== Profile - /profile
+
+[[profile-get]]
+=== GET /profile
+
+Fetch Profile of own user
+
+operation::profile-success[snippets='curl-request,http-response,response-fields']
+
+[[profile-patch]]
+=== PATCH /profile
+
+Update Profile of own user: Name and avatarUrl can be changed
+
+operation::profile-change-success[snippets='curl-request,request-fields,http-response']
+
+[[profile-post]]
+=== POST /profile
+
+Update Avatar with a new file
+
+operation::profile-upload-avatar-success[snippets='curl-request,http-response']
+
+= Multimedia Management
 
 [[albums]]
 == Albums
-
-=== Create new Album - POST /albums
-
-operation::albums-create[snippets='curl-request,http-response,response-fields']
 
 === GET /albums/own - All my Albums
 
 operation::albums-own[snippets='curl-request,http-response,response-fields']
 
+=== Create new Album - POST /albums
+
+operation::albums-create[snippets='curl-request,request-fields,http-response']
+
 === GET /albums/shared - All Albums shared with me
 
-operation::albums-shared[snippets='curl-request,http-response,response-fields']
+operation::albums-shared[snippets='curl-request,http-response']
 
 === GET /albums/:id
 
-operation::albums-one[snippets='curl-request,http-response,response-fields']
+operation::albums-one[snippets='curl-request,http-response']
 
 == Multimedias
+
+=== GET /multimedias/own - All my Multimedia
+
+operation::multimedias-own[snippets='curl-request,http-response,response-fields']
 
 === Create & upload new Multimedia - POST /multimedias
 
 File Content must be provided as a MultiPart file in the "form-data" body.
 ReceiverId and SenderId can be provided as URL request param or also as fields.
 
-operation::multimedias-create[snippets='curl-request,http-response,response-fields']
-
-=== GET /multimedias/own - All my Multimedia
-
-operation::multimedias-own[snippets='curl-request,http-response,response-fields']
+operation::multimedias-create[snippets='curl-request,request-parameters,http-response']
 
 === GET /multimedias/:id
 
-operation::multimedias-one[snippets='curl-request,http-response,response-fields']
+operation::multimedias-one[snippets='curl-request,http-response']
 
 === GET /multimedias/:id/file
 
@@ -249,39 +299,39 @@ operation::multimedias-get-file[snippets='curl-request,http-response']
 
 === POST /multimedias/:id/file
 
-operation::multimedias-update-file[snippets='curl-request,http-response,response-fields']
+operation::multimedias-update-file[snippets='curl-request,http-response']
 
 = Sendables
 
 All Sendables behave similar and share a big amount of code.
-See the first example of Sendable endpoints used on Message for further informatio.
+See the first example of Sendable endpoints used on Message for further information.
 
 [[messages]]
 == Messages
 
 === Create new Message - POST /messages
 
-operation::messages-create[snippets='curl-request,http-response,response-fields']
+operation::messages-create[snippets='curl-request,request-parameters,http-response,response-fields']
 
 === Filter Messages - GET /messages/filter?receiverId=<UUID>&senderId=<UUID>
 
-operation::messages-filter[snippets='curl-request,http-response,response-fields']
+operation::messages-filter[snippets='curl-request,http-response']
 
 === GET /messages/received - All my retrieved
 
-operation::messages-received[snippets='curl-request,http-response,response-fields']
+operation::messages-received[snippets='curl-request,http-response']
 
 === GET /messages/sent - All my sent
 
-operation::messages-sent[snippets='curl-request,http-response,response-fields']
+operation::messages-sent[snippets='curl-request,http-response']
 
 === GET /messages/:id
 
-operation::messages-one[snippets='curl-request,http-response,response-fields']
+operation::messages-one[snippets='curl-request,http-response']
 
 === PATCH /messages/:id/set-retrieved - Set Message as "retrieved"
 
-operation::messages-set-retrieved[snippets='curl-request,http-response,response-fields']
+operation::messages-set-retrieved[snippets='curl-request,http-response']
 
 
 [[calls]]
@@ -294,48 +344,48 @@ ReceiverId and SenderId can be provided as URL request param or also as fields.
 
 *Note*: The kind-of-secret JWT Jitsi token is only set by create, get-one, and accept.
 
-operation::calls-create[snippets='curl-request,http-response,response-fields']
+operation::calls-create[snippets='curl-request,request-parameters,http-response,response-fields']
 
 === Filter calls - GET /calls/filter?receiverId=<UUID>&senderId=<UUID>
 
-operation::calls-filter[snippets='curl-request,http-response,response-fields']
+operation::calls-filter[snippets='curl-request,http-response']
 
 === GET /calls/received - All my retrieved Calls
 
-operation::calls-received[snippets='curl-request,http-response,response-fields']
+operation::calls-received[snippets='curl-request,http-response']
 
 === GET /calls/sent - All my started Calls
 
-operation::calls-sent[snippets='curl-request,http-response,response-fields']
+operation::calls-sent[snippets='curl-request,http-response']
 
 === GET /calls/:id
 
 *Note*: The kind-of-secret JWT Jitsi token is only set by create, get-one, and accept.
 
-operation::calls-one[snippets='curl-request,http-response,response-fields']
+operation::calls-one[snippets='curl-request,http-response']
 
 === PATCH /calls/:id/accept - Accept a call
 
 Can be called by callee to accept an incoming call.
 *Note*: The kind-of-secret JWT Jitsi token is only set by create, get-one, and accept.
 
-operation::calls-accept[snippets='curl-request,http-response,response-fields']
+operation::calls-accept[snippets='curl-request,http-response']
 
 === PATCH /calls/:id/cancel - Cancel an outgoing own call
 
 Can be called by caller to cancel an outgoing own call.
 
-operation::calls-cancel[snippets='curl-request,http-response,response-fields']
+operation::calls-cancel[snippets='curl-request,http-response']
 
 === PATCH /calls/:id/deny - Denies an incoming call
 
 Can be called by callee to deny an incoming call.
 
-operation::calls-deny[snippets='curl-request,http-response,response-fields']
+operation::calls-deny[snippets='curl-request,http-response']
 
 === PATCH /calls/:id/finish - Finishes an incoming/outgoing call
 
 Can be called by both parties to finish a running call.
 
-operation::calls-finish[snippets='curl-request,http-response,response-fields']
+operation::calls-finish[snippets='curl-request,http-response']
 

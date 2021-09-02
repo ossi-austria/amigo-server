@@ -9,6 +9,7 @@ import java.util.*
 internal interface PersonRepository : CrudRepository<Person, UUID> {
     fun findByName(name: String): Person?
     fun findByGroupId(id: UUID): List<Person>
+    fun findByGroupIdAndId(groupId: UUID, id: UUID): Person?
     fun findByAccountId(id: UUID): List<Person>
 
 }

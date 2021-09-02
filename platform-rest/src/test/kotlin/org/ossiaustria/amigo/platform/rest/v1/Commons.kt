@@ -27,6 +27,7 @@ internal fun personFields(prefix: String = ""): MutableList<FieldDescriptor> {
         field(prefix + "name", STRING, "Fullname of this Person").optional(),
         field(prefix + "groupId", STRING, "References the Group").optional(),
         field(prefix + "memberType", STRING, "MemberType: can be ADMIN, MEMBER, ANALOGE").optional(),
+        field(prefix + "avatarUrl", STRING, "Optional URL of avatar image").optional(),
     )
 }
 
