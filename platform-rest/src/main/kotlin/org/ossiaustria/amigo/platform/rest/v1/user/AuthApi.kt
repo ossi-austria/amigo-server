@@ -1,4 +1,4 @@
-package org.ossiaustria.amigo.platform.rest.v1.auth
+package org.ossiaustria.amigo.platform.rest.v1.user
 
 
 import org.ossiaustria.amigo.platform.domain.services.auth.AuthService
@@ -9,7 +9,7 @@ import javax.validation.constraints.NotEmpty
 
 @RestController
 @RequestMapping("/v1/auth", produces = ["application/json"], consumes = ["application/json"])
-class AuthController(
+class AuthApi(
     val authService: AuthService,
     val currentUserService: CurrentUserService
 ) {

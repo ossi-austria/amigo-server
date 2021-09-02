@@ -1,4 +1,4 @@
-package org.ossiaustria.amigo.platform.rest.v1.auth
+package org.ossiaustria.amigo.platform.rest.v1.user
 
 import org.ossiaustria.amigo.platform.domain.services.auth.PasswordService
 import org.springframework.http.HttpStatus
@@ -7,7 +7,7 @@ import java.util.*
 
 @RestController
 @RequestMapping("/v1/auth/password", produces = ["application/json"], consumes = ["application/json"])
-class PasswordController(
+class PasswordApi(
     private val passwordService: PasswordService
 ) {
     @PostMapping("/reset")

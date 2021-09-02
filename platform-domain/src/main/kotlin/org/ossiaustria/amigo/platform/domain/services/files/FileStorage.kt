@@ -1,27 +1,69 @@
 package org.ossiaustria.amigo.platform.domain.services.files
 
-import org.ossiaustria.amigo.platform.domain.models.Multimedia
-import org.ossiaustria.amigo.platform.domain.services.ServiceError
 import org.springframework.core.io.Resource
+import org.springframework.core.io.UrlResource
 import org.springframework.web.multipart.MultipartFile
-import java.net.URI
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
+import java.util.*
 
-interface FileStorage {
+abstract class FileStorage {
 
-    fun saveFile(multimedia: Multimedia, multipartFile: MultipartFile, overwrite: Boolean = false): FileInfo
-    fun loadFile(multimedia: Multimedia): Resource
-    fun deleteFile(multimedia: Multimedia): Boolean
-    fun getUrl(multimedia: Multimedia): URI
+    protected val root: Path = Paths.get(ROOT_PATH)
+
+    init {
+        try {
+            ensureFolderExists(root)
+        } catch (e: IOException) {
+            throw Error("Could not initialize folder for upload!")
+        }
+    }
+
+    protected fun getFileInfo(
+        multimediaPath: Path,
+        overwrite: Boolean,
+        multipartFile: MultipartFile
+    ): FileInfo {
+        val exists = Files.isReadable(multimediaPath)
+        val writable = Files.isWritable(multimediaPath)
+        if (!overwrite && exists) {
+            throw FileStorageError.FileAlreadyExists(multimediaPath)
+        } else if (overwrite && exists && !writable) {
+            throw FileStorageError.FileNotOverwritable(multimediaPath)
+        } else {
+            if (exists) {
+                Files.delete(multimediaPath)
+            }
+            Files.copy(multipartFile.inputStream, multimediaPath)
+            val file = File(multimediaPath.toUri())
+            return FileInfo(size = file.length(), absolutePath = file.absolutePath)
+        }
+    }
+
+    protected fun loadResource(multimediaPath: Path): Resource {
+        val exists = Files.isReadable(multimediaPath)
+
+        if (!exists) {
+            throw FileStorageError.FileNotFound(multimediaPath)
+        }
+
+        val resource: Resource = UrlResource(multimediaPath.toUri())
+        return if (resource.exists() || resource.isReadable) resource
+        else throw RuntimeException("Could not read the file!")
+    }
+
+    protected fun ensureFolderExists(path: Path) {
+        if (!Files.isDirectory(path)) Files.createDirectory(path)
+        if (!Files.isDirectory(path)) throw FileNotFoundException("Cannot use path as directory: $path")
+    }
+
+    protected fun getOwnerPath(ownerId: UUID) = Paths.get(ROOT_PATH, ownerId.toString())
+
+    companion object {
+        const val ROOT_PATH = "files"
+    }
 }
-
-sealed class FileStorageError(errorName: String, message: String) : ServiceError(errorName, message, null) {
-    class FileAlreadyExists(path: Path) : FileStorageError("FILE_ALREADY_EXISTS", "FileAlreadyExists: $path")
-    class FileNotOverwritable(path: Path) : FileStorageError("FILE_NOT_OVERWRITABLE", "FileNotOverwritable: $path")
-    class FileNotFound(path: Path) : FileStorageError("FILE_NOT_FOUND", "$path")
-}
-
-data class FileInfo(
-    val size: Long,
-    val absolutePath: String
-)

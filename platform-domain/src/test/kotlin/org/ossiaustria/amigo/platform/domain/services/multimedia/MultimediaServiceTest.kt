@@ -12,7 +12,7 @@ import org.ossiaustria.amigo.platform.domain.models.enums.MultimediaType
 import org.ossiaustria.amigo.platform.domain.repositories.AlbumRepository
 import org.ossiaustria.amigo.platform.domain.repositories.MultimediaRepository
 import org.ossiaustria.amigo.platform.domain.services.AbstractServiceTest
-import org.ossiaustria.amigo.platform.domain.services.files.DiskFileStorage
+import org.ossiaustria.amigo.platform.domain.services.files.DiskMultimediaFileStorage
 import org.ossiaustria.amigo.platform.domain.services.files.FileInfo
 import org.ossiaustria.amigo.platform.domain.services.files.FileStorageError
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,7 +22,7 @@ import java.util.UUID.randomUUID
 internal class MultimediaServiceTest : AbstractServiceTest() {
 
     @SpykBean
-    lateinit var fileStorage: DiskFileStorage
+    lateinit var fileStorage: DiskMultimediaFileStorage
 
     @Autowired
     lateinit var service: MultimediaService

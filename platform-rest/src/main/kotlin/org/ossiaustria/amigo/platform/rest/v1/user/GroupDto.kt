@@ -1,9 +1,7 @@
-package org.ossiaustria.amigo.platform.rest.v1.groups
+package org.ossiaustria.amigo.platform.rest.v1.user
 
 import org.ossiaustria.amigo.platform.domain.models.Group
 import org.ossiaustria.amigo.platform.domain.models.Person
-import org.ossiaustria.amigo.platform.rest.v1.auth.PersonDto
-import org.ossiaustria.amigo.platform.rest.v1.auth.toDto
 import java.util.*
 
 data class GroupDto(

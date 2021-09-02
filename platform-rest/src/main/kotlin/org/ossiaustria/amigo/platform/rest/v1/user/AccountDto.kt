@@ -1,4 +1,4 @@
-package org.ossiaustria.amigo.platform.rest.v1.auth
+package org.ossiaustria.amigo.platform.rest.v1.user
 
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Person

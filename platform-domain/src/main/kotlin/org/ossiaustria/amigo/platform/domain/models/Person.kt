@@ -31,6 +31,7 @@ data class Person(
     @Enumerated(EnumType.STRING)
     val memberType: MembershipType = MembershipType.MEMBER,
 
+    val avatarUrl: String? = null
     ) {
 
     override fun toString(): String {

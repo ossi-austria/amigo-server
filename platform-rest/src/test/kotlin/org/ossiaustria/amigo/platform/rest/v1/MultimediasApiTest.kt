@@ -122,9 +122,7 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
     fun `getOne should return Multimedia visible by current user`() {
         val msgId = randomUUID()
 
-        every { multimediaService.getOne(msgId) } returns Mocks.multimedia(
-            id = msgId, ownerId = person1Id,
-        )
+        every { multimediaService.getOne(msgId) } returns Mocks.multimedia(id = msgId, ownerId = person1Id)
 
         val result: MultimediaDto = this.performGet("$baseUrl/$msgId", accessToken.token)
             .expectOk()
@@ -139,9 +137,7 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
     fun `download file should return Multimedia's file`() {
         val msgId = randomUUID()
 
-        every { multimediaService.getOne(msgId) } returns Mocks.multimedia(
-            id = msgId, ownerId = person1Id,
-        )
+        every { multimediaService.getOne(msgId) } returns Mocks.multimedia(id = msgId, ownerId = person1Id)
 
         every { multimediaService.loadFile(any()) } returns
                 ClassPathResource("classpath:application-test.xml")
@@ -157,6 +153,4 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
     fun `getOne needs authentication`() {
         this.performGet("$baseUrl/${randomUUID()}").expectUnauthorized()
     }
-
-
 }

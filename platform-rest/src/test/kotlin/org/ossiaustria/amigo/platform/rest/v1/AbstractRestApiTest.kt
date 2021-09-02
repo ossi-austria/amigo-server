@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.ossiaustria.amigo.platform.domain.config.ApplicationProfiles
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Group
+import org.ossiaustria.amigo.platform.domain.models.Person
 import org.ossiaustria.amigo.platform.domain.services.AccountService
 import org.ossiaustria.amigo.platform.domain.services.auth.JwtService
 import org.ossiaustria.amigo.platform.domain.services.auth.TokenResult
@@ -68,6 +69,8 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
     protected lateinit var refreshToken: TokenResult
     protected lateinit var person1Id: UUID
     protected lateinit var person2Id: UUID
+    protected lateinit var person1: Person
+    protected lateinit var person2: Person
 
     protected fun defaultAcceptContentAuth(
         builder: MockHttpServletRequestBuilder,
@@ -102,8 +105,10 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
 //        every { currentUserService.person() } answers { personRepository.findAll().first() }
         every { currentUserService.account() } answers { account }
 
-        person1Id = account.person().id
-        person2Id = accountSubjectPreparationTrait.subject2.id
+        person1 = account.person()
+        person1Id = person1.id
+        person2 = accountSubjectPreparationTrait.person2
+        person2Id = person2.id
     }
 
 

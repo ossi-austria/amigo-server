@@ -1,4 +1,4 @@
-package org.ossiaustria.amigo.platform.rest.v1.groups
+package org.ossiaustria.amigo.platform.rest.v1.user
 
 
 import io.micrometer.core.annotation.Timed
@@ -12,7 +12,7 @@ import java.util.*
 @Timed(value = "time.api.groups")
 @RestController
 @RequestMapping("/v1/groups", produces = ["application/json"], consumes = ["application/json"])
-class GroupsController(
+class GroupsApi(
     val groupsService: GroupService,
     val currentUserService: CurrentUserService
 ) {
