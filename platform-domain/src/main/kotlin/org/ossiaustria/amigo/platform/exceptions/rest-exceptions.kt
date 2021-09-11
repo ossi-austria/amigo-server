@@ -30,33 +30,43 @@ enum class ErrorCode(val errorCode: Int, val errorName: String) {
     CallChangeNotReceiverError(3002, "Call can just be manipulated by receiver for this request"),
 }
 
-@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Operation cannot be executed due to malformed input or invalid states.")
+@ResponseStatus(
+    code = HttpStatus.BAD_REQUEST,
+    reason = "Operation cannot be executed due to malformed input or invalid states."
+)
 open class RestException(
     val errorCode: Int,
     val errorName: String,
     detailMessage: String? = null,
-    cause: Throwable? = null) : RuntimeException(detailMessage, cause) {
+    cause: Throwable? = null
+) : RuntimeException(detailMessage, cause) {
 
     constructor(errorCode: ErrorCode) : this(errorCode.errorCode, errorCode.errorName)
-    constructor(errorCode: ErrorCode, detailMessage: String) : this(errorCode.errorCode, errorCode.errorName, detailMessage)
+    constructor(errorCode: ErrorCode, detailMessage: String) : this(
+        errorCode.errorCode,
+        errorCode.errorName,
+        detailMessage
+    )
 }
 
-@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Operation cannot be executed due to malformed input or invalid states.")
-class ValidationException(val validationErrors: Array<FieldError?>) : RestException(ErrorCode.ValidationFailed, validationErrors.joinToString("\n") { it.toString() })
+@ResponseStatus(
+    code = HttpStatus.BAD_REQUEST,
+    reason = "Operation cannot be executed due to malformed input or invalid states."
+)
+class ValidationException(val validationErrors: Array<FieldError?>) :
+    RestException(ErrorCode.ValidationFailed, validationErrors.joinToString("\n") { it.toString() })
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Cannot create entity due to a bad request")
 class BadRequestException(errorCode: ErrorCode, detailMessage: String) : RestException(errorCode, detailMessage)
 
 @ResponseStatus(code = HttpStatus.UNAUTHORIZED, reason = "Unauthorized")
 class UnauthorizedException(message: String? = null) : RestException(
-    ErrorCode.Unauthorized, message
-        ?: "Unauthorized"
+    ErrorCode.Unauthorized, message ?: "Unauthorized"
 )
 
 @ResponseStatus(code = HttpStatus.FORBIDDEN, reason = "Authorized, but forbidden")
 class ForbiddenException(message: String? = null) : RestException(
-    ErrorCode.Forbidden, message
-        ?: "Forbidden"
+    ErrorCode.Forbidden, message ?: "Forbidden"
 )
 
 @ResponseStatus(
@@ -82,15 +92,16 @@ class ForbiddenContentException(errorCode: ErrorCode, message: String) : RestExc
 class ConflictException(errorCode: ErrorCode, message: String) : RestException(errorCode, message)
 
 @ResponseStatus(code = HttpStatus.CONFLICT, reason = "The state of internal db is inconsistent")
-class UserAlreadyExistsException(username: String, email: String) : RestException(ErrorCode.UserCreationFailedEmailOrUsernameUsed, "'$username' or '$email' is already in use!")
+class UserAlreadyExistsException(username: String, email: String) :
+    RestException(ErrorCode.UserCreationFailedEmailOrUsernameUsed, "'$username' or '$email' is already in use!")
 
 @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "User not found")
-open class UnknownUserException(message: String? = null)
-    : NotFoundException(ErrorCode.UserNotExisting, message ?: "User is unknown and does not exist")
+open class UnknownUserException(message: String? = null) :
+    NotFoundException(ErrorCode.UserNotExisting, message ?: "User is unknown and does not exist")
 
 @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "User not found")
-open class UserNotFoundException(message: String = "User is unknown and or not exist")
-    : NotFoundException(ErrorCode.UserNotExisting, message)
+open class UserNotFoundException(message: String = "User is unknown and or not exist") :
+    NotFoundException(ErrorCode.UserNotExisting, message)
 
 @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Entity not found")
 class DefaultNotFoundException(message: String = "Entity does not exist") :

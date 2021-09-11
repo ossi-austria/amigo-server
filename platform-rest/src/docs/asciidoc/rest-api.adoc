@@ -190,6 +190,46 @@ A Group can contain at max 1 ANALOGUE Person.
 
 operation::groups-my-success[snippets='http-response,response-fields']
 
+[[groups-create]]
+=== POST /groups/
+
+Creator is automatically the OWNER of the new Group.
+Owner cannot be removed or lose privileges
+
+operation::groups-create[snippets='curl-request,request-fields,http-response']
+
+[[groups-change]]
+=== PATCH /groups/:id
+
+*Name* of Group can be changed
+
+operation::groups-change[snippets='curl-request,request-fields,http-response']
+
+[[groups-member-add]]
+=== POST /groups/:id/members
+
+*Email* is used to find an existing Account and create a new Person in this Group.
+*Name* and *MembershipType* must be initialised
+
+operation::groups-member-add[snippets='curl-request,request-fields,http-response']
+
+[[groups-member-change]]
+=== PATCH /groups/:id/members/:personId
+
+Change privilege of a member.
+
+*Attention:* OWNERS cannot be decreased in privilege.
+
+operation::groups-member-change[snippets='curl-request,request-fields,http-response']
+
+[[groups-member-remove]]
+=== DELETE /groups/:id/members/:personId
+
+Delete a non-OWNER of a Group.
+Note: This endpoint might change to not return a result
+
+operation::groups-member-remove[snippets='curl-request,http-response']
+
 [[groups-my]]
 === GET /groups/my
 
@@ -332,7 +372,6 @@ operation::messages-one[snippets='curl-request,http-response']
 === PATCH /messages/:id/set-retrieved - Set Message as "retrieved"
 
 operation::messages-set-retrieved[snippets='curl-request,http-response']
-
 
 [[calls]]
 == Calls

@@ -9,6 +9,7 @@ import org.ossiaustria.amigo.platform.rest.CurrentUserService
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import java.util.*
 
 @Timed(value = "time.api.profile")
 @RestController
@@ -29,9 +30,10 @@ class PersonProfileApi(
     fun updateProfile(
         account: Account,
         @RequestBody changePersonDto: ChangePersonDto,
+        @RequestParam(required = false) personId: UUID? = null
     ): PersonDto =
         personService
-            .changeNameAndAvatarUrl(account.person(), changePersonDto.name, changePersonDto.avatarUrl)
+            .changeNameAndAvatarUrl(account.person(personId), changePersonDto.name, changePersonDto.avatarUrl)
             .toDto()
 
 
