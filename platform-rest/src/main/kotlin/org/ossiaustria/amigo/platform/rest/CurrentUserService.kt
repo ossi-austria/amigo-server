@@ -1,7 +1,6 @@
 package org.ossiaustria.amigo.platform.rest
 
 import org.ossiaustria.amigo.platform.domain.models.Account
-import org.ossiaustria.amigo.platform.domain.models.Person
 import org.ossiaustria.amigo.platform.domain.services.AccountService
 import org.ossiaustria.amigo.platform.domain.services.PersonService
 import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Component
 interface CurrentUserService {
     fun authentication(): Authentication
     fun authenticationOrNull(): Authentication?
-    fun person(): Person
+//    fun person(): Person
     fun account(): Account
 }
 
@@ -31,11 +30,11 @@ class SimpleCurrentUserService(
         return SecurityContextHolder.getContext().authentication
     }
 
-    override fun person(): Person {
-        val tokenUserDetails: TokenUserDetails = authentication().principal as TokenUserDetails
-        return personService.findById(tokenUserDetails.personsIds.first())
-            ?: throw UserNotFoundException()
-    }
+//    override fun person(): Person {
+//        val tokenUserDetails: TokenUserDetails = authentication().principal as TokenUserDetails
+//        return personService.findById(tokenUserDetails.personsIds.first())
+//            ?: throw UserNotFoundException()
+//    }
 
     override fun account(): Account {
         val tokenUserDetails: TokenUserDetails = authentication().principal as TokenUserDetails

@@ -5,6 +5,7 @@ package org.ossiaustria.amigo.platform.domain.models
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
+import org.ossiaustria.amigo.platform.domain.services.ServiceError
 import java.util.*
 import javax.persistence.*
 
@@ -23,27 +24,30 @@ data class Group(
 
     @Fetch(FetchMode.SUBSELECT)
     @OneToMany(mappedBy = "groupId", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val members: MutableList<Person> = mutableListOf()
+    val members: List<Person> = mutableListOf()
 
 ) {
 
-    @Transient
-    val analogue: Person? =
+    fun analogue(): Person? =
         members.firstOrNull { it.memberType == MembershipType.ANALOGUE }
 
-    @Transient
-    val owner: Person? =
+    fun owner(): Person =
         members.firstOrNull { it.memberType == MembershipType.OWNER }
+            ?: throw ServiceError("Group without Owner", "Every group needs an Owner")
 
-    @Transient
-    val admins: List<Person> =
+    fun admins(): List<Person> =
         members.filter { it.memberType == MembershipType.ADMIN }
 
-    fun add(person: Person): Group = apply {
-        this.members.plusAssign(person.copy(groupId = this.id))
-    }
+    fun add(person: Person): Group =
+        copy(members = this.members.toMutableList().also { it.add(person.copy(groupId = id)) })
 
-    fun addAll(persons: List<Person>): Group = apply {
-        persons.forEach { this.add(it) }
-    }
+    fun removeMember(member: Person): Group = copy(members = members.filter { it.id != member.id })
+
+    fun findAdmin(account: Account) =
+        members.firstOrNull { it.accountId == account.id && it.memberType.isAtLeast(MembershipType.ADMIN) }
+
+    fun findMember(account: Account) = members.firstOrNull { it.accountId == account.id }
+    fun findMember(personId: UUID) = members.firstOrNull { it.id == personId }
+    fun findMember(person: Person) = findMember(person.id)
+
 }

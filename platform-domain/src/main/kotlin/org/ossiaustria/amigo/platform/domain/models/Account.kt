@@ -2,6 +2,7 @@ package org.ossiaustria.amigo.platform.domain.models
 
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
+import org.ossiaustria.amigo.platform.domain.services.sendables.SendableError
 import java.time.ZonedDateTime
 import java.util.*
 import javax.persistence.*
@@ -40,7 +41,11 @@ data class Account(
     val fcmToken: String? = null,
 ) {
 
-    fun person() = persons.first()
+    fun person(personId: UUID? = null): Person = if (personId != null) {
+        this.persons.find { it.id == personId } ?: throw SendableError.PersonsNotInSameGroup()
+    } else {
+        persons.first()
+    }
 
     fun hasPersonId(personId: UUID?): Boolean = this.persons.map { it.id }.contains(personId)
 

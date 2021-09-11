@@ -3,16 +3,17 @@ package org.ossiaustria.amigo.platform.rest.v1
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Group
 import org.ossiaustria.amigo.platform.domain.models.Person
+import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import org.ossiaustria.amigo.platform.domain.services.AccountService
 import org.ossiaustria.amigo.platform.domain.services.GroupService
+import org.ossiaustria.amigo.platform.domain.services.PersonService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import java.util.UUID.randomUUID
 
 @Component
 internal class AccountSubjectPreparationTrait {
 
-    lateinit var group: Group
+    var group: Group? = null
     lateinit var account: Account
     lateinit var account2: Account
     lateinit var person: Person
@@ -22,23 +23,23 @@ internal class AccountSubjectPreparationTrait {
     protected lateinit var groupService: GroupService
 
     @Autowired
+    protected lateinit var personService: PersonService
+
+    @Autowired
     protected lateinit var accountService: AccountService
 
     fun apply() {
-        group = createMockGroup()
         account = createMockAccount()
+        group = createMockGroup(account)
+        account = accountService.findOneByEmail(account.email)!! // has to be reloaded
         account2 = createMockAccount(userOverrideSuffix = "0002")
         person = account.persons.first()
         person2 = account2.persons.first()
     }
 
-
-    fun createMockGroup(): Group {
+    fun createMockGroup(account: Account): Group {
         groupInvocations++
-        val group = groupService.create(
-            randomUUID(), "Group-$groupInvocations"
-        )
-        return groupService.update(group)
+        return groupService.createGroup(account, "Group-$groupInvocations")
     }
 
     fun createMockAccount(
@@ -48,14 +49,19 @@ internal class AccountSubjectPreparationTrait {
         accountInvocations++
         val userSuffix = "-$accountInvocations$userOverrideSuffix"
 
-        val account = accountService.createAccountAndPerson(
-            email = "email$userSuffix@example.com",
-            plainPassword = plainPassword,
-            group = group,
-            fullName = "user name $userSuffix"
-        )
+        val nextAccout = accountService.createAccount("email$userSuffix@example.com", plainPassword)
 
-        return accountService.findOneByEmail(account.email)!!
+        group?.let {
+            groupService.addMember(
+                group!!.owner(),
+                group!!,
+                nextAccout.email,
+                "user name $userSuffix",
+                MembershipType.ADMIN
+            )
+        }
+
+        return accountService.findOneByEmail(nextAccout.email)!!
     }
 
     companion object {

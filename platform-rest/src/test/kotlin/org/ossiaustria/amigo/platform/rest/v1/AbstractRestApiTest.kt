@@ -65,6 +65,7 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
 
     protected lateinit var accessToken: TokenResult
     protected lateinit var account: Account
+    protected lateinit var account2: Account
     protected lateinit var group: Group
     protected lateinit var refreshToken: TokenResult
     protected lateinit var person1Id: UUID
@@ -101,8 +102,8 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
 
         accountSubjectPreparationTrait.apply()
         account = accountSubjectPreparationTrait.account
-        group = accountSubjectPreparationTrait.group
-//        every { currentUserService.person() } answers { personRepository.findAll().first() }
+        account2 = accountSubjectPreparationTrait.account2
+        group = accountSubjectPreparationTrait.group!!
         every { currentUserService.account() } answers { account }
 
         person1 = account.person()
@@ -140,7 +141,7 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
 
     @Transactional
     fun createMockGroup(): Group {
-        return accountSubjectPreparationTrait.createMockGroup()
+        return accountSubjectPreparationTrait.createMockGroup(account)
     }
 
     fun ResultActions.document(name: String, vararg snippets: Snippet): ResultActions {
