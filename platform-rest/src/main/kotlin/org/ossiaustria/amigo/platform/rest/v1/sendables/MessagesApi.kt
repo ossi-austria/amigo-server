@@ -2,7 +2,6 @@ package org.ossiaustria.amigo.platform.rest.v1.sendables
 
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Message
-import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.ossiaustria.amigo.platform.domain.services.multimedia.MultimediaService
 import org.ossiaustria.amigo.platform.domain.services.sendables.MessageService
 import org.springframework.http.MediaType
@@ -19,6 +18,9 @@ internal class MessagesApi(
 
     private val serviceWrapper = SendableApiWrapper(messageService)
 
+    private fun withPersonId(account: Account, personId: UUID? = null) =
+        account.person(personId).id
+
     @PostMapping(
         "", consumes = [
             MediaType.IMAGE_GIF_VALUE,
@@ -28,12 +30,13 @@ internal class MessagesApi(
             MediaType.MULTIPART_FORM_DATA_VALUE]
     )
     fun createMultimediaMessage(
-        @RequestParam(value = "senderId") senderId: UUID,
         @RequestParam(value = "receiverId") receiverId: UUID,
         @RequestPart("text") text: String,
         @RequestPart("file", required = false) file: MultipartFile? = null,
+        @RequestHeader("Amigo-Person-Id",required = false) personId: UUID? = null,
+        account: Account,
     ): MultiMessageDto {
-//        return MultimediaDto(randomUUID(),randomUUID(),randomUUID(),randomUUID(), "file", "MultimediaType.IMAGE")
+        val senderId = account.person(personId).id
         val multimedia = file?.let {
             multimediaService.createMultimedia(senderId, null, System.currentTimeMillis().toString(), it)
         }
@@ -45,6 +48,14 @@ internal class MessagesApi(
      * The following typical CRUD use cases are all handled by SendableApiWrapper for all Sendables
      */
 
+    @GetMapping("/all")
+    fun getOwn(
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        account: Account,
+    ) =
+        serviceWrapper.getOwn(withPersonId(account, personId)).map(Message::toDto)
+
+
     @GetMapping("/filter")
     fun getFiltered(
         @RequestParam(value = "receiverId", required = false) receiverId: UUID?,
@@ -53,21 +64,37 @@ internal class MessagesApi(
     ) = serviceWrapper.getFiltered(receiverId, senderId, account).map(Message::toDto)
 
     @GetMapping("/received")
-    fun getReceived(tokenUserDetails: TokenUserDetails) =
-        serviceWrapper.getReceived(tokenUserDetails).map(Message::toDto)
+    fun getReceived(
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        account: Account,
+    ) = withPersonId(account, personId).let {
+        serviceWrapper.getReceived(it).map(Message::toDto)
+    }
 
     @GetMapping("/sent")
-    fun getSent(tokenUserDetails: TokenUserDetails) =
-        serviceWrapper.getSent(tokenUserDetails).map(Message::toDto)
+    fun getSent(
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        account: Account,
+    ) = withPersonId(account, personId).let {
+        serviceWrapper.getSent(it).map(Message::toDto)
+    }
+
 
     @GetMapping("/{id}")
     fun getOne(
-        tokenUserDetails: TokenUserDetails,
         @PathVariable(value = "id") id: UUID,
-    ) = serviceWrapper.getOne(tokenUserDetails, id).toMultimediaDto()
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        account: Account,
+    ) = withPersonId(account, personId).let {
+        serviceWrapper.getOne(it, id).toMultimediaDto()
+    }
 
     @PatchMapping("/{id}/set-retrieved")
-    fun markAsRetrieved(tokenUserDetails: TokenUserDetails, @PathVariable(value = "id") id: UUID) =
-        serviceWrapper.markAsRetrieved(tokenUserDetails, id).toMultimediaDto()
+    fun markAsRetrieved(
+        @PathVariable(value = "id") id: UUID,
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        account: Account,
+    ) =
+        serviceWrapper.markAsRetrieved(withPersonId(account, personId), id).toMultimediaDto()
 
 }

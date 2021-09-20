@@ -2,6 +2,7 @@ package org.ossiaustria.amigo.platform.rest.v1.user
 
 
 import io.micrometer.core.annotation.Timed
+import io.swagger.annotations.ApiOperation
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.services.PersonService
 import org.ossiaustria.amigo.platform.exceptions.UserNotFoundException
@@ -19,24 +20,30 @@ class PersonProfileApi(
     val currentUserService: CurrentUserService
 ) {
 
+    @ApiOperation("Get own Person information (=Profile) for primary or given personId")
     @GetMapping
-    fun myProfile(account: Account): PersonDto =
+    fun myProfile(
+        account: Account,
+        @RequestHeader("Amigo-Person-Id",required = false) personId: UUID? = null
+    ): PersonDto =
         personService
-            .findById(account.person().id)
+            .findById(account.person(personId).id)
             .orThrow(UserNotFoundException())
             .toDto()
 
+    @ApiOperation("Update Profile for primary or given personId")
     @PatchMapping
     fun updateProfile(
         account: Account,
         @RequestBody changePersonDto: ChangePersonDto,
-        @RequestParam(required = false) personId: UUID? = null
+        @RequestHeader("Amigo-Person-Id",required = false) personId: UUID? = null
     ): PersonDto =
         personService
             .changeNameAndAvatarUrl(account.person(personId), changePersonDto.name, changePersonDto.avatarUrl)
             .toDto()
 
 
+    @ApiOperation("Upload Profile's avatar for primary or given personId")
     @PostMapping(
         "/avatar",
         consumes = [
@@ -48,10 +55,11 @@ class PersonProfileApi(
     )
     fun uploadAvatar(
         account: Account,
-        @RequestPart("file") file: MultipartFile
+        @RequestPart("file") file: MultipartFile,
+        @RequestPart("personId", required = false) personId: UUID? = null
     ): PersonDto =
         personService
-            .uploadAvatar(account.person(), file)
+            .uploadAvatar(account.person(personId), file)
             .toDto()
 
 }

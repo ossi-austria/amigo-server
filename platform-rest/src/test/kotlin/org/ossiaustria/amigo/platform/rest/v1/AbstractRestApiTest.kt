@@ -27,6 +27,7 @@ import org.springframework.restdocs.operation.preprocess.Preprocessors.removeHea
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
+import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import org.springframework.restdocs.snippet.Snippet
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity
 import org.springframework.test.annotation.DirtiesContext
@@ -73,12 +74,7 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
     protected lateinit var person1: Person
     protected lateinit var person2: Person
 
-    protected fun defaultAcceptContentAuth(
-        builder: MockHttpServletRequestBuilder,
-        token: String
-    ): MockHttpServletRequestBuilder {
-        return this.acceptContentAuth(builder, token)
-    }
+
 
 
     @BeforeEach
@@ -106,7 +102,7 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
         group = accountSubjectPreparationTrait.group!!
         every { currentUserService.account() } answers { account }
 
-        person1 = account.person()
+        person1 = account.primaryPerson()
         person1Id = person1.id
         person2 = accountSubjectPreparationTrait.person2
         person2Id = person2.id
@@ -156,4 +152,8 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
             fieldWithPath("time").type(JsonFieldType.STRING).description("Timestamp of error")
         )
     }
+
+    protected fun optionalPersonId() = listOf(
+        parameterWithName("personId").description("UUID of own Person to this request").optional(),
+    )
 }

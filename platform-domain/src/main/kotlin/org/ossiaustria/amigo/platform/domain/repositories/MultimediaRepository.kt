@@ -8,4 +8,5 @@ import java.util.*
 @Repository
 internal interface MultimediaRepository : CrudRepository<Multimedia, UUID> {
     fun findAllByOwnerIdOrderByCreatedAt(id: UUID): List<Multimedia>
+    fun findAllByAlbumIdIn(ids: List<UUID>): List<Multimedia>
 }

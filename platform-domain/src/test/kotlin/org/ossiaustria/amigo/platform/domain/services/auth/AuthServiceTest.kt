@@ -5,11 +5,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.ossiaustria.amigo.platform.domain.models.Account
-import org.ossiaustria.amigo.platform.domain.models.ValidationException
 import org.ossiaustria.amigo.platform.domain.repositories.AccountRepository
 import org.ossiaustria.amigo.platform.domain.services.AbstractServiceTest
 import org.ossiaustria.amigo.platform.exceptions.UnauthorizedException
 import org.ossiaustria.amigo.platform.exceptions.UserAlreadyExistsException
+import org.ossiaustria.amigo.platform.exceptions.ValidationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import java.util.UUID.randomUUID
@@ -119,8 +119,8 @@ internal class AuthServiceTest : AbstractServiceTest() {
     fun `registerUser should create a person for the new account`() {
         val result: Account = service.registerUser("user@example.org", "password", "Username")
         assertThat(result).isNotNull
-        assertThat(result.person()).isNotNull
-        assertThat(result.person().name).isNotNull
-        assertThat(result.person().name).isEqualTo("Username")
+        assertThat(result.primaryPerson()).isNotNull
+        assertThat(result.primaryPerson().name).isNotNull
+        assertThat(result.primaryPerson().name).isEqualTo("Username")
     }
 }

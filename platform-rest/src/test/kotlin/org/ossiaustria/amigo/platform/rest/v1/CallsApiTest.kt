@@ -55,13 +55,13 @@ internal class CallsApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `createCall should return calls via receiverId`() {
 
-        val senderId = randomUUID()
-        val receiverId = randomUUID()
+        val senderId = person1Id
+        val receiverId = person2Id
 
         every { callService.createCall(eq(senderId), eq(receiverId), any()) } returns
                 mockCall(senderId = senderId, receiverId = receiverId)
 
-        val url = "$baseUrl?receiverId=$receiverId&senderId=$senderId&callType=VIDEO"
+        val url = "$baseUrl?receiverId=$receiverId&personId=$senderId&callType=VIDEO"
 
         val result = this.performPost(url, accessToken.token)
             .expectOk()
@@ -69,7 +69,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
                 "calls-create",
                 requestParameters(
                     param("receiverId", "UUID of receiver"),
-                    param("senderId", "UUID of sender - must be your id"),
+                    param("personId", "UUID of sender - must be your id"),
                     param("callType", "VIDEO or AUDIO"),
                 ),
                 responseFields(callTokenResponseFields())
@@ -94,7 +94,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `filter should return calls via receiverId`() {
 
-        val receiverId = account.person().id
+        val receiverId = account.primaryPerson().id
         val senderId = randomUUID()
 
         val url = "$baseUrl/filter?receiverId=$receiverId&senderId=$senderId"
@@ -142,14 +142,18 @@ internal class CallsApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `received should return calls received by current user`() {
 
-        val result = this.performGet("$baseUrl/received", accessToken.token)
+        val result = this.performGet("$baseUrl/received", accessToken.token, person1Id)
             .expectOk()
-            .document("calls-received", responseFields(callResponseFields("[].")))
+            .document(
+                "calls-received",
+                responseFields(callResponseFields("[].")),
+                requestParameters(optionalPersonId())
+            )
             .returnsList(CallDto::class.java)
 
         assertThat(result).isNotNull
         assertThat(result).isNotEmpty
-        result.forEach { assertThat(it.receiverId).isEqualTo(account.person().id) }
+        result.forEach { assertThat(it.receiverId).isEqualTo(account.primaryPerson().id) }
     }
 
     @Test
@@ -162,14 +166,18 @@ internal class CallsApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `sent should return calls sent by current user`() {
 
-        val result = this.performGet("$baseUrl/sent", accessToken.token)
+        val result = this.performGet("$baseUrl/sent", accessToken.token, person1Id)
             .expectOk()
-            .document("calls-sent", responseFields(callResponseFields("[].")))
+            .document(
+                "calls-sent",
+                responseFields(callResponseFields("[].")),
+                requestParameters(optionalPersonId())
+            )
             .returnsList(CallDto::class.java)
 
         assertThat(result).isNotNull
         assertThat(result).isNotEmpty
-        result.forEach { assertThat(it.senderId).isEqualTo(account.person().id) }
+        result.forEach { assertThat(it.senderId).isEqualTo(account.primaryPerson().id) }
     }
 
     @Test
@@ -184,12 +192,16 @@ internal class CallsApiTest : AbstractRestApiTest() {
         val id = randomUUID()
 
         every { callService.getOne(id) } returns mockCall(
-            id = id, senderId = randomUUID(), receiverId = account.person().id
+            id = id, senderId = randomUUID(), receiverId = account.primaryPerson().id
         )
 
-        val result: CallTokenDto = this.performGet("$baseUrl/$id", accessToken.token)
+        val result: CallTokenDto = this.performGet("$baseUrl/$id", accessToken.token, person1Id)
             .expectOk()
-            .document("calls-one", responseFields(callTokenResponseFields()))
+            .document(
+                "calls-one",
+                responseFields(callTokenResponseFields()),
+                requestParameters(optionalPersonId())
+            )
             .returns(CallTokenDto::class.java)
 
         assertThat(result).isNotNull
@@ -204,9 +216,13 @@ internal class CallsApiTest : AbstractRestApiTest() {
     @Test
     @Tag(TestTags.RESTDOC)
     fun `accept should start call`() {
-        val result: CallTokenDto = this.performPatch("$baseUrl/$msgId/accept", accessToken.token)
+        val result: CallTokenDto = this.performPatch("$baseUrl/$msgId/accept", accessToken.token, person1Id)
             .expectOk()
-            .document("calls-accept", responseFields(callTokenResponseFields()))
+            .document(
+                "calls-accept",
+                responseFields(callTokenResponseFields()),
+                requestParameters(optionalPersonId())
+            )
             .returns(CallTokenDto::class.java)
 
         assertThat(result).isNotNull
@@ -220,7 +236,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
     @Test
     @Tag(TestTags.RESTDOC)
     fun `accept needs authentication`() {
-        this.performPatch("$baseUrl/${randomUUID()}/accept").expectUnauthorized()
+        this.performPatch("$baseUrl/${randomUUID()}/accept",personId = person1Id).expectUnauthorized()
     }
 
     @Test
@@ -229,14 +245,18 @@ internal class CallsApiTest : AbstractRestApiTest() {
         // cancel must be executed by sender
         every { callService.getOne(eq(msgId)) } returns Call(
             id = msgId,
-            senderId = account.person().id,
+            senderId = account.primaryPerson().id,
             receiverId = person2Id,
             callType = CallType.VIDEO,
         )
 
-        val result: CallDto = this.performPatch("$baseUrl/$msgId/cancel", accessToken.token)
+        val result: CallDto = this.performPatch("$baseUrl/$msgId/cancel", accessToken.token, person1Id)
             .expectOk()
-            .document("calls-cancel", responseFields(callResponseFields()))
+            .document(
+                "calls-cancel",
+                responseFields(callResponseFields()),
+                requestParameters(optionalPersonId())
+            )
             .returns(CallDto::class.java)
 
         assertThat(result).isNotNull
@@ -254,9 +274,13 @@ internal class CallsApiTest : AbstractRestApiTest() {
     @Test
     @Tag(TestTags.RESTDOC)
     fun `deny should deny call`() {
-        val result: CallDto = this.performPatch("$baseUrl/$msgId/deny", accessToken.token)
+        val result: CallDto = this.performPatch("$baseUrl/$msgId/deny", accessToken.token, person1Id)
             .expectOk()
-            .document("calls-deny", responseFields(callResponseFields()))
+            .document(
+                "calls-deny",
+                responseFields(callResponseFields()),
+                requestParameters(optionalPersonId())
+            )
             .returns(CallDto::class.java)
 
         assertThat(result).isNotNull
@@ -276,9 +300,13 @@ internal class CallsApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `finish should stop call`() {
 
-        val result: CallDto = this.performPatch("$baseUrl/$msgId/finish", accessToken.token)
+        val result: CallDto = this.performPatch("$baseUrl/$msgId/finish", accessToken.token, person1Id)
             .expectOk()
-            .document("calls-finish", responseFields(callResponseFields()))
+            .document(
+                "calls-finish",
+                responseFields(callResponseFields()),
+                requestParameters(optionalPersonId())
+            )
             .returns(CallDto::class.java)
 
         assertThat(result).isNotNull

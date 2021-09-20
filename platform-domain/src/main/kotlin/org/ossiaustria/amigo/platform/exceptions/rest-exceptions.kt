@@ -53,8 +53,12 @@ open class RestException(
     code = HttpStatus.BAD_REQUEST,
     reason = "Operation cannot be executed due to malformed input or invalid states."
 )
-class ValidationException(val validationErrors: Array<FieldError?>) :
-    RestException(ErrorCode.ValidationFailed, validationErrors.joinToString("\n") { it.toString() })
+class ValidationException(message: String, val validationErrors: Array<FieldError?> = arrayOf()) :
+    RestException(ErrorCode.ValidationFailed, message) {
+    constructor(validationErrors: Array<FieldError?>) :
+            this(validationErrors.joinToString("\n") { it.toString() }, validationErrors)
+
+}
 
 @ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "Cannot create entity due to a bad request")
 class BadRequestException(errorCode: ErrorCode, detailMessage: String) : RestException(errorCode, detailMessage)

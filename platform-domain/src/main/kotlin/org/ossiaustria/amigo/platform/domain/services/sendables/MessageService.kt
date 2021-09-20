@@ -70,6 +70,8 @@ class MessageServiceImpl : MessageService {
     override fun findWithPersons(senderId: UUID?, receiverId: UUID?) =
         wrapper.findWithPersons(senderId, receiverId)
 
+    override fun findWithPerson(personId: UUID) = wrapper.findWithPerson(personId)
+
     override fun findWithSender(senderId: UUID) = wrapper.findWithSender(senderId)
 
     override fun findWithReceiver(receiverId: UUID) = wrapper.findWithReceiver(receiverId)

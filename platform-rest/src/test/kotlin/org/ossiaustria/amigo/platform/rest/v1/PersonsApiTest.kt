@@ -31,7 +31,7 @@ internal class PersonsApiTest : AbstractRestApiTest() {
                 PersonAvatar(person2.copy(avatarUrl = null), resource = null)
 
         val url = "$rootUrl$person2Id/avatar.jpg"
-        this.performGet(url, accessToken = accessToken.token).andExpect(MockMvcResultMatchers.status().isNotFound)
+        this.performGet(url, accessToken = accessToken.token, personId = person1Id).andExpect(MockMvcResultMatchers.status().isNotFound)
     }
 
     @Test
@@ -42,7 +42,7 @@ internal class PersonsApiTest : AbstractRestApiTest() {
                 PersonAvatar(person2.copy(avatarUrl = "avatar.jpg"), resource = null)
 
         val url = "$rootUrl$person2Id/avatar.jpg"
-        this.performGet(url, accessToken = accessToken.token)
+        this.performGet(url, accessToken = accessToken.token, personId = person1Id)
             .document("persons-avatar-success")
             .andExpect(MockMvcResultMatchers.status().is3xxRedirection)
     }
@@ -59,7 +59,7 @@ internal class PersonsApiTest : AbstractRestApiTest() {
                 )
 
         val url = "$rootUrl$person2Id/avatar.jpg"
-        this.performGet(url, accessToken = accessToken.token).expectOk()
+        this.performGet(url, accessToken = accessToken.token, personId = person1Id).expectOk()
     }
 
     @Test

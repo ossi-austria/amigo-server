@@ -154,14 +154,14 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
     fun `changeName should change name when person is OWNER`() {
         val (account, group, _) = createAccountWithGroups("user2@email.org", MembershipType.OWNER)
 
-        val result = groupService.changeName(account.person(), group, "groupName")
+        val result = groupService.changeName(account.primaryPerson(), group, "groupName")
         then(result.name, equalTo("groupName"))
     }
 
     @Test
     fun `changeName should change name when person is ADMIN`() {
         val (account, group, _) = createAccountWithGroups("user2@email.org", MembershipType.ADMIN)
-        val result = groupService.changeName(account.person(), group, "groupName")
+        val result = groupService.changeName(account.primaryPerson(), group, "groupName")
         then(result.name, equalTo("groupName"))
     }
 
@@ -170,7 +170,7 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
         val (account, group, _) = createAccountWithGroups("user2@email.org")
 
         assertThrows(SecurityError.PersonHasInsufficientRights::class.java) {
-            groupService.changeName(account.person(), group, "groupName")
+            groupService.changeName(account.primaryPerson(), group, "groupName")
         }
     }
 
@@ -180,7 +180,7 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
         val (account2, _, _) = createAccountWithGroups("user3@email.org")
 
         assertThrows(SecurityError.PersonHasInsufficientRights::class.java) {
-            groupService.addMember(account.person(), group, account2.email, "new member", MembershipType.MEMBER)
+            groupService.addMember(account.primaryPerson(), group, account2.email, "new member", MembershipType.MEMBER)
         }
     }
 
@@ -189,7 +189,7 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
         val (account, group, _) = createAccountWithGroups("user2@email.org", MembershipType.ADMIN)
 
         assertThrows(SecurityError.PersonNotFound::class.java) {
-            groupService.addMember(account.person(), group, "random@email", "new member", MembershipType.MEMBER)
+            groupService.addMember(account.primaryPerson(), group, "random@email", "new member", MembershipType.MEMBER)
         }
     }
 
@@ -199,7 +199,13 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
         val (account2, _, _) = createAccountWithGroups("user3@email.org")
 
         val result =
-            groupService.addMember(account.person(), group, account2.email, "new member", MembershipType.ANALOGUE)
+            groupService.addMember(
+                account.primaryPerson(),
+                group,
+                account2.email,
+                "new member",
+                MembershipType.ANALOGUE
+            )
         then(result.members, hasSize(2))
         then(result.members.last().accountId, equalTo(account2.id))
         then(result.members.last().name, equalTo("new member"))
@@ -211,11 +217,17 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
         val (account, group, _) = createAccountWithGroups("user2@email.org", MembershipType.ADMIN)
         val (account2, _, _) = createAccountWithGroups("user3@email.org")
         val groupAddedMember =
-            groupService.addMember(account.person(), group, account2.email, "new member", MembershipType.ANALOGUE)
+            groupService.addMember(
+                account.primaryPerson(),
+                group,
+                account2.email,
+                "new member",
+                MembershipType.ANALOGUE
+            )
         then(groupAddedMember.members, hasSize(2))
         val member = groupAddedMember.members.last()
         val result =
-            groupService.changeMember(account.person(), groupAddedMember, member, MembershipType.ADMIN)
+            groupService.changeMember(account.primaryPerson(), groupAddedMember, member, MembershipType.ADMIN)
         then(result.members, hasSize(2))
         then(result.members.last().accountId, equalTo(account2.id))
         then(result.members.last().id, equalTo(member.id))
@@ -229,7 +241,7 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
         val (account2, _, _) = createAccountWithGroups("user3@email.org")
 
         assertThrows(GroupServiceError.GroupMemberNotFound::class.java) {
-            groupService.changeMember(account.person(), group, account2.person(), MembershipType.ADMIN)
+            groupService.changeMember(account.primaryPerson(), group, account2.primaryPerson(), MembershipType.ADMIN)
         }
     }
 
@@ -239,7 +251,7 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
         val (account2, _, _) = createAccountWithGroups("user3@email.org")
 
         assertThrows(GroupServiceError.GroupOwnerNotChangeable::class.java) {
-            groupService.changeMember(account.person(), group, account.person(), MembershipType.ADMIN)
+            groupService.changeMember(account.primaryPerson(), group, account.primaryPerson(), MembershipType.ADMIN)
         }
     }
 
@@ -248,10 +260,10 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
         val (account, group, _) = createAccountWithGroups("user2@email.org", MembershipType.OWNER)
         val (account2, _, _) = createAccountWithGroups("user3@email.org")
         val addMember =
-            groupService.addMember(account.person(), group, account2.email, "new member", MembershipType.OWNER)
+            groupService.addMember(account.primaryPerson(), group, account2.email, "new member", MembershipType.OWNER)
 
         assertThrows(GroupServiceError.GroupOwnerNotChangeable::class.java) {
-            groupService.changeMember(account.person(), group, addMember.members.last(), MembershipType.ADMIN)
+            groupService.changeMember(account.primaryPerson(), group, addMember.members.last(), MembershipType.ADMIN)
         }
     }
 
@@ -260,10 +272,16 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
         val (account, group, _) = createAccountWithGroups("user2@email.org", MembershipType.ADMIN)
         val (account2, _, _) = createAccountWithGroups("user3@email.org")
         val groupAfterAdding =
-            groupService.addMember(account.person(), group, account2.email, "new member", MembershipType.ANALOGUE)
+            groupService.addMember(
+                account.primaryPerson(),
+                group,
+                account2.email,
+                "new member",
+                MembershipType.ANALOGUE
+            )
         then(groupAfterAdding.members, hasSize(2))
         val addedMember = groupAfterAdding.members.last()
-        val result = groupService.removeMember(account.person(), groupAfterAdding, addedMember)
+        val result = groupService.removeMember(account.primaryPerson(), groupAfterAdding, addedMember)
         then(result.findMember(addedMember), equalTo(null))
     }
 
@@ -272,10 +290,10 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
         val (account, group, _) = createAccountWithGroups("user2@email.org", MembershipType.ADMIN)
         val (account2, _, _) = createAccountWithGroups("user3@email.org")
         val addMember =
-            groupService.addMember(account.person(), group, account2.email, "new member", MembershipType.OWNER)
+            groupService.addMember(account.primaryPerson(), group, account2.email, "new member", MembershipType.OWNER)
 
         assertThrows(GroupServiceError.GroupOwnerNotChangeable::class.java) {
-            groupService.removeMember(account.person(), group, addMember.members.last())
+            groupService.removeMember(account.primaryPerson(), group, addMember.members.last())
         }
     }
 
@@ -284,10 +302,10 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
         val (account, group, _) = createAccountWithGroups("user2@email.org", MembershipType.OWNER)
         val (account2, _, _) = createAccountWithGroups("user3@email.org")
         val addMember =
-            groupService.addMember(account.person(), group, account2.email, "new member", MembershipType.OWNER)
+            groupService.addMember(account.primaryPerson(), group, account2.email, "new member", MembershipType.OWNER)
 
         assertThrows(GroupServiceError.GroupOwnerNotChangeable::class.java) {
-            groupService.removeMember(account.person(), group, account.person())
+            groupService.removeMember(account.primaryPerson(), group, account.primaryPerson())
         }
     }
 

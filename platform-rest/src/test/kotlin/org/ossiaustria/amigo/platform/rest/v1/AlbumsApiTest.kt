@@ -17,7 +17,8 @@ import org.springframework.restdocs.payload.JsonFieldType.ARRAY
 import org.springframework.restdocs.payload.JsonFieldType.STRING
 import org.springframework.restdocs.payload.PayloadDocumentation.requestFields
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
-import java.util.*
+import org.springframework.restdocs.request.RequestDocumentation.requestParameters
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 internal class AlbumsApiTest : AbstractRestApiTest() {
@@ -49,13 +50,14 @@ internal class AlbumsApiTest : AbstractRestApiTest() {
 
         // Cannot mock “RequestPart" name and file
         every { albumService.createAlbum(eq(ownerId), eq(name)) } returns
-                mockAlbum(ownerId = ownerId, name = name)
+            mockAlbum(ownerId = ownerId, name = name)
 
         val result = this.performPost(
-            baseUrl, accessToken.token, body = AlbumsApi.CreateAlbumRequest(
+            baseUrl, accessToken.token, personId = person1Id,
+            body = AlbumsApi.CreateAlbumRequest(
                 ownerId = ownerId,
                 name = name
-            )
+            ),
         )
             .expectOk()
             .document(
@@ -82,28 +84,36 @@ internal class AlbumsApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `own should return albums of current user`() {
 
-        val result = this.performGet("$baseUrl/own", accessToken.token)
+        val result = this.performGet("$baseUrl/own", accessToken.token, person1Id)
             .expectOk()
-            .document("albums-own", responseFields(albumsResponseFields("[].")))
+            .document(
+                "albums-own",
+                responseFields(albumsResponseFields("[].")),
+                requestParameters(optionalPersonId())
+            )
             .returnsList(AlbumDto::class.java)
 
         assertThat(result).isNotNull
         assertThat(result).isNotEmpty
-        result.forEach { assertThat(it.ownerId).isEqualTo(account.person().id) }
+        result.forEach { assertThat(it.ownerId).isEqualTo(account.primaryPerson().id) }
     }
 
     @Test
     @Tag(TestTags.RESTDOC)
     fun `shared should return accessible albums by current user`() {
 
-        val result = this.performGet("$baseUrl/shared", accessToken.token)
+        val result = this.performGet("$baseUrl/shared", accessToken.token, person1Id)
             .expectOk()
-            .document("albums-shared", responseFields(albumsResponseFields("[].")))
+            .document(
+                "albums-shared",
+                responseFields(albumsResponseFields("[].")),
+                requestParameters(optionalPersonId())
+            )
             .returnsList(AlbumDto::class.java)
 
         assertThat(result).isNotNull
         assertThat(result).isNotEmpty
-        result.forEach { assertThat(it.ownerId).isNotEqualTo(account.person().id) }
+        result.forEach { assertThat(it.ownerId).isNotEqualTo(account.primaryPerson().id) }
     }
 
     @Test
@@ -121,9 +131,13 @@ internal class AlbumsApiTest : AbstractRestApiTest() {
             id = msgId, ownerId = person1Id,
         )
 
-        val result: AlbumDto = this.performGet("$baseUrl/$msgId", accessToken.token)
+        val result: AlbumDto = this.performGet("$baseUrl/$msgId", accessToken.token, person1Id)
             .expectOk()
-            .document("albums-one", responseFields(albumsResponseFields()))
+            .document(
+                "albums-one",
+                responseFields(albumsResponseFields()),
+                requestParameters(optionalPersonId())
+            )
             .returns(AlbumDto::class.java)
 
         assertThat(result).isNotNull
@@ -143,9 +157,9 @@ internal class AlbumsApiTest : AbstractRestApiTest() {
     ): Album {
         return Album(
             id, ownerId = ownerId, name = name, items = listOf(
-                Multimedia(id = randomUUID(), ownerId = ownerId, type = MultimediaType.IMAGE, filename = "filename"),
-                Multimedia(id = randomUUID(), ownerId = ownerId, type = MultimediaType.IMAGE, filename = "filename"),
-            )
+            Multimedia(id = randomUUID(), ownerId = ownerId, type = MultimediaType.IMAGE, filename = "filename"),
+            Multimedia(id = randomUUID(), ownerId = ownerId, type = MultimediaType.IMAGE, filename = "filename"),
+        )
         )
     }
 

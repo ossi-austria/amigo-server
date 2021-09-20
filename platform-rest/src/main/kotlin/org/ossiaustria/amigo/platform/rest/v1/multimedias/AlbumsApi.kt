@@ -1,12 +1,18 @@
 package org.ossiaustria.amigo.platform.rest.v1.multimedias
 
 import io.micrometer.core.annotation.Timed
+import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Album
-import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.ossiaustria.amigo.platform.domain.services.multimedia.AlbumService
 import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
-import org.springframework.web.bind.annotation.*
-import java.util.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @Timed
 @RestController
@@ -19,30 +25,31 @@ internal class AlbumsApi(private val albumService: AlbumService) {
     }
 
     @GetMapping("/own")
-    fun own(tokenUserDetails: TokenUserDetails): List<AlbumDto> {
-        val receiverId = tokenUserDetails.personsIds.first()
+    fun own(
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        account: Account,
+    ): List<AlbumDto> {
+        val receiverId = account.person(personId).id
         return albumService.findWithOwner(receiverId).map(Album::toDto)
     }
 
     @GetMapping("/shared")
-    fun shared(tokenUserDetails: TokenUserDetails): List<AlbumDto> {
-        val accessorId = tokenUserDetails.personsIds.first()
+    fun shared(
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        account: Account,
+    ): List<AlbumDto> {
+        val accessorId = account.person(personId).id
         return albumService.findWithAccess(accessorId).map(Album::toDto)
     }
 
     @GetMapping("/{id}")
     fun getOne(
-        tokenUserDetails: TokenUserDetails,
         @PathVariable(value = "id") id: UUID,
-    ): AlbumDto = getOneEntity(tokenUserDetails, id).toDto()
-
-    private fun getOneEntity(
-        tokenUserDetails: TokenUserDetails,
-        id: UUID
-    ): Album {
-        val personId = tokenUserDetails.personsIds.first()
-        val album = albumService.getOne(personId, id) ?: throw DefaultNotFoundException()
-        return album
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        account: Account,
+    ): AlbumDto {
+        val album = albumService.getOne(account.person(personId).id, id) ?: throw DefaultNotFoundException()
+        return album.toDto()
     }
 
     internal data class CreateAlbumRequest(

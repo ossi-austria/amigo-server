@@ -1,6 +1,7 @@
 package org.ossiaustria.amigo.platform.rest.v1.user
 
 
+import io.swagger.annotations.ApiOperation
 import org.ossiaustria.amigo.platform.domain.services.auth.AuthService
 import org.ossiaustria.amigo.platform.rest.CurrentUserService
 import org.springframework.web.bind.annotation.*
@@ -14,6 +15,7 @@ class AuthApi(
     val currentUserService: CurrentUserService
 ) {
 
+    @ApiOperation("Log in with existing Account")
     @PostMapping("/login")
     fun login(@RequestBody loginRequest: LoginRequest): LoginResultDto = authService
         .loginUser(
@@ -22,11 +24,13 @@ class AuthApi(
         )
         .toDto()
 
+    @ApiOperation("Refresh the AccessToken via valid RefreshToken for an Account")
     @PostMapping("/refresh-token")
     fun refreshToken(@RequestBody refreshAccessTokenRequest: RefreshAccessTokenRequest): TokenResultDto = authService
         .refreshAccessToken(refreshToken = refreshAccessTokenRequest.refreshToken)
         .toDto()
 
+    @ApiOperation("Register a new Account")
     @PostMapping("/register")
     fun register(@RequestBody registerRequest: RegisterRequest): SecretAccountDto = authService
         .registerUser(
@@ -36,6 +40,7 @@ class AuthApi(
         )
         .toSecretUserDto()
 
+    @ApiOperation("DEPRECATED, get own Account information")
     @GetMapping("/whoami")
     fun whoami(): AccountDto = currentUserService.account().toDto()
 

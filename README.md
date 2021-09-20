@@ -4,10 +4,9 @@ This is the home of the *amigo-platform* which serves as the main service for th
 
 * Authentication with JWT Token
 * REST Api for Messages, Albums, Multimedia and NFC
-* Connector to MinIO for file handling
 * Connector to Jitsi for video conferences
 
-## Setup in Docker context
+## Setup in Docker context for PRODUCTION
 
 ### 1. Install docker and docker-compose
 
@@ -17,18 +16,15 @@ https://docs.docker.com/compose/install/
 
 Copy "system.env.default" and **change SECRETs and DB passwords** before the use in a production environment!
 
+Set *at least* the following variables,
+JITSI_JWT_APP_SECRET should have 32 chars!
 ```
-SPRING_PROFILES_ACTIVE=dev
-DB_HOST=amigodb
-DB_PORT=5432
-DB_USER=amigo
-DB_PASS=password                                             
-DB_NAME=amigo_platform
-POSTGRES_USER=amigo
-POSTGRES_PASSWORD=password                                           
-POSTGRES_DB=amigo_platform
-AMIGO_ACCESS_TOKEN_SECRET= define this
-AMIGO_REFRESH_TOKEN_SECRET= define this
+AMIGO_ACCESS_TOKEN_SECRET=547fewtabd4w68b4w6
+AMIGO_REFRESH_TOKEN_SECRET=547fewtabd4w68b4w7
+
+JITSI_JWT_APP_ID=jitsi
+JITSI_JWT_APP_SECRET=bbbbvvxxywqqqdddccsssxgasdfzaaaa
+JITSI_ROOT_URL=https://amigo-dev.ossi-austria.org/
 ```
 
 ### 2. initialise docker container
@@ -58,15 +54,36 @@ git checkout develop
 docker-compose up
 ```
 
-3. Start the "RestApplication" via Intellij with "dev" spring env profile active
+**Attention:**
+
+As the development Environment will only rely on POSTGRES within docker,
+you need to add the variables defined in system.env to the environment which runs spring boot server.
+
+Do that a) as ENV VARs or better b) in IDE running config
+
+4. Start the "RestApplication" via Intellij with "dev" spring env profile active
 
 **Caution**: The database is recreated on startup when schema changes happen. As we do not offer a stable version yet,
 we can live with this, but you should not.
 
 Please be patient.
 
-docker build --build-arg DEPENDENCY=build/dependency -t springio/gs-spring-boot-docker .
+It may crash on first start for missing secrets, add those variables into the environment settings:
+Defaults for postgres might work on your machine, but not when localhost is not accessible.
+Map necessary env vars when defaults wont apply.
 
-docker run -e "SPRING_PROFILES_ACTIVE=dev" -p 8080:8080 -t springio/gs-spring-boot-docker
+At least Jitsi info is needed in IDE run config:
 
+````
+JITSI_JWT_APP_SECRET=***;
+JITSI_JWT_APP_ID=amigo-platform-dev;
+JITSI_ROOT_URL=https://***/
+````
+4. Add firebase-config
 
+Firebase is need for FCM to support push notifications.
+Additional configs can be provided, in a $ROOT/configs directory 
+which is ignored by git and NOT compiled into the app, but merely used as runtime config.
+
+* Ask someone for more information
+* Add **firebase-service-account.json** into that directory

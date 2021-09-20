@@ -9,6 +9,7 @@ import java.util.*
 data class TokenUserDetails(
     val accountId: UUID,
     val email: String,
+    @Deprecated("use given personId")
     val personsIds: List<UUID> = listOf(),
     val expiration: Date = Date(),
     val issuedAt: Date = Date(),
@@ -31,6 +32,7 @@ data class TokenUserDetails(
 
     override fun isEnabled(): Boolean = true
 
+    @Deprecated("use given personID")
     fun personId() = personsIds.first()
 
 }

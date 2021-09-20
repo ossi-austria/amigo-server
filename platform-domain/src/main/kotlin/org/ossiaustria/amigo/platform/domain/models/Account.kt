@@ -41,11 +41,14 @@ data class Account(
     val fcmToken: String? = null,
 ) {
 
-    fun person(personId: UUID? = null): Person = if (personId != null) {
+    fun person(personId: UUID?): Person = if (personId != null) {
         this.persons.find { it.id == personId } ?: throw SendableError.PersonsNotInSameGroup()
     } else {
-        persons.first()
+        primaryPerson()
     }
+
+    fun primaryPerson() = persons.first()
+
 
     fun hasPersonId(personId: UUID?): Boolean = this.persons.map { it.id }.contains(personId)
 
