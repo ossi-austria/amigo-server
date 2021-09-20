@@ -2,6 +2,7 @@ package org.ossiaustria.amigo.platform.rest.v1.user
 
 
 import io.micrometer.core.annotation.Timed
+import io.swagger.annotations.ApiOperation
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Group
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
@@ -20,11 +21,13 @@ class GroupsApi(
     val currentUserService: CurrentUserService
 ) {
 
-    @GetMapping("/my")
+    @ApiOperation("Get own Group[s]")
+    @GetMapping
     fun getMyGroups(account: Account): List<GroupDto> =
         groupsService.findGroupsOfUser(account).map(Group::toDto)
 
-    @PostMapping()
+    @ApiOperation("Create new Group and an admin Person for own Account")
+    @PostMapping
     fun createGroup(
         account: Account,
         @RequestBody createGroupRequest: CreateGroupRequest,
@@ -37,6 +40,7 @@ class GroupsApi(
     }
 
 
+    @ApiOperation("Change name of Group via PATCH")
     @PatchMapping("/{id}")
     fun changeGroupName(
         account: Account,
@@ -53,6 +57,7 @@ class GroupsApi(
         ).toDto()
     }
 
+    @ApiOperation("Add a new Person to this Group")
     @PostMapping("/{id}/members")
     fun addMember(
         account: Account,
@@ -71,6 +76,7 @@ class GroupsApi(
         ).toDto()
     }
 
+    @ApiOperation("Change a Person/Membership of this Group")
     @PatchMapping("/{id}/members/{personId}")
     fun changeMember(
         account: Account,
@@ -86,6 +92,7 @@ class GroupsApi(
         return groupsService.changeMember(admin, findGroup, member, request.membershipType).toDto()
     }
 
+    @ApiOperation("Remove a Person/Membership of this Group")
     @DeleteMapping("/{id}/members/{personId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun removeMember(
@@ -101,6 +108,7 @@ class GroupsApi(
         return groupsService.removeMember(admin, findGroup, member).toDto()
     }
 
+    @ApiOperation("Get a Group by :id")
     @GetMapping("/{id}")
     fun getGroup(
         @PathVariable("id") id: UUID,
@@ -109,6 +117,7 @@ class GroupsApi(
         groupsService.findGroup(account, id).toDto()
 
 
+    @ApiOperation("Search/filter visible Groups")
     @GetMapping("/filtered")
     fun filterGroups(
         @RequestParam(value = "personId", required = false) personId: UUID?,

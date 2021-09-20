@@ -103,14 +103,21 @@ The response body will include an error providing further information.
 
 === Requests
 
-Every authenticated request needs following header(s):
+Every authenticated request needs at least the following header(s):
 
 [source]
 ----
 Content-Type: application/json
 Accept: application/json
 Authorization: Bearer $SECRET_ACCESS_TOKEN
+Amigo-Person-Id: $UUID of own person
 ----
+
+*Attention*: Currently providing the *Amigo-Person-Id* information is optional, as the first Person of Account will be used otherwise.
+As amigo-platform is designed to be a multi-group user system, an Account can have several Persons in different Groups.
+Therefore, the usage of *Amigo-Person-Id* is meant as specific authentication and encouraged.
+
+Addtionally it is useful to provide the
 
 The Private Token can be obtained during authentication
 
@@ -345,6 +352,18 @@ operation::multimedias-update-file[snippets='curl-request,http-response']
 
 All Sendables behave similar and share a big amount of code.
 See the first example of Sendable endpoints used on Message for further information.
+
+As a multi-user platform, amigo-platform needs to know which Person is meant to be the owner of the request.
+
+Every idempotent sendable request takes an optional "personId" parameter:
+
+|===
+|Parameter|Description
+
+|`+personId?+`
+|UUID of own Person to this request
+
+|===
 
 [[messages]]
 == Messages

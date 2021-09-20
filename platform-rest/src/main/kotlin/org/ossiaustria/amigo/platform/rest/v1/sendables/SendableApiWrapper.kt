@@ -2,7 +2,6 @@ package org.ossiaustria.amigo.platform.rest.v1.sendables
 
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Sendable
-import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.ossiaustria.amigo.platform.domain.services.sendables.SendableService
 import org.ossiaustria.amigo.platform.exceptions.BadRequestException
 import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
@@ -25,26 +24,26 @@ internal class SendableApiWrapper<T : Sendable<T>>(
         return sendableService.findWithPersons(senderId, receiverId)
     }
 
-    fun getReceived(tokenUserDetails: TokenUserDetails): List<T> {
-        val receiverId = tokenUserDetails.personsIds.first()
-        return sendableService.findWithReceiver(receiverId)
+    fun getOwn(personId: UUID): List<T> {
+        return sendableService.findWithPerson(personId)
     }
 
-    fun getSent(tokenUserDetails: TokenUserDetails): List<T> {
-        val receiverId = tokenUserDetails.personsIds.first()
-        return sendableService.findWithSender(receiverId)
+    fun getReceived(personId: UUID): List<T> {
+        return sendableService.findWithReceiver(personId)
     }
 
-    fun getOne(tokenUserDetails: TokenUserDetails, id: UUID): T {
-        val personId = tokenUserDetails.personsIds.first()
+    fun getSent(personId: UUID): List<T> {
+        return sendableService.findWithSender(personId)
+    }
+
+    fun getOne(personId: UUID, id: UUID): T {
         val sendable =
             sendableService.getOne(id) ?: throw NotFoundException(ErrorCode.NotFound, "Sendable $id not found!")
         if (!sendable.isViewableBy(personId)) throw DefaultNotFoundException()
         return sendable
     }
 
-    fun markAsRetrieved(tokenUserDetails: TokenUserDetails, id: UUID): T {
-        val personId = tokenUserDetails.personsIds.first()
+    fun markAsRetrieved(personId: UUID, id: UUID): T {
         val item = sendableService.getOne(id) ?: throw NotFoundException(ErrorCode.NotFound, "Sendable $id not found!")
         if (!item.isRetrievableBy(personId)) throw DefaultNotFoundException()
         return sendableService.markAsRetrieved(id, ZonedDateTime.now())

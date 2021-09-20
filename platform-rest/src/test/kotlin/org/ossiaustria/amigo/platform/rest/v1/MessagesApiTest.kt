@@ -35,7 +35,7 @@ internal class MessagesApiTest : AbstractRestApiTest() {
 
     @BeforeEach
     fun before() {
-        val id = account.person().id
+        val id = account.primaryPerson().id
 
         every { messageService.findWithReceiver(eq(id)) } returns listOf(
             mockMessage(senderId = randomUUID(), receiverId = id),
@@ -126,7 +126,7 @@ internal class MessagesApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `filter should return messages via receiverId`() {
 
-        val receiverId = account.person().id
+        val receiverId = account.primaryPerson().id
         val senderId = randomUUID()
 
         val url = "$baseUrl/filter?receiverId=$receiverId&senderId=$senderId"
@@ -168,28 +168,36 @@ internal class MessagesApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `received should return messages received by current user`() {
 
-        val result = this.performGet("$baseUrl/received", accessToken.token)
+        val result = this.performGet("$baseUrl/received", accessToken.token, person1Id)
             .expectOk()
-            .document("messages-received", responseFields(messageResponseFields("[].")))
+            .document(
+                "messages-received",
+                responseFields(messageResponseFields("[].")),
+                requestParameters(optionalPersonId())
+            )
             .returnsList(MessageDto::class.java)
 
         assertThat(result).isNotNull
         assertThat(result).isNotEmpty
-        result.forEach { assertThat(it.receiverId).isEqualTo(account.person().id) }
+        result.forEach { assertThat(it.receiverId).isEqualTo(account.primaryPerson().id) }
     }
 
     @Test
     @Tag(TestTags.RESTDOC)
     fun `sent should return messages sent by current user`() {
 
-        val result = this.performGet("$baseUrl/sent", accessToken.token)
+        val result = this.performGet("$baseUrl/sent", accessToken.token, person1Id)
             .expectOk()
-            .document("messages-sent", responseFields(messageResponseFields("[].")))
+            .document(
+                "messages-sent",
+                responseFields(messageResponseFields("[].")),
+                requestParameters(optionalPersonId())
+            )
             .returnsList(MessageDto::class.java)
 
         assertThat(result).isNotNull
         assertThat(result).isNotEmpty
-        result.forEach { assertThat(it.senderId).isEqualTo(account.person().id) }
+        result.forEach { assertThat(it.senderId).isEqualTo(account.primaryPerson().id) }
     }
 
     @Test
@@ -198,12 +206,15 @@ internal class MessagesApiTest : AbstractRestApiTest() {
         val msgId = randomUUID()
 
         every { messageService.getOne(msgId) } returns mockMessage(
-            id = msgId, senderId = randomUUID(), receiverId = account.person().id
+            id = msgId, senderId = randomUUID(), receiverId = account.primaryPerson().id
         )
 
-        val result: MultiMessageDto = this.performGet("$baseUrl/$msgId", accessToken.token)
+        val result: MultiMessageDto = this.performGet("$baseUrl/$msgId", accessToken.token, person1Id)
             .expectOk()
-            .document("messages-one", responseFields(messageResponseFields()))
+            .document(
+                "messages-one", responseFields(messageResponseFields()),
+                requestParameters(optionalPersonId())
+            )
             .returns(MultiMessageDto::class.java)
 
         assertThat(result).isNotNull
@@ -216,20 +227,24 @@ internal class MessagesApiTest : AbstractRestApiTest() {
         val senderId = randomUUID()
 
         every { messageService.getOne(eq(msgId)) } returns Message(
-            id = msgId, senderId = senderId, receiverId = account.person().id, text = "text",
+            id = msgId, senderId = senderId, receiverId = account.primaryPerson().id, text = "text",
             retrievedAt = null
         )
 
         every { messageService.markAsRetrieved(eq(msgId), any()) } returns Message(
-            id = msgId, senderId = senderId, receiverId = account.person().id, text = "text",
+            id = msgId, senderId = senderId, receiverId = account.primaryPerson().id, text = "text",
             retrievedAt = ZonedDateTime.now()
         )
 
 
-        val result: MultiMessageDto = this.performPatch("$baseUrl/$msgId/set-retrieved", accessToken.token)
-            .expectOk()
-            .document("messages-set-retrieved", responseFields(messageResponseFields()))
-            .returns(MultiMessageDto::class.java)
+        val result: MultiMessageDto =
+            this.performPatch("$baseUrl/$msgId/set-retrieved", accessToken.token, person1Id)
+                .expectOk()
+                .document(
+                    "messages-set-retrieved", responseFields(messageResponseFields()),
+                    requestParameters(optionalPersonId())
+                )
+                .returns(MultiMessageDto::class.java)
 
         assertThat(result).isNotNull
         assertThat(result.retrievedAt).isNotNull

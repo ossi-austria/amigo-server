@@ -21,11 +21,8 @@ internal class SendableServiceMixin<S : Sendable<S>>(
         return when {
             (receiverId != null && senderId != null) ->
                 repository.findAllByReceiverIdAndSenderIdOrderByCreatedAtDesc(receiverId, senderId)
-
             (receiverId != null) -> repository.findAllByReceiverIdOrderByCreatedAt(receiverId)
-
             (senderId != null) -> repository.findAllBySenderIdOrderByCreatedAt(senderId)
-
             else -> throw SendableError.PersonsNotProvided()
         }.also {
             Log.info("findWithPersons: senderId=$senderId receiverId=$receiverId -> ${it.size} results")
@@ -40,6 +37,13 @@ internal class SendableServiceMixin<S : Sendable<S>>(
 
     override fun getOne(id: UUID): S? {
         return repository.findByIdOrNull(id)
+    }
+
+    override fun findWithPerson(personId: UUID): List<S> {
+        return repository.findAllByReceiverIdOrSenderIdOrderByCreatedAtDesc(personId, personId)
+            .also {
+                Log.info("findWithPerson: (senderId OR receiverId) = $personId -> ${it.size} results")
+            }
     }
 
     override fun findWithSender(senderId: UUID): List<S> {

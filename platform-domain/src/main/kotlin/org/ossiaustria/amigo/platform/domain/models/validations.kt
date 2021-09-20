@@ -1,6 +1,7 @@
 package org.ossiaustria.amigo.platform.domain.models
 
-class ValidationException(message: String) : Exception(message)
+import org.ossiaustria.amigo.platform.exceptions.ValidationException
+
 
 interface Validator<T> {
 

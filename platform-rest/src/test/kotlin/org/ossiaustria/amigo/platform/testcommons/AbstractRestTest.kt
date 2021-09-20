@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import java.util.UUID
 
 
 abstract class AbstractRestTest {
@@ -26,6 +27,7 @@ abstract class AbstractRestTest {
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
         const val HEADER_PRIVATE_TOKEN = "Authorization"
+        const val HEADER_PERSON_ID = "Amigo-Person-Id"
     }
 
     @Autowired
@@ -34,11 +36,17 @@ abstract class AbstractRestTest {
     protected fun acceptContentAuth(
         requestBuilder: MockHttpServletRequestBuilder,
         jwtToken: String,
+        personId: UUID? = null,
         mediaType: MediaType = MediaType.APPLICATION_JSON
     ): MockHttpServletRequestBuilder {
         return requestBuilder
             .accept(MediaType.APPLICATION_JSON, MediaType.ALL)
             .header(HEADER_PRIVATE_TOKEN, "Bearer $jwtToken")
+            .apply {
+                if (personId != null) {
+                    header(HEADER_PERSON_ID, personId)
+                }
+            }
             .contentType(mediaType)
     }
 
@@ -49,39 +57,64 @@ abstract class AbstractRestTest {
     }
 
 
-    protected fun performPost(url: String, accessToken: String? = null, body: Any? = null) = mockMvc.perform(
-        generateRequestBuilder(url, accessToken, body, HttpMethod.POST)
+    protected fun performPost(
+        url: String,
+        accessToken: String? = null,
+        body: Any? = null,
+        personId: UUID? = null
+    ) = mockMvc.perform(
+        generateRequestBuilder(url, accessToken, body, HttpMethod.POST, personId)
     )
 
     protected fun performPartPost(
         url: String,
         accessToken: String,
         filePart: MockMultipartFile? = null,
-        bodyPart: MockPart? = null
+        bodyPart: MockPart? = null,
+        personId: UUID? = null
     ) =
-        mockMvc.perform(generatePartRequestBuilder(url, accessToken, filePart, bodyPart))
+        mockMvc.perform(generatePartRequestBuilder(url, accessToken, filePart, bodyPart,personId))
 
-    protected fun performPatch(url: String, accessToken: String? = null, body: Any? = null) = mockMvc.perform(
-        generateRequestBuilder(url, accessToken, body, HttpMethod.PATCH)
+    protected fun performPatch(
+        url: String,
+        accessToken: String? = null,
+        body: Any? = null,
+        personId: UUID? = null
+    ) = mockMvc.perform(
+        generateRequestBuilder(url, accessToken, body, HttpMethod.PATCH,personId)
     )
 
-    protected fun performPut(url: String, accessToken: String? = null, body: Any? = null) = mockMvc.perform(
-        generateRequestBuilder(url, accessToken, body, HttpMethod.PUT)
+    protected fun performPut(
+        url: String,
+        accessToken: String? = null,
+        body: Any? = null,
+        personId: UUID? = null
+    ) = mockMvc.perform(
+        generateRequestBuilder(url, accessToken, body, HttpMethod.PUT,personId)
     )
 
-    protected fun performGet(url: String, accessToken: String? = null) = mockMvc.perform(
-        generateRequestBuilder(url, accessToken, null, HttpMethod.GET)
+    protected fun performGet(
+        url: String,
+        accessToken: String? = null,
+        personId: UUID? = null
+    ) = mockMvc.perform(
+        generateRequestBuilder(url, accessToken, null, HttpMethod.GET,personId)
     )
 
-    protected fun performDelete(url: String, accessToken: String? = null) = mockMvc.perform(
-        generateRequestBuilder(url, accessToken, null, HttpMethod.DELETE)
+    protected fun performDelete(
+        url: String,
+        accessToken: String? = null,
+        personId: UUID? = null
+    ) = mockMvc.perform(
+        generateRequestBuilder(url, accessToken, null, HttpMethod.DELETE,personId)
     )
 
     private fun generateRequestBuilder(
         url: String,
         jwtToken: String?,
         body: Any?,
-        method: HttpMethod = HttpMethod.GET
+        method: HttpMethod = HttpMethod.GET,
+        personId: UUID? = null
     ): MockHttpServletRequestBuilder {
         val builder = when (method) {
             HttpMethod.GET -> RestDocumentationRequestBuilders.get(url)
@@ -99,7 +132,7 @@ abstract class AbstractRestTest {
         return if (jwtToken == null) {
             acceptAnonymousAuth(builder)
         } else {
-            acceptContentAuth(builder, jwtToken)
+            acceptContentAuth(builder, jwtToken, personId)
         }
     }
 
@@ -108,6 +141,7 @@ abstract class AbstractRestTest {
         jwtToken: String,
         filePart: MockMultipartFile?,
         bodyPart: MockPart?,
+        personId: UUID?=null,
     ): MockMultipartHttpServletRequestBuilder {
         val builder = multipart(url)
 
@@ -120,7 +154,8 @@ abstract class AbstractRestTest {
         return acceptContentAuth(
             builder,
             jwtToken,
-            mediaType = MediaType.MULTIPART_FORM_DATA
+            mediaType = MediaType.MULTIPART_FORM_DATA,
+            personId = personId
         ) as MockMultipartHttpServletRequestBuilder
     }
 

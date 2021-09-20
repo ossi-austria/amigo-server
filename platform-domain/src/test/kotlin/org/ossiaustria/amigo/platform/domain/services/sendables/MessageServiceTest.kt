@@ -7,9 +7,9 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.ossiaustria.amigo.platform.domain.models.Message
-import org.ossiaustria.amigo.platform.domain.models.ValidationException
 import org.ossiaustria.amigo.platform.domain.repositories.MessageRepository
 import org.ossiaustria.amigo.platform.domain.services.messaging.NotificationService
+import org.ossiaustria.amigo.platform.exceptions.ValidationException
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID.randomUUID
 

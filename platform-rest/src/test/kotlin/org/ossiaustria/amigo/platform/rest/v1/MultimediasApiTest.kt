@@ -85,7 +85,11 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
         val second = this.performPartPost("$baseUrl/${first.id}/file", accessToken.token, filePart = file)
             .expectOk()
-            .document("multimedias-update-file", responseFields(multimediasResponseFields()))
+            .document(
+                "multimedias-update-file",
+                responseFields(multimediasResponseFields()),
+                requestParameters(optionalPersonId())
+            )
             .returns(MultimediaDto::class.java)
         assertThat(second).isNotNull
     }
@@ -103,12 +107,16 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
         val result = this.performGet("$baseUrl/own", accessToken.token)
             .expectOk()
-            .document("multimedias-own", responseFields(multimediasResponseFields("[].")))
+            .document(
+                "multimedias-own",
+                responseFields(multimediasResponseFields("[].")),
+                requestParameters(optionalPersonId())
+            )
             .returnsList(MultimediaDto::class.java)
 
         assertThat(result).isNotNull
         assertThat(result).isNotEmpty
-        result.forEach { assertThat(it.ownerId).isEqualTo(account.person().id) }
+        result.forEach { assertThat(it.ownerId).isEqualTo(account.primaryPerson().id) }
     }
 
     @Test
@@ -124,9 +132,13 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
         every { multimediaService.getOne(msgId) } returns Mocks.multimedia(id = msgId, ownerId = person1Id)
 
-        val result: MultimediaDto = this.performGet("$baseUrl/$msgId", accessToken.token)
+        val result: MultimediaDto = this.performGet("$baseUrl/$msgId", accessToken.token, person1Id)
             .expectOk()
-            .document("multimedias-one", responseFields(multimediasResponseFields()))
+            .document(
+                "multimedias-one",
+                responseFields(multimediasResponseFields()),
+                requestParameters(optionalPersonId())
+            )
             .returns(MultimediaDto::class.java)
 
         assertThat(result).isNotNull
@@ -142,7 +154,7 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
         every { multimediaService.loadFile(any()) } returns
                 ClassPathResource("classpath:application-test.xml")
 
-        this.performGet("$baseUrl/$msgId/file", accessToken.token)
+        this.performGet("$baseUrl/$msgId/file", accessToken.token,person1Id)
             .expectOk()
             .document("multimedias-get-file")
 

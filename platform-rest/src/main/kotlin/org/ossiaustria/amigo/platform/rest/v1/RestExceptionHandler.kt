@@ -49,6 +49,12 @@ class RestExceptionHandler {
         return ResponseEntity(error, HttpStatus.BAD_REQUEST)
     }
 
+    @ExceptionHandler(ValidationException::class)
+    fun handleException(exception: ValidationException): ResponseEntity<RestExceptionDto> {
+        val error = RestExceptionDto(exception)
+        return ResponseEntity(error, HttpStatus.BAD_REQUEST)
+    }
+
     @ExceptionHandler(BadRequestException::class)
     fun handleException(exception: BadRequestException): ResponseEntity<RestExceptionDto> {
         return ResponseEntity(RestExceptionDto(exception), HttpStatus.BAD_REQUEST)

@@ -3,6 +3,7 @@ package org.ossiaustria.amigo.platform.domain.services.multimedia
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.models.StringValidator
 import org.ossiaustria.amigo.platform.domain.models.enums.MultimediaType
+import org.ossiaustria.amigo.platform.domain.repositories.AlbumShareRepository
 import org.ossiaustria.amigo.platform.domain.repositories.MultimediaRepository
 import org.ossiaustria.amigo.platform.domain.services.ServiceError
 import org.ossiaustria.amigo.platform.domain.services.files.MultimediaFileStorage
@@ -19,7 +20,6 @@ import java.util.UUID.randomUUID
 interface MultimediaService {
 
     fun getOne(id: UUID): Multimedia?
-    fun getAll(): List<Multimedia>
     fun findWithOwner(ownerId: UUID): List<Multimedia>
 
     /**
@@ -36,6 +36,7 @@ interface MultimediaService {
     fun uploadFile(multimedia: Multimedia, multipartFile: MultipartFile): Multimedia
     fun loadFile(multimedia: Multimedia): Resource?
     fun count(): Long
+    fun findWithAccess(accessorId: UUID): List<Multimedia>
 }
 
 sealed class MultimediaError(errorName: String, message: String, cause: Throwable? = null) :
@@ -54,6 +55,9 @@ class MultimediaServiceImpl : MultimediaService {
 
     @Autowired
     private lateinit var repository: MultimediaRepository
+
+    @Autowired
+    private lateinit var albumShareRepository: AlbumShareRepository
 
     @Autowired
     private lateinit var multimediaFileStorage: MultimediaFileStorage
@@ -132,13 +136,19 @@ class MultimediaServiceImpl : MultimediaService {
 
     override fun getOne(id: UUID): Multimedia? = repository.findByIdOrNull(id)
 
-    override fun getAll(): List<Multimedia> = repository.findAll().toList().also {
-        Log.info("getAll: -> ${it.size} results")
-    }
 
     override fun findWithOwner(ownerId: UUID) = repository.findAllByOwnerIdOrderByCreatedAt(ownerId).also {
         Log.info("findWithSender: ownerId=$ownerId -> ${it.size} results")
     }
+
+    override fun findWithAccess(accessorId: UUID): List<Multimedia> = albumShareRepository
+        .findAllByReceiverIdOrderByCreatedAt(accessorId)
+        .map { it.albumId }
+        .let { ids ->
+            repository.findAllByAlbumIdIn(ids).toList().also {
+                Log.info("findWithAccess: ownerId=$accessorId -> ${it.size} results")
+            }
+        }
 
     companion object {
         private val Log = LoggerFactory.getLogger(this::class.java)

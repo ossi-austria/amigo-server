@@ -30,7 +30,7 @@ internal class PersonProfileApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `profile should return user's profile`() {
 
-        val person = this.performGet(rootUrl, accessToken = accessToken.token)
+        val person = this.performGet(rootUrl, accessToken = accessToken.token, personId = person1Id)
             .expectOk()
             .document("profile-success", responseFields(personFields()))
             .returns(PersonDto::class.java)
@@ -50,7 +50,7 @@ internal class PersonProfileApiTest : AbstractRestApiTest() {
 
         val request = ChangePersonDto("name", "https://gitlab.com/uploads/-/system/user/avatar/3209720/avatar.png")
 
-        val person = this.performPatch(rootUrl, accessToken = accessToken.token, body = request)
+        val person = this.performPatch(rootUrl, accessToken = accessToken.token, body = request, personId = person1Id)
             .expectOk()
             .document(
                 "profile-change-success",
@@ -73,7 +73,8 @@ internal class PersonProfileApiTest : AbstractRestApiTest() {
     fun `changeMyProfile should change name of User`() {
 
         val request = ChangePersonDto("name", null)
-        val person = this.performPatch(rootUrl, accessToken = accessToken.token, body = request)
+        val person = this.performPatch(rootUrl, accessToken = accessToken.token, personId = person1Id,
+            body = request)
             .returns(PersonDto::class.java)
 
         assertEquals(person.id, person1Id)
@@ -87,7 +88,12 @@ internal class PersonProfileApiTest : AbstractRestApiTest() {
 
         val request = ChangePersonDto(null, "https://gitlab.com/uploads/-/system/user/avatar/3209720/avatar.png")
         val person = this
-            .performPatch(rootUrl, accessToken = accessToken.token, body = request)
+            .performPatch(
+                rootUrl,
+                accessToken = accessToken.token,
+                body = request,
+                personId = person1Id
+            )
             .returns(PersonDto::class.java)
 
         assertEquals(person.id, person1Id)
@@ -104,9 +110,9 @@ internal class PersonProfileApiTest : AbstractRestApiTest() {
 
         // Cannot mock "RequestPart" name and file
         every { personService.uploadAvatar(eq(person1), any()) } returns
-                person1.copy(avatarUrl = avatarUrl)
+            person1.copy(avatarUrl = avatarUrl)
 
-        val person = this.performPartPost("$rootUrl/avatar", accessToken.token, filePart = file)
+        val person = this.performPartPost("$rootUrl/avatar", accessToken.token, filePart = file, personId = person1Id)
             .expectOk()
             .document("profile-upload-avatar-success", responseFields(personFields()))
             .returns(PersonDto::class.java)

@@ -11,5 +11,6 @@ internal interface SendableRepository<T : Sendable<T>> : CrudRepository<T, UUID>
     fun findAllBySenderIdOrderByCreatedAt(id: UUID): List<T>
     fun findAllByReceiverIdOrderByCreatedAt(id: UUID): List<T>
     fun findAllByReceiverIdAndSenderIdOrderByCreatedAtDesc(receiverId: UUID, senderId: UUID): List<T>
+    fun findAllByReceiverIdOrSenderIdOrderByCreatedAtDesc(receiverId: UUID, senderId: UUID): List<T>
 }
 

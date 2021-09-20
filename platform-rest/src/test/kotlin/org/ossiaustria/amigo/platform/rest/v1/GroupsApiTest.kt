@@ -55,7 +55,7 @@ internal class GroupsApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `changeGroupName should create a new group with creator as owner`() {
 
-        val mockGroup = createMockGroup().add(account.person())
+        val mockGroup = createMockGroup().add(account.primaryPerson())
 
         val request = ChangeGroupRequest(
             name = "newGroupName",
@@ -162,9 +162,13 @@ internal class GroupsApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `myGroups should return all Groups where user is member of`() {
 
-        val groups = this.performGet("$rootUrl/my", accessToken = accessToken.token)
+        val groups = this.performGet(rootUrl, accessToken = accessToken.token,person1Id)
             .expectOk()
-            .document("groups-my-success", responseFields(groupFields("[].")))
+            .document(
+                "groups-my-success",
+                responseFields(groupFields("[].")),
+                requestParameters(optionalPersonId())
+            )
             .returnsList(GroupDto::class.java)
 
         assertEquals(2, groups.size)
@@ -183,7 +187,8 @@ internal class GroupsApiTest : AbstractRestApiTest() {
 
         val person = account.persons.first()
 
-        val groups = this.performGet("$rootUrl/filtered?personId=${person.id}", accessToken = accessToken.token)
+        val groups = this.performGet("$rootUrl/filtered?personId=${person.id}",
+            accessToken = accessToken.token)
             .expectOk()
             .document(
                 "groups-filtered-success",
@@ -202,13 +207,13 @@ internal class GroupsApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `filtered needs authentication`() {
         val person = account.persons.first()
-        this.performPost("$rootUrl/filtered?personId=${person.id}").expectUnauthorized()
+        this.performPost("$rootUrl/filtered").expectUnauthorized()
     }
 
     @Test
     @Tag(TestTags.RESTDOC)
     fun `getGroup should return a specific Group which user belongs to`() {
-        val mockGroup = createMockGroup().add(account.person())
+        val mockGroup = createMockGroup().add(account.primaryPerson())
 
         val group = this.performGet("$rootUrl/${mockGroup.id}", accessToken = accessToken.token)
             .expectOk()

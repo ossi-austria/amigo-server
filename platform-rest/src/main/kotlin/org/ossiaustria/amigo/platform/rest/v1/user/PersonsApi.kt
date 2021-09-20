@@ -14,9 +14,10 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
+import java.util.UUID
 import javax.servlet.http.HttpServletResponse
 
 @Timed(value = "time.api.profile")
@@ -30,11 +31,12 @@ class PersonsApi(
     @GetMapping("/{id}/avatar.*")
     fun profileAvatar(
         @PathVariable("id") id: UUID,
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
         account: Account,
         request: HttpServletResponse
     ): ResponseEntity<Resource> {
 
-        val personAvatar = personService.loadAvatar(account.person(), id)
+        val personAvatar = personService.loadAvatar(account.person(personId), id)
 
         if (personAvatar.isUseless) {
             throw NotFoundException(ErrorCode.NotFound, "This Person has no avatar (yet).")

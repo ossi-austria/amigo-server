@@ -1,8 +1,8 @@
 package org.ossiaustria.amigo.platform.rest.v1.multimedias
 
 import io.micrometer.core.annotation.Timed
+import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
-import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.ossiaustria.amigo.platform.domain.services.multimedia.MultimediaService
 import org.ossiaustria.amigo.platform.exceptions.BadRequestException
 import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
@@ -49,21 +49,23 @@ internal class MultimediasApi(private val multimediaService: MultimediaService) 
             MediaType.MULTIPART_FORM_DATA_VALUE]
     )
     fun uploadFile(
-        tokenUserDetails: TokenUserDetails,
         @PathVariable(value = "id") id: UUID,
-        @RequestPart("file") file: MultipartFile
+        @RequestPart("file") file: MultipartFile,
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        account: Account,
     ): Multimedia {
-        val multimedia = getOneEntity(tokenUserDetails, id)
+        val multimedia = getOneEntity(account.person(personId).id, id)
         return multimediaService.uploadFile(multimedia, file)
     }
 
     @GetMapping("/{id}/file")
     fun downloadFile(
-        tokenUserDetails: TokenUserDetails,
         @PathVariable(value = "id") id: UUID,
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        account: Account,
     ): ResponseEntity<Resource> {
         try {
-            val multimedia = getOneEntity(tokenUserDetails, id)
+            val multimedia = getOneEntity(account.person(personId).id, id)
             val resource = multimediaService.loadFile(multimedia)
 
             val filename = multimedia.filename()
@@ -80,22 +82,34 @@ internal class MultimediasApi(private val multimediaService: MultimediaService) 
 
 
     @GetMapping("/own")
-    fun getOwn(tokenUserDetails: TokenUserDetails): List<MultimediaDto> {
-        val receiverId = tokenUserDetails.personsIds.first()
+    fun own(
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        account: Account,
+    ): List<MultimediaDto> {
+        val receiverId = account.person(personId).id
         return multimediaService.findWithOwner(receiverId).map(Multimedia::toDto)
+    }
+
+    @GetMapping("/shared")
+    fun shared(
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        account: Account,
+    ): List<MultimediaDto> {
+        val accessorId = account.person(personId).id
+        return multimediaService.findWithAccess(accessorId).map(Multimedia::toDto)
     }
 
     @GetMapping("/{id}")
     fun getOne(
-        tokenUserDetails: TokenUserDetails,
         @PathVariable(value = "id") id: UUID,
-    ): MultimediaDto = getOneEntity(tokenUserDetails, id).toDto()
+        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        account: Account,
+    ): MultimediaDto = getOneEntity(account.person(personId).id, id).toDto()
 
     private fun getOneEntity(
-        tokenUserDetails: TokenUserDetails,
+        personId: UUID,
         id: UUID
     ): Multimedia {
-        val personId = tokenUserDetails.personsIds.first()
         val multimedia = multimediaService.getOne(id)
             ?: throw NotFoundException(ErrorCode.NotFound, "Multimedia $id not found!")
 
