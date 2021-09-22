@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.ossiaustria.amigo.platform.domain.models.Sendable
 import org.ossiaustria.amigo.platform.domain.services.AbstractServiceTest
+import org.ossiaustria.amigo.platform.domain.services.SecurityError
 import org.ossiaustria.amigo.platform.exceptions.NotFoundException
 import java.time.ZonedDateTime
 import java.util.UUID.randomUUID
@@ -42,7 +43,7 @@ internal abstract class SendableServiceTest<S : Sendable<S>, T : SendableService
 
     @Test
     fun `findWithPersons should throw when personsId are both null`() {
-        assertThrows<SendableError.PersonsNotProvided> {
+        assertThrows<SecurityError.PersonsNotProvided> {
             service.findWithPersons(null, null)
         }
     }

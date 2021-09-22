@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.ossiaustria.amigo.platform.domain.models.Message
 import org.ossiaustria.amigo.platform.domain.repositories.MessageRepository
+import org.ossiaustria.amigo.platform.domain.services.SecurityError
 import org.ossiaustria.amigo.platform.domain.services.messaging.NotificationService
 import org.ossiaustria.amigo.platform.exceptions.ValidationException
 import org.springframework.beans.factory.annotation.Autowired
@@ -69,7 +70,7 @@ internal class MessageServiceTest : SendableServiceTest<Message, MessageService>
 
     @Test
     fun `createMessage should throw when sender and receiver are the same`() {
-        assertThrows<SendableError.PersonsAreTheSame> {
+        assertThrows<SecurityError.PersonsAreTheSame> {
             service.createMessage(personId1, personId1, "text", null)
         }
     }
@@ -83,7 +84,7 @@ internal class MessageServiceTest : SendableServiceTest<Message, MessageService>
 
     @Test
     fun `createMessage should throw when send and receiver are not in same group`() {
-        assertThrows<SendableError.PersonsNotInSameGroup> {
+        assertThrows<SecurityError.PersonsNotInSameGroup> {
             service.createMessage(personId1, personId3, "text", null)
         }
     }

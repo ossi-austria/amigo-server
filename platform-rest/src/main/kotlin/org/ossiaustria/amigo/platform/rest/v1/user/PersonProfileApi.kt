@@ -56,7 +56,7 @@ class PersonProfileApi(
     fun uploadAvatar(
         account: Account,
         @RequestPart("file") file: MultipartFile,
-        @RequestPart("personId", required = false) personId: UUID? = null
+        @RequestHeader("Amigo-Person-Id",required = false) personId: UUID? = null
     ): PersonDto =
         personService
             .uploadAvatar(account.person(personId), file)

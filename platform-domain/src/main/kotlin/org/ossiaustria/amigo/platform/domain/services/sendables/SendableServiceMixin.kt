@@ -4,6 +4,7 @@ import org.ossiaustria.amigo.platform.domain.models.Person
 import org.ossiaustria.amigo.platform.domain.models.Sendable
 import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.ossiaustria.amigo.platform.domain.repositories.SendableRepository
+import org.ossiaustria.amigo.platform.domain.services.SecurityError
 import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
 import org.ossiaustria.amigo.platform.exceptions.ErrorCode
 import org.ossiaustria.amigo.platform.exceptions.NotFoundException
@@ -23,7 +24,7 @@ internal class SendableServiceMixin<S : Sendable<S>>(
                 repository.findAllByReceiverIdAndSenderIdOrderByCreatedAtDesc(receiverId, senderId)
             (receiverId != null) -> repository.findAllByReceiverIdOrderByCreatedAt(receiverId)
             (senderId != null) -> repository.findAllBySenderIdOrderByCreatedAt(senderId)
-            else -> throw SendableError.PersonsNotProvided()
+            else -> throw SecurityError.PersonsNotProvided()
         }.also {
             Log.info("findWithPersons: senderId=$senderId receiverId=$receiverId -> ${it.size} results")
         }
@@ -66,10 +67,10 @@ internal class SendableServiceMixin<S : Sendable<S>>(
     }
 
     fun validateSenderReceiver(senderId: UUID, receiverId: UUID): Pair<Person, Person> {
-        if (senderId == receiverId) throw SendableError.PersonsAreTheSame()
+        if (senderId == receiverId) throw SecurityError.PersonsAreTheSame()
         val sender = personRepository.findByIdOrNull(senderId) ?: throw DefaultNotFoundException()
         val receiver = personRepository.findByIdOrNull(receiverId) ?: throw DefaultNotFoundException()
-        if (sender.groupId != receiver.groupId) throw SendableError.PersonsNotInSameGroup()
+        if (sender.groupId != receiver.groupId) throw SecurityError.PersonsNotInSameGroup()
         return Pair(sender, receiver)
     }
 
