@@ -3,6 +3,7 @@ package org.ossiaustria.amigo.platform.testcommons
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.ossiaustria.amigo.platform.rest.v1.common.Headers
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpMethod
@@ -27,7 +28,7 @@ abstract class AbstractRestTest {
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
         const val HEADER_PRIVATE_TOKEN = "Authorization"
-        const val HEADER_PERSON_ID = "Amigo-Person-Id"
+        const val HEADER_PERSON_ID = Headers.PID
     }
 
     @Autowired
@@ -73,7 +74,7 @@ abstract class AbstractRestTest {
         bodyPart: MockPart? = null,
         personId: UUID? = null
     ) =
-        mockMvc.perform(generatePartRequestBuilder(url, accessToken, filePart, bodyPart,personId))
+        mockMvc.perform(generatePartRequestBuilder(url, accessToken, filePart, bodyPart, personId))
 
     protected fun performPatch(
         url: String,
@@ -81,7 +82,7 @@ abstract class AbstractRestTest {
         body: Any? = null,
         personId: UUID? = null
     ) = mockMvc.perform(
-        generateRequestBuilder(url, accessToken, body, HttpMethod.PATCH,personId)
+        generateRequestBuilder(url, accessToken, body, HttpMethod.PATCH, personId)
     )
 
     protected fun performPut(
@@ -90,7 +91,7 @@ abstract class AbstractRestTest {
         body: Any? = null,
         personId: UUID? = null
     ) = mockMvc.perform(
-        generateRequestBuilder(url, accessToken, body, HttpMethod.PUT,personId)
+        generateRequestBuilder(url, accessToken, body, HttpMethod.PUT, personId)
     )
 
     protected fun performGet(
@@ -98,7 +99,7 @@ abstract class AbstractRestTest {
         accessToken: String? = null,
         personId: UUID? = null
     ) = mockMvc.perform(
-        generateRequestBuilder(url, accessToken, null, HttpMethod.GET,personId)
+        generateRequestBuilder(url, accessToken, null, HttpMethod.GET, personId)
     )
 
     protected fun performDelete(
@@ -106,7 +107,7 @@ abstract class AbstractRestTest {
         accessToken: String? = null,
         personId: UUID? = null
     ) = mockMvc.perform(
-        generateRequestBuilder(url, accessToken, null, HttpMethod.DELETE,personId)
+        generateRequestBuilder(url, accessToken, null, HttpMethod.DELETE, personId)
     )
 
     private fun generateRequestBuilder(
@@ -141,7 +142,7 @@ abstract class AbstractRestTest {
         jwtToken: String,
         filePart: MockMultipartFile?,
         bodyPart: MockPart?,
-        personId: UUID?=null,
+        personId: UUID? = null,
     ): MockMultipartHttpServletRequestBuilder {
         val builder = multipart(url)
 

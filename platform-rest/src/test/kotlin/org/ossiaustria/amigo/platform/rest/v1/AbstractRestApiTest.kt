@@ -47,7 +47,7 @@ import javax.transaction.Transactional
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles(ApplicationProfiles.TEST)
 @ComponentScan("org.ossiaustria.amigo.platform")
-@AutoConfigureEmbeddedDatabase
+@AutoConfigureEmbeddedDatabase(type = AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 internal abstract class AbstractRestApiTest : AbstractRestTest() {
@@ -73,9 +73,6 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
     protected lateinit var person2Id: UUID
     protected lateinit var person1: Person
     protected lateinit var person2: Person
-
-
-
 
     @BeforeEach
     fun setUp(
@@ -153,7 +150,4 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
         )
     }
 
-    protected fun optionalPersonId() = listOf(
-        parameterWithName("personId").description("UUID of own Person to this request").optional(),
-    )
 }

@@ -113,13 +113,13 @@ internal class NfcInfoServiceTest : AbstractServiceTest() {
     @Test
     fun `linkToAlbum-findWithAccess should give access to other Person's Album`() {
         val nfc = service.createNfc("ndef", personId1, personId2)
-        val findWithAccess = service.findWithAccess(personId1)
+        val findWithAccess = service.findAlbumsWithAccess(personId1)
         assertThat(findWithAccess).isEmpty()
 
         val album = albumRepository.save(Album(randomUUID(), "name", personId2))
         service.linkToAlbum(nfc, album)
 
-        val after = service.findWithAccess(personId1)
+        val after = service.findAlbumsWithAccess(personId1)
         assertThat(after).isNotEmpty
         assertThat(after.first().id).isEqualTo(album.id)
     }
@@ -131,5 +131,4 @@ internal class NfcInfoServiceTest : AbstractServiceTest() {
             service.linkToPerson(nfc, person3)
         }
     }
-
 }

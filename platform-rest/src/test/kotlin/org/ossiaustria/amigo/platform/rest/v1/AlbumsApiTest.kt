@@ -88,9 +88,7 @@ internal class AlbumsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "albums-own",
-                responseFields(albumsResponseFields("[].")),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(albumsResponseFields("[].")))
             .returnsList(AlbumDto::class.java)
 
         assertThat(result).isNotNull
@@ -106,9 +104,7 @@ internal class AlbumsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "albums-shared",
-                responseFields(albumsResponseFields("[].")),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(albumsResponseFields("[].")))
             .returnsList(AlbumDto::class.java)
 
         assertThat(result).isNotNull
@@ -135,9 +131,7 @@ internal class AlbumsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "albums-one",
-                responseFields(albumsResponseFields()),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(albumsResponseFields()))
             .returns(AlbumDto::class.java)
 
         assertThat(result).isNotNull

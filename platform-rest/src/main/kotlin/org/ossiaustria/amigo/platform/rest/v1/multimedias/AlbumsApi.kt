@@ -1,10 +1,13 @@
 package org.ossiaustria.amigo.platform.rest.v1.multimedias
 
 import io.micrometer.core.annotation.Timed
+import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Album
 import org.ossiaustria.amigo.platform.domain.services.multimedia.AlbumService
 import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
+import org.ossiaustria.amigo.platform.rest.v1.common.Headers
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -19,33 +22,53 @@ import java.util.UUID
 @RequestMapping("/v1/albums", produces = ["application/json"], consumes = ["application/json"])
 internal class AlbumsApi(private val albumService: AlbumService) {
 
-    @PostMapping("")
-    fun createAlbum(@RequestBody request: CreateAlbumRequest): AlbumDto {
+    @ApiOperation("Create a new Album as Owner")
+    @PostMapping
+    fun createAlbum(
+        @RequestBody request: CreateAlbumRequest
+    ): AlbumDto {
         return albumService.createAlbum(request.ownerId, request.name).toDto()
     }
 
+    @ApiOperation("Get all Albums you can access")
     @GetMapping("/own")
     fun own(
-        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null,
+
+        @ApiParam(hidden = true)
         account: Account,
     ): List<AlbumDto> {
         val receiverId = account.person(personId).id
         return albumService.findWithOwner(receiverId).map(Album::toDto)
     }
 
+    @ApiOperation("Get all Albums you are allowed to view")
     @GetMapping("/shared")
     fun shared(
-        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null,
+
+        @ApiParam(hidden = true)
         account: Account,
     ): List<AlbumDto> {
         val accessorId = account.person(personId).id
         return albumService.findWithAccess(accessorId).map(Album::toDto)
     }
 
+    @ApiOperation("Get one Album")
     @GetMapping("/{id}")
     fun getOne(
-        @PathVariable(value = "id") id: UUID,
-        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        @PathVariable(value = "id")
+        id: UUID,
+
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null,
+
+        @ApiParam(hidden = true)
         account: Account,
     ): AlbumDto {
         val album = albumService.getOne(account.person(personId).id, id) ?: throw DefaultNotFoundException()

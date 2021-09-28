@@ -34,7 +34,7 @@ interface NfcInfoService {
     fun findByLinkedAlbum(linkedAlbumId: UUID): List<NfcInfo>
     fun findByLinkedPerson(linkedPersonId: UUID): List<NfcInfo>
     fun count(): Long
-    fun findWithAccess(accessorId: UUID): List<Album>
+    fun findAlbumsWithAccess(accessorId: UUID): List<Album>
 }
 
 @Service
@@ -108,7 +108,7 @@ class NfcInfoServiceImpl : NfcInfoService {
         )
     }
 
-    override fun findWithAccess(accessorId: UUID): List<Album> = repository
+    override fun findAlbumsWithAccess(accessorId: UUID): List<Album> = repository
         .findByOwnerId(accessorId)
         .mapNotNull { it.linkedAlbumId }
         .let { ids ->
@@ -122,7 +122,6 @@ class NfcInfoServiceImpl : NfcInfoService {
     }
 
     override fun getOne(id: UUID): NfcInfo? = repository.findByIdOrNull(id)
-
 
     override fun findAllByCreator(creatorId: UUID) = repository.findByCreatorId(creatorId)
     override fun findAllByOwner(ownerId: UUID): List<NfcInfo> = repository.findByCreatorId(ownerId)

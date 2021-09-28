@@ -17,7 +17,9 @@ class AuthApi(
 
     @ApiOperation("Log in with existing Account")
     @PostMapping("/login")
-    fun login(@RequestBody loginRequest: LoginRequest): LoginResultDto = authService
+    fun login(
+        @RequestBody loginRequest: LoginRequest
+    ): LoginResultDto = authService
         .loginUser(
             email = loginRequest.email,
             plainPassword = loginRequest.password
@@ -26,13 +28,17 @@ class AuthApi(
 
     @ApiOperation("Refresh the AccessToken via valid RefreshToken for an Account")
     @PostMapping("/refresh-token")
-    fun refreshToken(@RequestBody refreshAccessTokenRequest: RefreshAccessTokenRequest): TokenResultDto = authService
+    fun refreshToken(
+        @RequestBody refreshAccessTokenRequest: RefreshAccessTokenRequest
+    ): TokenResultDto = authService
         .refreshAccessToken(refreshToken = refreshAccessTokenRequest.refreshToken)
         .toDto()
 
     @ApiOperation("Register a new Account")
     @PostMapping("/register")
-    fun register(@RequestBody registerRequest: RegisterRequest): SecretAccountDto = authService
+    fun register(
+        @RequestBody registerRequest: RegisterRequest
+    ): SecretAccountDto = authService
         .registerUser(
             email = registerRequest.email,
             plainPassword = registerRequest.password,

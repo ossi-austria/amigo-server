@@ -1,5 +1,7 @@
 package org.ossiaustria.amigo.platform.config.security
 
+import org.ossiaustria.amigo.platform.domain.models.Account
+import org.ossiaustria.amigo.platform.domain.services.auth.TokenResult
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -12,6 +14,7 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
@@ -24,6 +27,7 @@ import springfox.documentation.builders.RequestHandlerSelectors
 import springfox.documentation.spi.DocumentationType
 
 import springfox.documentation.spring.web.plugins.Docket
+import javax.servlet.http.HttpServletResponse
 
 
 @Configuration
@@ -90,8 +94,14 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
     fun amigoPlatformSwaggerDocs(): Docket? {
         val version = "0.1"
         return Docket(DocumentationType.SWAGGER_2)
+            .ignoredParameterTypes(
+                Account::class.java,
+                TokenResult::class.java,
+                HttpServletResponse::class.java,
+                AuthenticationPrincipal::class.java,
+            )
             .select()
-            .apis(RequestHandlerSelectors.basePackage("org.ossiaustria.amigo.platform"))
+            .apis(RequestHandlerSelectors.basePackage("org.ossiaustria.amigo.platform.rest.v1"))
             .paths(PathSelectors.any())
             .build()
             .apiInfo(
