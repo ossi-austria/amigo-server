@@ -124,7 +124,7 @@ class NfcInfoServiceImpl : NfcInfoService {
     override fun getOne(id: UUID): NfcInfo? = repository.findByIdOrNull(id)
 
     override fun findAllByCreator(creatorId: UUID) = repository.findByCreatorId(creatorId)
-    override fun findAllByOwner(ownerId: UUID): List<NfcInfo> = repository.findByCreatorId(ownerId)
+    override fun findAllByOwner(ownerId: UUID): List<NfcInfo> = repository.findByOwnerId(ownerId)
 
     override fun findAllByPerson(personId: UUID): List<NfcInfo> =
         repository.findByCreatorIdOrOwnerId(personId, personId)

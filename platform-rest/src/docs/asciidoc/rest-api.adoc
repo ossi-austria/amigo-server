@@ -152,6 +152,10 @@ operation::register-fail[snippets='http-response']
 
 operation::register-success[snippets='curl-request,request-fields,http-response,response-fields']
 
+Or use explicit Group registering:
+
+operation::register-explicit-success[snippets='curl-request,request-fields,http-response']
+
 [[authentication-login]]
 === POST /auth/login
 

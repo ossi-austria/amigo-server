@@ -4,13 +4,21 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.ossiaustria.amigo.platform.rest.v1.user.*
+import org.ossiaustria.amigo.platform.rest.v1.user.AccountDto
+import org.ossiaustria.amigo.platform.rest.v1.user.LoginRequest
+import org.ossiaustria.amigo.platform.rest.v1.user.LoginResultDto
+import org.ossiaustria.amigo.platform.rest.v1.user.RefreshAccessTokenRequest
+import org.ossiaustria.amigo.platform.rest.v1.user.RegisterRequest
+import org.ossiaustria.amigo.platform.rest.v1.user.SecretAccountDto
+import org.ossiaustria.amigo.platform.rest.v1.user.TokenResultDto
 import org.ossiaustria.amigo.platform.utils.RandomUtils
 import org.springframework.restdocs.payload.FieldDescriptor
-import org.springframework.restdocs.payload.JsonFieldType.*
+import org.springframework.restdocs.payload.JsonFieldType.ARRAY
+import org.springframework.restdocs.payload.JsonFieldType.OBJECT
+import org.springframework.restdocs.payload.JsonFieldType.STRING
 import org.springframework.restdocs.payload.PayloadDocumentation.requestFields
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
-import java.util.*
+import java.util.UUID
 
 internal class AuthApiTest : AbstractRestApiTest() {
 
@@ -34,6 +42,31 @@ internal class AuthApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "register-success",
+                requestFields(registerRequestFields()),
+                responseFields(userSecretDtoResponseFields())
+            ).returns(SecretAccountDto::class.java)
+
+        with(accountService.findOneByEmail(email)!!) {
+            assertThat(id).isEqualTo(result.id)
+        }
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `should register with new user for explicit Group`() {
+        val randomUserName = RandomUtils.generateRandomUserName(10)
+        val randomPassword = RandomUtils.generateRandomPassword(30, true)
+        val email = "$randomUserName@example.com"
+        val registerRequest = RegisterRequest(
+            email, randomPassword, "absolute-new-name", optionalGroupId = group.id
+        )
+
+        val url = "$authUrl/register"
+
+        val result = this.performPost(url, body = registerRequest)
+            .expectOk()
+            .document(
+                "register-explicit-success",
                 requestFields(registerRequestFields()),
                 responseFields(userSecretDtoResponseFields())
             ).returns(SecretAccountDto::class.java)
@@ -254,6 +287,10 @@ internal class AuthApiTest : AbstractRestApiTest() {
             field("password", STRING, "A plain text password"),
             field("email", STRING, "A valid email"),
             field("name", STRING, "The fullname of the user"),
+            field(
+                "optionalGroupId", STRING,
+                "When given: attaches to existing Group. If not: creating a new implicit Group"
+            ).optional(),
         )
     }
 

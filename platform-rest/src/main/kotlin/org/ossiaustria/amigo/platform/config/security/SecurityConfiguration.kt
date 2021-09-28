@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
@@ -19,14 +20,15 @@ import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
 import springfox.documentation.builders.ApiInfoBuilder
-
+import springfox.documentation.builders.ParameterBuilder
 import springfox.documentation.builders.PathSelectors
-
 import springfox.documentation.builders.RequestHandlerSelectors
-
+import springfox.documentation.schema.ModelRef
+import springfox.documentation.service.Contact
+import springfox.documentation.service.Parameter
 import springfox.documentation.spi.DocumentationType
-
 import springfox.documentation.spring.web.plugins.Docket
+import java.util.UUID
 import javax.servlet.http.HttpServletResponse
 
 
@@ -45,9 +47,11 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
     override fun configure(webSecurity: WebSecurity) {
         webSecurity.ignoring().antMatchers("/docs", "/docs/*")
         webSecurity.ignoring().antMatchers("/error", "/favicon.ico")
-        webSecurity.ignoring().antMatchers("/swagger-ui/**", "/configuration/**","/swagger-ui.html",
-            "/swagger-ui.html/","/swagger-ui.html/*","/swagger-ui.html/**",
-            "/swagger-resources/**", "/v2/api-docs", "/v3/api-docs", "/webjars/**")
+        webSecurity.ignoring().antMatchers(
+            "/swagger-ui/**", "/configuration/**", "/swagger-ui.html",
+            "/swagger-ui.html/", "/swagger-ui.html/*", "/swagger-ui.html/**",
+            "/swagger-resources/**", "/v2/api-docs", "/v3/api-docs", "/webjars/**"
+        )
     }
 
     @Throws(Exception::class)
@@ -57,7 +61,14 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
             .anonymous().and()
             .authorizeRequests()
-            .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html","/swagger-ui.html/","/swagger-ui.html/*", "/webjars/swagger-ui/**").permitAll()
+            .antMatchers(
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html",
+                "/swagger-ui.html/",
+                "/swagger-ui.html/*",
+                "/webjars/swagger-ui/**"
+            ).permitAll()
             .and().authorizeRequests()
             .antMatchers(
                 "*",
@@ -104,13 +115,39 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
             .apis(RequestHandlerSelectors.basePackage("org.ossiaustria.amigo.platform.rest.v1"))
             .paths(PathSelectors.any())
             .build()
+            .directModelSubstitute(UUID::class.java, String::class.java)
+            .genericModelSubstitutes(ResponseEntity::class.java)
+            .globalOperationParameters(operationParameters())
             .apiInfo(
                 ApiInfoBuilder()
                     .version(version)
+                    .license("MIT")
+                    .contact(Contact("OSSI Austria", "ossi-austria.org", "hello@ossi-austria.org"))
                     .title("amigo-platform API")
                     .description("Almost RESTful API for amigo-platform auth, multimedia and messaging v$version")
                     .build()
             )
+    }
+
+    fun operationParameters(): List<Parameter>? {
+        val headers: MutableList<Parameter> = ArrayList<Parameter>()
+        headers.add(
+            ParameterBuilder().name("Authorization")
+                .description("Access Token DESC")
+                .modelRef(ModelRef("string"))
+                .parameterType("header")
+                .required(true)
+                .build()
+        )
+        headers.add(
+            ParameterBuilder().name("Amigo-Person-Id")
+                .description("Custom Head for current PersonId")
+                .modelRef(ModelRef("string"))
+                .parameterType("header")
+                .required(false)
+                .build()
+        )
+        return headers
     }
 
     companion object {

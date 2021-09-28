@@ -27,6 +27,14 @@ sealed class SecurityError(errorName: String, message: String) : ServiceError(er
     @ResponseStatus(code = HttpStatus.BAD_REQUEST)
     class PersonsNotProvided : SecurityError("PERSONS_NOT_GIVEN", "Sender and receiver are not given")
 
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    class GroupNotFound(info: String) :
+        SecurityError("GROUP_NOT_FOUND", "Group could not be found: $info")
+
+    @ResponseStatus(code = HttpStatus.BAD_REQUEST)
+    class GroupCannotBeCreated(info: String) :
+        SecurityError("GROUP_CANNOT_BE_CREATED", "Group could not be found: $info")
+
 }
 
 open class SecuredService {
