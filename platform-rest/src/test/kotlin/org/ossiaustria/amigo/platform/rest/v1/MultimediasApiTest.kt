@@ -87,9 +87,7 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "multimedias-update-file",
-                responseFields(multimediasResponseFields()),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(multimediasResponseFields()))
             .returns(MultimediaDto::class.java)
         assertThat(second).isNotNull
     }
@@ -109,9 +107,7 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "multimedias-own",
-                responseFields(multimediasResponseFields("[].")),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(multimediasResponseFields("[].")))
             .returnsList(MultimediaDto::class.java)
 
         assertThat(result).isNotNull
@@ -136,9 +132,7 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "multimedias-one",
-                responseFields(multimediasResponseFields()),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(multimediasResponseFields()))
             .returns(MultimediaDto::class.java)
 
         assertThat(result).isNotNull

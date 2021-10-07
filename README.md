@@ -87,3 +87,12 @@ which is ignored by git and NOT compiled into the app, but merely used as runtim
 
 * Ask someone for more information
 * Add **firebase-service-account.json** into that directory
+
+# Create OpenApi client from openApi
+
+Note: Works with openApi v2 currently.
+
+````
+docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli generate -i http://192.168.0.20:8080/v2/api-docs -g dart -o /local/out/dart
+````
+https://springframework.guru/spring-boot-restful-api-documentation-with-swagger-2/

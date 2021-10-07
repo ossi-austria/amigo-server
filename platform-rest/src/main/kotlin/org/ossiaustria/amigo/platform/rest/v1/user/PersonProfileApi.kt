@@ -3,14 +3,23 @@ package org.ossiaustria.amigo.platform.rest.v1.user
 
 import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.services.PersonService
 import org.ossiaustria.amigo.platform.exceptions.UserNotFoundException
 import org.ossiaustria.amigo.platform.rest.CurrentUserService
+import org.ossiaustria.amigo.platform.rest.v1.common.Headers
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.util.*
+import java.util.UUID
 
 @Timed(value = "time.api.profile")
 @RestController
@@ -23,8 +32,12 @@ class PersonProfileApi(
     @ApiOperation("Get own Person information (=Profile) for primary or given personId")
     @GetMapping
     fun myProfile(
+        @ApiParam(hidden = true)
         account: Account,
-        @RequestHeader("Amigo-Person-Id",required = false) personId: UUID? = null
+
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null
     ): PersonDto =
         personService
             .findById(account.person(personId).id)
@@ -34,9 +47,14 @@ class PersonProfileApi(
     @ApiOperation("Update Profile for primary or given personId")
     @PatchMapping
     fun updateProfile(
+        @ApiParam(hidden = true)
         account: Account,
-        @RequestBody changePersonDto: ChangePersonDto,
-        @RequestHeader("Amigo-Person-Id",required = false) personId: UUID? = null
+
+        @RequestBody
+        changePersonDto: ChangePersonDto,
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null
     ): PersonDto =
         personService
             .changeNameAndAvatarUrl(account.person(personId), changePersonDto.name, changePersonDto.avatarUrl)
@@ -54,9 +72,15 @@ class PersonProfileApi(
             MediaType.MULTIPART_FORM_DATA_VALUE]
     )
     fun uploadAvatar(
+        @ApiParam(hidden = true)
         account: Account,
-        @RequestPart("file") file: MultipartFile,
-        @RequestPart("personId", required = false) personId: UUID? = null
+
+        @RequestPart("file")
+        file: MultipartFile,
+
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null
     ): PersonDto =
         personService
             .uploadAvatar(account.person(personId), file)

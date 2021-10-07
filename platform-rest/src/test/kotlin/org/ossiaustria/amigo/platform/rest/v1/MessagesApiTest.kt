@@ -172,9 +172,7 @@ internal class MessagesApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "messages-received",
-                responseFields(messageResponseFields("[].")),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(messageResponseFields("[].")))
             .returnsList(MessageDto::class.java)
 
         assertThat(result).isNotNull
@@ -190,9 +188,7 @@ internal class MessagesApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "messages-sent",
-                responseFields(messageResponseFields("[].")),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(messageResponseFields("[].")))
             .returnsList(MessageDto::class.java)
 
         assertThat(result).isNotNull
@@ -212,9 +208,7 @@ internal class MessagesApiTest : AbstractRestApiTest() {
         val result: MultiMessageDto = this.performGet("$baseUrl/$msgId", accessToken.token, person1Id)
             .expectOk()
             .document(
-                "messages-one", responseFields(messageResponseFields()),
-                requestParameters(optionalPersonId())
-            )
+                "messages-one", responseFields(messageResponseFields()))
             .returns(MultiMessageDto::class.java)
 
         assertThat(result).isNotNull
@@ -242,7 +236,7 @@ internal class MessagesApiTest : AbstractRestApiTest() {
                 .expectOk()
                 .document(
                     "messages-set-retrieved", responseFields(messageResponseFields()),
-                    requestParameters(optionalPersonId())
+                   
                 )
                 .returns(MultiMessageDto::class.java)
 

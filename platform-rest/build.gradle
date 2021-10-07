@@ -1,16 +1,17 @@
 plugins {
-    id 'org.springframework.boot' version '2.5.4'
+    id 'org.springframework.boot' version '2.5.5'
+    id 'io.spring.dependency-management'
     id 'org.asciidoctor.jvm.convert' version "2.4.0"
 }
 
 dependencies {
     implementation project(path: ':platform-domain', configuration: 'default')
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+//    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinxCoroutinesVersion"
 
     implementation "org.projectlombok:lombok"
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.10"
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.12.5"
 
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
@@ -40,6 +41,7 @@ dependencies {
     def springfoxVersion = "2.9.2"
     implementation "io.springfox:springfox-swagger2:$springfoxVersion"
     implementation "io.springfox:springfox-swagger-ui:$springfoxVersion"
+    implementation "io.springfox:springfox-bean-validators:$springfoxVersion"
 
     testImplementation "org.junit.jupiter:junit-jupiter:$jupiterVersion"
     // DO NOT USE:   testImplementation "org.junit.jupiter:junit-jupiter-api:$jupiter"

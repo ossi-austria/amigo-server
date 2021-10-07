@@ -2,7 +2,7 @@ package org.ossiaustria.amigo.platform.domain.models
 
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
-import org.ossiaustria.amigo.platform.domain.services.sendables.SendableError
+import org.ossiaustria.amigo.platform.domain.services.SecurityError
 import java.time.ZonedDateTime
 import java.util.*
 import javax.persistence.*
@@ -42,7 +42,7 @@ data class Account(
 ) {
 
     fun person(personId: UUID?): Person = if (personId != null) {
-        this.persons.find { it.id == personId } ?: throw SendableError.PersonsNotInSameGroup()
+        this.persons.find { it.id == personId } ?: throw SecurityError.PersonsNotInSameGroup()
     } else {
         primaryPerson()
     }

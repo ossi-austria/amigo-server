@@ -18,7 +18,7 @@ import org.springframework.test.context.TestPropertySource
 @SpringBootTest
 @ActiveProfiles(ApplicationProfiles.TEST)
 @ComponentScan("org.ossiaustria.amigo.platform.domain")
-@AutoConfigureEmbeddedDatabase
+@AutoConfigureEmbeddedDatabase(type = AutoConfigureEmbeddedDatabase.DatabaseType.POSTGRES)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 @ContextConfiguration(classes = [NoopMessagingConfig::class])

@@ -1,6 +1,8 @@
 package org.ossiaustria.amigo.platform.rest.v1.multimedias
 
 import io.micrometer.core.annotation.Timed
+import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.services.multimedia.MultimediaService
@@ -8,21 +10,29 @@ import org.ossiaustria.amigo.platform.exceptions.BadRequestException
 import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
 import org.ossiaustria.amigo.platform.exceptions.ErrorCode
 import org.ossiaustria.amigo.platform.exceptions.NotFoundException
+import org.ossiaustria.amigo.platform.rest.v1.common.Headers
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestPart
+import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
-import java.util.*
+import java.util.UUID
 
 @Timed(value = "time.api.multimedias")
 @RestController
 @RequestMapping("/v1/multimedias", produces = ["application/json"], consumes = ["application/json"])
 internal class MultimediasApi(private val multimediaService: MultimediaService) {
 
+    @ApiOperation("Upload a File and create new Multimedia")
     @PostMapping(
-        "",
         consumes = [
             MediaType.IMAGE_GIF_VALUE,
             MediaType.APPLICATION_JSON_VALUE,
@@ -31,14 +41,22 @@ internal class MultimediasApi(private val multimediaService: MultimediaService) 
             MediaType.MULTIPART_FORM_DATA_VALUE]
     )
     fun createMultimedia(
-        @RequestParam(value = "ownerId") ownerId: UUID,
-        @RequestParam(value = "albumId", required = false) albumId: UUID? = null,
-        @RequestPart(value = "name", required = false) name: String?,
-        @RequestPart("file") file: MultipartFile,
+        @RequestParam(value = "ownerId")
+        ownerId: UUID,
+
+        @RequestParam(value = "albumId", required = false)
+        albumId: UUID? = null,
+
+        @RequestPart(value = "name", required = false)
+        name: String?,
+
+        @RequestPart("file")
+        file: MultipartFile,
     ): MultimediaDto {
         return multimediaService.createMultimedia(ownerId, albumId, name, file).toDto()
     }
 
+    @ApiOperation("Upload a File to update Multimedia")
     @PostMapping(
         "/{id}/file",
         consumes = [
@@ -50,18 +68,30 @@ internal class MultimediasApi(private val multimediaService: MultimediaService) 
     )
     fun uploadFile(
         @PathVariable(value = "id") id: UUID,
-        @RequestPart("file") file: MultipartFile,
-        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
-        account: Account,
+        @RequestPart("file")
+        file: MultipartFile,
+
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null,
+
+        @ApiParam(hidden = true) account: Account,
     ): Multimedia {
         val multimedia = getOneEntity(account.person(personId).id, id)
         return multimediaService.uploadFile(multimedia, file)
     }
 
+    @ApiOperation("Download File of Multimedia")
     @GetMapping("/{id}/file")
     fun downloadFile(
-        @PathVariable(value = "id") id: UUID,
-        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        @PathVariable(value = "id")
+        id: UUID,
+
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null,
+
+        @ApiParam(hidden = true)
         account: Account,
     ): ResponseEntity<Resource> {
         try {
@@ -81,18 +111,28 @@ internal class MultimediasApi(private val multimediaService: MultimediaService) 
     }
 
 
+    @ApiOperation("Get all own Multimedias")
     @GetMapping("/own")
     fun own(
-        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null,
+
+        @ApiParam(hidden = true)
         account: Account,
     ): List<MultimediaDto> {
         val receiverId = account.person(personId).id
         return multimediaService.findWithOwner(receiverId).map(Multimedia::toDto)
     }
 
+    @ApiOperation("Get all Multimedias shared for you")
     @GetMapping("/shared")
     fun shared(
-        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null,
+
+        @ApiParam(hidden = true)
         account: Account,
     ): List<MultimediaDto> {
         val accessorId = account.person(personId).id
@@ -101,8 +141,14 @@ internal class MultimediasApi(private val multimediaService: MultimediaService) 
 
     @GetMapping("/{id}")
     fun getOne(
-        @PathVariable(value = "id") id: UUID,
-        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        @PathVariable(value = "id")
+        id: UUID,
+
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null,
+
+        @ApiParam(hidden = true)
         account: Account,
     ): MultimediaDto = getOneEntity(account.person(personId).id, id).toDto()
 

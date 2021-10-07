@@ -7,9 +7,9 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.21"
-        classpath("org.jetbrains.kotlin:kotlin-noarg:1.5.21")
-        classpath("org.jetbrains.kotlin:kotlin-allopen:1.5.21")
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.31"
+        classpath("org.jetbrains.kotlin:kotlin-noarg:1.5.31")
+        classpath("org.jetbrains.kotlin:kotlin-allopen:1.5.31")
   }
 }
 
@@ -31,17 +31,17 @@ subprojects {
     apply plugin: 'kotlin-allopen'
     apply plugin: 'jacoco'
 
-    ext['junit-jupiter.version'] = '5.7.2'
+    ext['junit-jupiter.version'] = '5.8.1'
 
     ext {
-        kotlinxCoroutinesVersion = "1.5.0"
-        jupiterVersion = "5.7.2"
+        kotlinxCoroutinesVersion = "1.5.2-native-mt"
+        jupiterVersion = "5.8.1"
         firebaseAdminVersion = "7.3.0"
-        mockkVersion = "1.11.0"
+        mockkVersion = "1.12.0"
         springmockkVersion = "3.0.1"
-        testcontainersVersion = "1.15.3"
+        testcontainersVersion = "1.16.0"
         hamcrestVersion = "1.3"
-        zonkPostegresTestVersion = "2.0.1"
+        zonkPostegresTestVersion = "2.1.0"
     }
     repositories {
 //        jcenter()
@@ -50,8 +50,8 @@ subprojects {
 
     dependencyManagement {
         imports {
-            mavenBom("org.springframework.boot:spring-boot-dependencies:2.5.2.RELEASE") {
-                bomProperty("kotlin.version", "1.5.10")
+            mavenBom("org.springframework.boot:spring-boot-dependencies:2.5.5.RELEASE") {
+                bomProperty("kotlin.version", "1.5.31")
             }
         }
     }

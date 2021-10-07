@@ -94,7 +94,7 @@ class PersonService {
 
     fun findByViewerAndId(person: Person, id: UUID): Person {
         return personRepository.findByGroupIdAndId(person.groupId, id)
-            ?: throw NotFoundException(ErrorCode.NotFound, "Other Person not found in same Group")
+            ?: throw SecurityError.PersonsNotInSameGroup()
     }
 
     fun loadAvatar(viewer: Person, otherPersonId: UUID): PersonAvatar {

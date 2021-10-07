@@ -166,9 +166,7 @@ internal class GroupsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "groups-my-success",
-                responseFields(groupFields("[].")),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(groupFields("[].")))
             .returnsList(GroupDto::class.java)
 
         assertEquals(2, groups.size)

@@ -1,19 +1,30 @@
 package org.ossiaustria.amigo.platform.rest.v1.sendables
 
+import io.swagger.annotations.ApiModel
+import io.swagger.annotations.ApiModelProperty
 import org.ossiaustria.amigo.platform.domain.models.Message
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import java.time.ZonedDateTime
 import java.util.*
 
 
+@ApiModel(description = "Message")
 internal data class MessageDto(
+    @ApiModelProperty(dataType = "String")
     override val id: UUID,
+    @ApiModelProperty(dataType = "String")
     override val senderId: UUID,
+    @ApiModelProperty(dataType = "String")
     override val receiverId: UUID,
+    @ApiModelProperty(dataType = "String")
     val text: String,
+    @ApiModelProperty(dataType = "String")
     val multimediaId: UUID? = null,
+    @ApiModelProperty
     override val createdAt: ZonedDateTime = ZonedDateTime.now(),
+    @ApiModelProperty
     override val sentAt: ZonedDateTime? = null,
+    @ApiModelProperty
     override val retrievedAt: ZonedDateTime? = null
 ) : SendableDto
 

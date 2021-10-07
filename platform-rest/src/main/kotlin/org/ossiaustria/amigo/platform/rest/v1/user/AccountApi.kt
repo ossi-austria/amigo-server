@@ -2,6 +2,7 @@ package org.ossiaustria.amigo.platform.rest.v1.user
 
 
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.services.auth.AuthService
 import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.ossiaustria.amigo.platform.rest.CurrentUserService
@@ -20,7 +21,7 @@ class AccountApi(
     @ApiOperation("Update Firebase Cloud Messaging token for own Account")
     @PostMapping("/set-fcm-token")
     fun setFcmToken(
-        tokenUserDetails: TokenUserDetails,
+        @ApiParam(hidden = true) tokenUserDetails: TokenUserDetails,
         @RequestBody setFcmTokenRequest: SetFcmTokenRequest
     ) {
         authService.setFcmToken(tokenUserDetails.accountId, setFcmTokenRequest.fcmToken)

@@ -5,6 +5,7 @@ package org.ossiaustria.amigo.platform.domain.models
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
+import org.ossiaustria.amigo.platform.domain.services.SecurityError
 import org.ossiaustria.amigo.platform.domain.services.ServiceError
 import java.util.*
 import javax.persistence.*
@@ -50,4 +51,9 @@ data class Group(
     fun findMember(personId: UUID) = members.firstOrNull { it.id == personId }
     fun findMember(person: Person) = findMember(person.id)
 
+    companion object {
+        fun assertSameGroup(id1:UUID,id2:UUID) {
+            if (id1 != id2) throw SecurityError.PersonsNotInSameGroup()
+        }
+    }
 }

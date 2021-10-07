@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Import
 import org.springframework.scheduling.annotation.EnableScheduling
+import springfox.bean.validators.configuration.BeanValidatorPluginsConfiguration
 import springfox.documentation.swagger2.annotations.EnableSwagger2
 
 @SpringBootApplication(
@@ -14,7 +15,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
 )
 @EnableConfigurationProperties(ApplicationConfiguration::class)
 @EnableSwagger2
-@Import(DomainModule::class)
+@Import(value=[DomainModule::class,BeanValidatorPluginsConfiguration::class])
 class RestApplication
 
 fun main(args: Array<String>) {

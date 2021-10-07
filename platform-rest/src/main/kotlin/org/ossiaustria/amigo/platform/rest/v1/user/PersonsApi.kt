@@ -2,12 +2,15 @@ package org.ossiaustria.amigo.platform.rest.v1.user
 
 
 import io.micrometer.core.annotation.Timed
+import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.services.PersonService
 import org.ossiaustria.amigo.platform.exceptions.BadRequestException
 import org.ossiaustria.amigo.platform.exceptions.ErrorCode
 import org.ossiaustria.amigo.platform.exceptions.NotFoundException
 import org.ossiaustria.amigo.platform.rest.CurrentUserService
+import org.ossiaustria.amigo.platform.rest.v1.common.Headers
 import org.springframework.core.io.Resource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -28,10 +31,16 @@ class PersonsApi(
     val currentUserService: CurrentUserService
 ) {
 
+    @ApiOperation("Download avatar File of an Person")
     @GetMapping("/{id}/avatar.*")
     fun profileAvatar(
-        @PathVariable("id") id: UUID,
-        @RequestHeader("Amigo-Person-Id", required = false) personId: UUID? = null,
+        @PathVariable("id")
+        id: UUID,
+
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null,
+
+        @ApiParam(hidden = true)
         account: Account,
         request: HttpServletResponse
     ): ResponseEntity<Resource> {

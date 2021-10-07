@@ -11,6 +11,7 @@ import org.ossiaustria.amigo.platform.domain.models.Call
 import org.ossiaustria.amigo.platform.domain.models.enums.CallState
 import org.ossiaustria.amigo.platform.domain.models.enums.CallType
 import org.ossiaustria.amigo.platform.domain.repositories.CallRepository
+import org.ossiaustria.amigo.platform.domain.services.SecurityError
 import org.ossiaustria.amigo.platform.domain.services.jitsi.JitsiJwtService
 import org.ossiaustria.amigo.platform.domain.services.messaging.NotificationService
 import org.springframework.beans.factory.annotation.Autowired
@@ -195,7 +196,7 @@ internal class CallServiceTest : SendableServiceTest<Call, CallService>() {
 
     @Test
     fun `createCall should throw when sender and receiver are the same`() {
-        assertThrows<SendableError.PersonsAreTheSame> {
+        assertThrows<SecurityError.PersonsAreTheSame> {
             service.createCall(personId1, personId1, CallType.VIDEO)
         }
     }
@@ -203,7 +204,7 @@ internal class CallServiceTest : SendableServiceTest<Call, CallService>() {
 
     @Test
     fun `createCall should throw when send and receiver are not in same group`() {
-        assertThrows<SendableError.PersonsNotInSameGroup> {
+        assertThrows<SecurityError.PersonsNotInSameGroup> {
             service.createCall(personId1, personId3, CallType.VIDEO)
         }
     }

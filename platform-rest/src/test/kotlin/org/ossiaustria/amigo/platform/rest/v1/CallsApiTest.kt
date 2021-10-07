@@ -146,9 +146,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-received",
-                responseFields(callResponseFields("[].")),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(callResponseFields("[].")))
             .returnsList(CallDto::class.java)
 
         assertThat(result).isNotNull
@@ -170,9 +168,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-sent",
-                responseFields(callResponseFields("[].")),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(callResponseFields("[].")))
             .returnsList(CallDto::class.java)
 
         assertThat(result).isNotNull
@@ -199,9 +195,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-one",
-                responseFields(callTokenResponseFields()),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(callTokenResponseFields()))
             .returns(CallTokenDto::class.java)
 
         assertThat(result).isNotNull
@@ -220,9 +214,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-accept",
-                responseFields(callTokenResponseFields()),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(callTokenResponseFields()))
             .returns(CallTokenDto::class.java)
 
         assertThat(result).isNotNull
@@ -254,9 +246,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-cancel",
-                responseFields(callResponseFields()),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(callResponseFields()))
             .returns(CallDto::class.java)
 
         assertThat(result).isNotNull
@@ -278,9 +268,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-deny",
-                responseFields(callResponseFields()),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(callResponseFields()))
             .returns(CallDto::class.java)
 
         assertThat(result).isNotNull
@@ -304,9 +292,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-finish",
-                responseFields(callResponseFields()),
-                requestParameters(optionalPersonId())
-            )
+                responseFields(callResponseFields()))
             .returns(CallDto::class.java)
 
         assertThat(result).isNotNull

@@ -1,11 +1,16 @@
 package org.ossiaustria.amigo.platform.domain.services.auth
 
 
-import org.ossiaustria.amigo.platform.domain.models.*
+import org.ossiaustria.amigo.platform.domain.models.Account
+import org.ossiaustria.amigo.platform.domain.models.EmailValidator
+import org.ossiaustria.amigo.platform.domain.models.Group
+import org.ossiaustria.amigo.platform.domain.models.Person
+import org.ossiaustria.amigo.platform.domain.models.StringValidator
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import org.ossiaustria.amigo.platform.domain.repositories.AccountRepository
 import org.ossiaustria.amigo.platform.domain.repositories.GroupRepository
 import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
+import org.ossiaustria.amigo.platform.domain.services.SecurityError
 import org.ossiaustria.amigo.platform.exceptions.UnauthorizedException
 import org.ossiaustria.amigo.platform.exceptions.UserAlreadyExistsException
 import org.slf4j.LoggerFactory
@@ -17,7 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.validation.Validator
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 import javax.transaction.Transactional
 import javax.validation.constraints.Email
@@ -73,7 +78,8 @@ class AuthService(
     fun registerUser(
         @Email email: String,
         @NotBlank plainPassword: String,
-        @NotBlank name: String
+        @NotBlank name: String,
+        optionalGroupId: UUID? = null,
     ): Account {
 
         EmailValidator.validate(email)
@@ -82,32 +88,64 @@ class AuthService(
         val encryptedPassword = passwordEncoder.encode(plainPassword)
         val byEmail: Account? = accountRepository.findOneByEmail(email)
 
-
         log.info("Someone tries to register: $name $email")
         if (byEmail != null) throw UserAlreadyExistsException(email, email)
 
         val accountId = randomUUID()
 
-        val account =
-            Account(
+        val initialPersons = createInitialGroupPersons(name, accountId, optionalGroupId)
+        val account = Account(
                 id = accountId, email = email, passwordEncrypted = encryptedPassword,
-                persons = listOf(
-                    Person(
-                        id = randomUUID(),
-                        name = name,
-                        groupId = defaultGroupForNewUsers().id,
-                        memberType = MembershipType.MEMBER,
-                        accountId = accountId
-                    )
-                )
+                persons = initialPersons
             )
 
         val newUser = accountRepository.save(account)
 
-//        personRepository.save(
-//
-//        )
         return accountRepository.findOneByEmail(newUser.email)!!
+    }
+
+    /**
+     * Can create a Registration for a new User with an invitation (optionalGroupId), or
+     * create an implicit Group
+     */
+    fun createInitialGroupPersons(
+        name: String,
+        accountId: UUID,
+        optionalGroupId: UUID? = null,
+    ): List<Person> {
+        var type = MembershipType.MEMBER
+        val chosenGroupId = if (optionalGroupId != null) {
+            groupRepository.findByIdOrNull(optionalGroupId)?.id
+                ?: throw SecurityError.GroupNotFound(optionalGroupId.toString())
+        } else {
+            type = MembershipType.OWNER
+            createImplicitGroup(accountId, optionalGroupId).id
+        }
+
+        return listOf(
+            Person(
+                id = randomUUID(),
+                accountId = accountId,
+                name = name,
+                groupId = chosenGroupId,
+                memberType = type
+            )
+        )
+    }
+
+    private fun createImplicitGroup(accountId: UUID, optionalGroupId: UUID?): Group {
+        val group = groupRepository.findByName(accountId.toString()).firstOrNull()
+        if (group != null) {
+            throw SecurityError.GroupCannotBeCreated(optionalGroupId.toString())
+        }
+        val newGroupId = randomUUID()
+        return groupRepository.save(
+            Group(
+                newGroupId,
+                accountId.toString(),
+                listOf()
+            )
+        )
     }
 
     @Transactional
@@ -155,9 +193,6 @@ class AuthService(
     } catch (e: Exception) {
         throw UnauthorizedException(e.message)
     }
-
-    private fun defaultGroupForNewUsers(): Group = groupRepository.findByName(DEFAULT_GROUP).firstOrNull()
-        ?: groupRepository.save(Group(randomUUID(), DEFAULT_GROUP))
 
     @Transactional
     fun changePasswordForUser(account: Account, newPassword: String): Boolean {

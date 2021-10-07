@@ -15,9 +15,14 @@ class PasswordApi(
     @PostMapping("/reset")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun passwordReset(
-        @RequestParam(value = "email", required = false) email: String?,
-        @RequestParam(value = "user_name", required = false) userName: String?,
-        @RequestParam(value = "user_id", required = false) userId: UUID?
+        @RequestParam(value = "email", required = false)
+        email: String?,
+
+        @RequestParam(value = "user_name", required = false)
+        userName: String?,
+
+        @RequestParam(value = "user_id", required = false)
+        userId: UUID?
     ) {
         passwordService.resetPasswordStart(email, userName, userId)
     }

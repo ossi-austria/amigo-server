@@ -3,6 +3,7 @@ package org.ossiaustria.amigo.platform.rest.v1.user
 
 import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Group
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
@@ -23,14 +24,20 @@ class GroupsApi(
 
     @ApiOperation("Get own Group[s]")
     @GetMapping
-    fun getMyGroups(account: Account): List<GroupDto> =
+    fun getMyGroups(
+        @ApiParam(hidden = true)
+        account: Account
+    ): List<GroupDto> =
         groupsService.findGroupsOfUser(account).map(Group::toDto)
 
     @ApiOperation("Create new Group and an admin Person for own Account")
     @PostMapping
     fun createGroup(
+        @ApiParam(hidden = true)
         account: Account,
-        @RequestBody createGroupRequest: CreateGroupRequest,
+
+        @RequestBody
+        createGroupRequest: CreateGroupRequest,
     ): GroupDto {
         return groupsService.createGroup(
             account,
@@ -43,9 +50,14 @@ class GroupsApi(
     @ApiOperation("Change name of Group via PATCH")
     @PatchMapping("/{id}")
     fun changeGroupName(
+        @ApiParam(hidden = true)
         account: Account,
-        @PathVariable("id") id: UUID,
-        @RequestBody changeGroupRequest: ChangeGroupRequest
+
+        @PathVariable("id")
+        id: UUID,
+
+        @RequestBody
+        changeGroupRequest: ChangeGroupRequest
     ): GroupDto {
         val group = groupsService.findGroup(account, id)
         val person = group.findAdmin(account)
@@ -60,9 +72,14 @@ class GroupsApi(
     @ApiOperation("Add a new Person to this Group")
     @PostMapping("/{id}/members")
     fun addMember(
+        @ApiParam(hidden = true)
         account: Account,
-        @PathVariable("id") id: UUID,
-        @RequestBody request: AddGroupMemberRequest
+
+        @PathVariable("id")
+        id: UUID,
+
+        @RequestBody
+        request: AddGroupMemberRequest
     ): GroupDto {
         val group = groupsService.findGroup(account, id)
         val admin = group.findAdmin(account)
@@ -79,10 +96,17 @@ class GroupsApi(
     @ApiOperation("Change a Person/Membership of this Group")
     @PatchMapping("/{id}/members/{personId}")
     fun changeMember(
+        @ApiParam(hidden = true)
         account: Account,
-        @PathVariable("id") id: UUID,
-        @PathVariable("personId") personId: UUID,
-        @RequestBody request: ChangeGroupMemberRequest
+
+        @PathVariable("id")
+        id: UUID,
+
+        @PathVariable("personId")
+        personId: UUID,
+
+        @RequestBody
+        request: ChangeGroupMemberRequest
     ): GroupDto {
         val findGroup = groupsService.findGroup(account, id)
         val admin = findGroup.findAdmin(account)
@@ -96,9 +120,14 @@ class GroupsApi(
     @DeleteMapping("/{id}/members/{personId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun removeMember(
+        @ApiParam(hidden = true)
         account: Account,
-        @PathVariable("id") id: UUID,
-        @PathVariable("personId") personId: UUID,
+
+        @PathVariable("id")
+        id: UUID,
+
+        @PathVariable("personId")
+        personId: UUID,
     ): GroupDto {
         val findGroup = groupsService.findGroup(account, id)
         val admin = findGroup.findAdmin(account)
@@ -111,19 +140,27 @@ class GroupsApi(
     @ApiOperation("Get a Group by :id")
     @GetMapping("/{id}")
     fun getGroup(
-        @PathVariable("id") id: UUID,
-        account: Account
-    ): GroupDto =
-        groupsService.findGroup(account, id).toDto()
+        @PathVariable("id")
+        id: UUID,
 
+        @ApiParam(hidden = true)
+        account: Account
+        ): GroupDto =
+        groupsService.findGroup(account, id).toDto()
 
     @ApiOperation("Search/filter visible Groups")
     @GetMapping("/filtered")
     fun filterGroups(
-        @RequestParam(value = "personId", required = false) personId: UUID?,
-        @RequestParam(value = "name", required = false) name: String?,
-        account: Account
-    ): List<GroupDto> =
+        @RequestParam(value = "personId", required = false)
+        personId: UUID?,
+
+        @RequestParam(value = "name", required = false)
+        name: String?,
+
+        @ApiParam(hidden = true)
+        account: Account,
+
+        ): List<GroupDto> =
         groupsService.filterGroups(account, personId, name).map(Group::toDto)
 
 }
