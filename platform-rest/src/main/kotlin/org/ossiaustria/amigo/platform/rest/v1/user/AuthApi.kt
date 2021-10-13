@@ -16,7 +16,7 @@ import javax.validation.constraints.Email
 import javax.validation.constraints.NotEmpty
 
 @RestController
-@RequestMapping("/v1/auth", produces = ["application/json"], consumes = ["application/json"])
+@RequestMapping("/v1/auth", produces = ["application/json"])
 class AuthApi(
     val authService: AuthService,
     val currentUserService: CurrentUserService

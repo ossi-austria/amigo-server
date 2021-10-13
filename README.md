@@ -96,3 +96,14 @@ Note: Works with openApi v2 currently.
 docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli generate -i http://192.168.0.20:8080/v2/api-docs -g dart -o /local/out/dart
 ````
 https://springframework.guru/spring-boot-restful-api-documentation-with-swagger-2/
+
+# Create Testdata via Swagger
+
+* http://amigo-dev.ossi-austria.org:8080/swagger-ui.html
+* loging with your Test user, via auth-api login (click on "Try out")
+`  {
+  "email": "string",
+  "password": "string"
+  }`
+* remember your data: **personId**, **accessToken**, eventually groupId
+* On every Request, provide **personId** as **Amigo-Person-Id** and **accessToken** as **Authorization**

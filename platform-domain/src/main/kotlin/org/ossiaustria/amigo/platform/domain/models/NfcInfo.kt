@@ -35,6 +35,11 @@ data class NfcInfo(
 
     val name: String,
 
+    /**
+     * String to store the NFC tag's ID information
+     */
+    val nfcRef: String,
+
     @Column(length = 16, nullable = true)
     @JoinColumn(name = "linked_person_id", foreignKey = ForeignKey(name = "nfcs_person_linked_person_id_fk"))
     val linkedPersonId: UUID? = null,

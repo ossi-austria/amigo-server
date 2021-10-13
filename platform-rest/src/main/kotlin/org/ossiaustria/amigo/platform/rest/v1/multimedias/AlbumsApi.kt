@@ -19,15 +19,23 @@ import java.util.UUID
 
 @Timed
 @RestController
-@RequestMapping("/v1/albums", produces = ["application/json"], consumes = ["application/json"])
+@RequestMapping("/v1/albums", produces = ["application/json"])
 internal class AlbumsApi(private val albumService: AlbumService) {
 
     @ApiOperation("Create a new Album as Owner")
     @PostMapping
     fun createAlbum(
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null,
+
+        @ApiParam(hidden = true)
+        account: Account,
+
         @RequestBody request: CreateAlbumRequest
     ): AlbumDto {
-        return albumService.createAlbum(request.ownerId, request.name).toDto()
+        val ownerId = account.person(personId).id
+        return albumService.createAlbum(ownerId, request.name).toDto()
     }
 
     @ApiOperation("Get all Albums you can access")
@@ -76,7 +84,6 @@ internal class AlbumsApi(private val albumService: AlbumService) {
     }
 
     internal data class CreateAlbumRequest(
-        val ownerId: UUID,
         val name: String,
     )
 }

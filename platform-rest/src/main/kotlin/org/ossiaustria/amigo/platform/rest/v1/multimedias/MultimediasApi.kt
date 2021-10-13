@@ -28,7 +28,7 @@ import java.util.UUID
 
 @Timed(value = "time.api.multimedias")
 @RestController
-@RequestMapping("/v1/multimedias", produces = ["application/json"], consumes = ["application/json"])
+@RequestMapping("/v1/multimedias", produces = ["application/json"])
 internal class MultimediasApi(private val multimediaService: MultimediaService) {
 
     @ApiOperation("Upload a File and create new Multimedia")

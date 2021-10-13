@@ -43,9 +43,10 @@ internal class NfcInfoApiTest : AbstractRestApiTest() {
         val ownerId = person1Id
         val creatorId = person1Id
         val name = "newname"
+        val nfcRef = "nfcRef"
 
         // Cannot mock “RequestPart" name and file
-        every { nfcInfoService.createNfc(eq(name), eq(ownerId), eq(creatorId)) } returns
+        every { nfcInfoService.createNfc(eq(name), eq(nfcRef), eq(ownerId), eq(creatorId)) } returns
             mockNfcInfo(name = name, ownerId = ownerId, creatorId = creatorId)
 
         val result = this.performPost(
@@ -54,6 +55,7 @@ internal class NfcInfoApiTest : AbstractRestApiTest() {
                 name = name,
                 ownerId = ownerId,
                 creatorId = creatorId,
+                nfcRef = nfcRef,
             ),
         )
             .expectOk()
@@ -63,6 +65,45 @@ internal class NfcInfoApiTest : AbstractRestApiTest() {
                     field("creatorId", STRING, "UUID of creator - must be your person's id"),
                     field("ownerId", STRING, "UUID of owner - must be the Analogue's id"),
                     field("name", STRING, "Name of NFC Tag to be shown in UI").optional(),
+                    field("nfcRef", STRING, "Unique ref id on NTF Tag").optional(),
+                ),
+                responseFields(nfcInfosResponseFields())
+            )
+            .returns(NfcInfoDto::class.java)
+
+        assertThat(result).isNotNull
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `changeNfc should change NfcInfo`() {
+
+        val itemId = randomUUID()
+
+        every { nfcInfoService.findAllByCreator(person1Id) } returns listOf(
+            mockNfcInfo(
+                id = itemId, ownerId = person2Id, creatorId = person1Id
+            )
+        )
+
+        every { nfcInfoService.changeNfcInfo(any(), any(), any(), any()) } returns
+            mockNfcInfo(name = "name", nfcRef = "nfcRef", ownerId = person2Id, creatorId = person1Id)
+
+        val result = this.performPatch(
+            "$baseUrl/$itemId", accessToken.token, personId = person1Id,
+            body = NfcInfoApi.ChangeNfcInfoRequest(
+                name = "newname",
+                linkedAlbumId = randomUUID(),
+                linkedPersonId = randomUUID(),
+            ),
+        )
+            .expectOk()
+            .document(
+                "nfcs-change",
+                requestFields(
+                    field("name", STRING, "Name of NFC Tag to be set to").optional(),
+                    field("linkedAlbumId", STRING, "UUID of Album - must be in same Group"),
+                    field("linkedPersonId", STRING, "UUID of Person - must be in same Group"),
                 ),
                 responseFields(nfcInfosResponseFields())
             )
@@ -86,7 +127,8 @@ internal class NfcInfoApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "nfcs-own",
-                responseFields(nfcInfosResponseFields("[].")))
+                responseFields(nfcInfosResponseFields("[]."))
+            )
             .returnsList(NfcInfoDto::class.java)
 
         assertThat(result).isNotNull
@@ -151,7 +193,8 @@ internal class NfcInfoApiTest : AbstractRestApiTest() {
         id: UUID = randomUUID(),
         ownerId: UUID,
         creatorId: UUID,
-        name: String = "filename",
+        name: String = "name",
+        nfcRef: String = "nfcRef",
         type: NfcInfoType = NfcInfoType.UNDEFINED
     ): NfcInfo {
         return NfcInfo(
@@ -159,6 +202,7 @@ internal class NfcInfoApiTest : AbstractRestApiTest() {
             ownerId = ownerId,
             creatorId = creatorId,
             name = name,
+            nfcRef = nfcRef,
             type = type
         )
     }
@@ -170,6 +214,7 @@ internal class NfcInfoApiTest : AbstractRestApiTest() {
             field(prefix + "creatorId", STRING, "UUID of Creator"),
             field(prefix + "type", STRING, "NfcInfoType"),
             field(prefix + "name", STRING, "File to name that file locally"),
+            field(prefix + "nfcRef", STRING, "Unique ref id on NTF Tag"),
             field(prefix + "linkedPersonId", STRING, "Optional linkedPerson").optional(),
             field(prefix + "linkedAlbumId", STRING, "Optional linkedAlbum").optional(),
             field(prefix + "createdAt", STRING, "LocalDateTime of NfcInfo creation"),

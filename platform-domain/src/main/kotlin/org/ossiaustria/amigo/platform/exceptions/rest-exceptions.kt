@@ -28,6 +28,7 @@ enum class ErrorCode(val errorCode: Int, val errorName: String) {
 
     CallChangeNotSenderError(3001, "Call can just be manipulated by sender for this request"),
     CallChangeNotReceiverError(3002, "Call can just be manipulated by receiver for this request"),
+    AlbumNotFound(4001,"Album not Found"),
 }
 
 @ResponseStatus(

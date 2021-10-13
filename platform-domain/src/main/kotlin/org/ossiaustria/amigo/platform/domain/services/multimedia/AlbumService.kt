@@ -37,11 +37,12 @@ class AlbumServiceImpl : AlbumService {
         return createNew(ownerId, name)
     }
 
-    private fun createNew(ownerId: UUID, name: String) = Album(
+    private fun createNew(ownerId: UUID, name: String) = repository.save(Album(
         id = randomUUID(),
         ownerId = ownerId,
         createdAt = ZonedDateTime.now(),
         name = name,
+    )
     )
 
     override fun count(): Long = repository.count()

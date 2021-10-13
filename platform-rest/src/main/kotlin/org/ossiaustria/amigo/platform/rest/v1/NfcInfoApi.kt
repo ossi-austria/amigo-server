@@ -12,6 +12,7 @@ import org.ossiaustria.amigo.platform.rest.v1.common.Headers
 import org.ossiaustria.amigo.platform.rest.v1.multimedias.AlbumDto
 import org.ossiaustria.amigo.platform.rest.v1.multimedias.toDto
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -22,8 +23,10 @@ import java.util.UUID
 
 @Timed
 @RestController
-@RequestMapping("/v1/nfcs", produces = ["application/json"], consumes = ["application/json"])
-internal class NfcInfoApi(private val nfcInfoService: NfcInfoService) {
+@RequestMapping("/v1/nfcs", produces = ["application/json"])
+internal class NfcInfoApi(
+    private val nfcInfoService: NfcInfoService,
+) {
 
     @ApiOperation("Create a new NfcInfo as Creator for an Owner")
     @PostMapping("")
@@ -32,7 +35,39 @@ internal class NfcInfoApi(private val nfcInfoService: NfcInfoService) {
         @RequestBody
         request: CreateNfcInfoRequest
     ): NfcInfoDto {
-        return nfcInfoService.createNfc(request.name, request.ownerId, request.creatorId).toDto()
+        return nfcInfoService.createNfc(
+            request.name,request.nfcRef, request.ownerId, request.creatorId
+        ).toDto()
+    }
+
+
+    @ApiOperation("Change name or linked Entity of an NFC you created")
+    @PatchMapping("/{id}")
+    fun changeNfc(
+        @ApiParam(required = true, value = "UUID of NfcInfo")
+        @PathVariable(value = "id")
+        id: UUID,
+
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null,
+
+        @ApiParam(hidden = true)
+        account: Account,
+
+        @ApiParam(required = true, value = "Create Request")
+        @RequestBody
+        request: ChangeNfcInfoRequest
+    ): NfcInfoDto {
+        val creatorId = account.person(personId).id
+        val existing = nfcInfoService.findAllByCreator(creatorId).find {
+            it.id == id
+        } ?: throw DefaultNotFoundException()
+
+        return nfcInfoService.changeNfcInfo(
+            existing, request.name,
+            request.linkedPersonId,
+            request.linkedAlbumId).toDto()
     }
 
     @ApiOperation("Get all NfcInfo which have you as Owner")
@@ -97,8 +132,15 @@ internal class NfcInfoApi(private val nfcInfoService: NfcInfoService) {
 
     internal data class CreateNfcInfoRequest(
         val name: String,
+        val nfcRef: String,
         val ownerId: UUID,
         val creatorId: UUID,
+    )
+
+    internal data class ChangeNfcInfoRequest(
+        val name: String? = null,
+        val linkedAlbumId: UUID? = null,
+        val linkedPersonId: UUID? = null,
     )
 }
 

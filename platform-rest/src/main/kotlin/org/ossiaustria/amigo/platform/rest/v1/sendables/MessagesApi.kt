@@ -27,7 +27,7 @@ import java.util.UUID
 
 @Api("REST for Messages and sending")
 @RestController
-@RequestMapping("/v1/messages", produces = ["application/json"], consumes = ["application/json"])
+@RequestMapping("/v1/messages", produces = ["application/json"])
 internal class MessagesApi(
     private val messageService: MessageService,
     private val multimediaService: MultimediaService

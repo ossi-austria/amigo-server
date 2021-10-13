@@ -7,8 +7,15 @@ import org.hibernate.annotations.FetchMode
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import org.ossiaustria.amigo.platform.domain.services.SecurityError
 import org.ossiaustria.amigo.platform.domain.services.ServiceError
-import java.util.*
-import javax.persistence.*
+import java.util.UUID
+import javax.persistence.CascadeType
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.FetchType
+import javax.persistence.Id
+import javax.persistence.OneToMany
+import javax.persistence.Table
+import javax.persistence.UniqueConstraint
 
 @Entity
 @Table(
@@ -52,7 +59,7 @@ data class Group(
     fun findMember(person: Person) = findMember(person.id)
 
     companion object {
-        fun assertSameGroup(id1:UUID,id2:UUID) {
+        fun assertSameGroup(id1: UUID, id2: UUID) {
             if (id1 != id2) throw SecurityError.PersonsNotInSameGroup()
         }
     }

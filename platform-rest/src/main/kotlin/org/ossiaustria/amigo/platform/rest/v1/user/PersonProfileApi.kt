@@ -23,7 +23,7 @@ import java.util.UUID
 
 @Timed(value = "time.api.profile")
 @RestController
-@RequestMapping("/v1/profile", produces = ["application/json"], consumes = ["application/json"])
+@RequestMapping("/v1/profile", produces = ["application/json"])
 class PersonProfileApi(
     val personService: PersonService,
     val currentUserService: CurrentUserService

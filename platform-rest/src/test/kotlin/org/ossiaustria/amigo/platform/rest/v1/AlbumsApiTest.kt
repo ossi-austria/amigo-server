@@ -55,7 +55,6 @@ internal class AlbumsApiTest : AbstractRestApiTest() {
         val result = this.performPost(
             baseUrl, accessToken.token, personId = person1Id,
             body = AlbumsApi.CreateAlbumRequest(
-                ownerId = ownerId,
                 name = name
             ),
         )
@@ -63,7 +62,6 @@ internal class AlbumsApiTest : AbstractRestApiTest() {
             .document(
                 "albums-create",
                 requestFields(
-                    field("ownerId", STRING, "UUID of owner - must be your person's id"),
                     field("name", STRING, "Name of album").optional(),
                 ),
                 responseFields(albumsResponseFields())
