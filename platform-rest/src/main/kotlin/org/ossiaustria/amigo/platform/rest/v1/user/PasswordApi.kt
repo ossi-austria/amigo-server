@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/v1/auth/password", produces = ["application/json"], consumes = ["application/json"])
+@RequestMapping("/v1/auth/password", produces = ["application/json"])
 class PasswordApi(
     private val passwordService: PasswordService
 ) {

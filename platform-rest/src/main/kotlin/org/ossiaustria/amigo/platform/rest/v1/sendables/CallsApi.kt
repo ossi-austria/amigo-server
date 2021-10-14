@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 @RestController
-@RequestMapping("/v1/calls", produces = ["application/json"], consumes = ["application/json"])
+@RequestMapping("/v1/calls", produces = ["application/json"])
 internal class CallsApi(private val callService: CallService) {
 
     private val serviceWrapper = SendableApiWrapper(callService)

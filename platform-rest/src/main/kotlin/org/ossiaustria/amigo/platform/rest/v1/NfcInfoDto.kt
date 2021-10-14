@@ -11,6 +11,7 @@ internal data class NfcInfoDto(
     val ownerId: UUID,
     val type: NfcInfoType,
     val name: String,
+    val nfcRef: String,//"04266F62C06780"
     val linkedPersonId: UUID? = null,
     val linkedAlbumId: UUID? = null,
     val createdAt: ZonedDateTime = ZonedDateTime.now(),
@@ -23,6 +24,7 @@ internal fun NfcInfo.toDto() = NfcInfoDto(
     ownerId = ownerId,
     type = type,
     name = name,
+    nfcRef = nfcRef,
     linkedPersonId = linkedPersonId,
     linkedAlbumId = linkedAlbumId,
     createdAt = createdAt,

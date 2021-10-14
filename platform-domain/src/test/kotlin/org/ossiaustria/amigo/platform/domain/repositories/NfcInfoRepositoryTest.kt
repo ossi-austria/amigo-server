@@ -21,7 +21,7 @@ internal class NfcInfoRepositoryTest : AbstractRepositoryTest<NfcInfo, NfcInfoRe
     }
 
     override fun createDefaultEntityPair(id: UUID): Pair<UUID, NfcInfo> {
-        val entity = NfcInfo(id, person.id, person.id, NfcInfoType.LOGIN, "name")
+        val entity = NfcInfo(id, person.id, person.id, NfcInfoType.LOGIN, "name", "nfcRef")
         return Pair(id, entity)
     }
 

@@ -352,6 +352,36 @@ operation::multimedias-get-file[snippets='curl-request,http-response']
 
 operation::multimedias-update-file[snippets='curl-request,http-response']
 
+= NFC Tags & Information
+
+== General Structure
+
+operation::nfcs-create[snippets='response-fields']
+
+== Create new NFC - POST /nfc
+
+operation::nfcs-create[snippets='curl-request,request-fields,http-response,response-fields']
+
+== Change NFC - PATCH /nfc/:id
+
+You can set Name and ONE OF linked Album OR linked Person.
+Of both are provided, Album will be linked.
+
+operation::nfcs-change[snippets='curl-request,request-fields,http-response,response-fields']
+
+== Get all own NFC - GET /nfc/own
+
+operation::nfcs-own[snippets='curl-request,http-response']
+
+== Get all created NFC - GET /nfc/created
+
+operation::nfcs-created[snippets='curl-request,http-response']
+
+== Get one NFC - GET /nfc/:id
+
+operation::nfcs-one[snippets='curl-request,http-response']
+
+
 = Sendables
 
 All Sendables behave similar and share a big amount of code.

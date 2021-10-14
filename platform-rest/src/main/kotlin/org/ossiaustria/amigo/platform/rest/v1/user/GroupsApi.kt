@@ -16,7 +16,7 @@ import java.util.*
 
 @Timed(value = "time.api.groups")
 @RestController
-@RequestMapping("/v1/groups", produces = ["application/json"], consumes = ["application/json"])
+@RequestMapping("/v1/groups", produces = ["application/json"])
 class GroupsApi(
     val groupsService: GroupService,
     val currentUserService: CurrentUserService

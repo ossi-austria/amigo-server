@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/v1/account", produces = ["application/json"], consumes = ["application/json"])
+@RequestMapping("/v1/account", produces = ["application/json"])
 class AccountApi(
     val authService: AuthService,
     val currentUserService: CurrentUserService
