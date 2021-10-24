@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Album
 import org.ossiaustria.amigo.platform.domain.services.multimedia.AlbumService
+import org.ossiaustria.amigo.platform.domain.services.sendables.NfcInfoService
 import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
 import org.ossiaustria.amigo.platform.rest.v1.common.Headers
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,7 +21,10 @@ import java.util.UUID
 @Timed
 @RestController
 @RequestMapping("/v1/albums", produces = ["application/json"])
-internal class AlbumsApi(private val albumService: AlbumService) {
+internal class AlbumsApi(
+    private val albumService: AlbumService,
+    private val nfcInfoService: NfcInfoService,
+) {
 
     @ApiOperation("Create a new Album as Owner")
     @PostMapping
@@ -79,7 +83,13 @@ internal class AlbumsApi(private val albumService: AlbumService) {
         @ApiParam(hidden = true)
         account: Account,
     ): AlbumDto {
-        val album = albumService.getOne(account.person(personId).id, id) ?: throw DefaultNotFoundException()
+        val accessorId = account.person(personId).id
+        val album =
+            albumService.getOne(accessorId, id)
+            ?: nfcInfoService
+                .findAlbumsWithAccess(accessorId)
+                .firstOrNull { it.id == id }
+            ?: throw DefaultNotFoundException()
         return album.toDto()
     }
 
