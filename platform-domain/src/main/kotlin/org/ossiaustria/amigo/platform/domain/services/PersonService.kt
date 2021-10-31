@@ -6,8 +6,6 @@ import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.ossiaustria.amigo.platform.domain.services.files.AvatarFileStorage
 import org.ossiaustria.amigo.platform.domain.services.multimedia.MultimediaError
 import org.ossiaustria.amigo.platform.domain.services.multimedia.MultimediaServiceImpl
-import org.ossiaustria.amigo.platform.exceptions.ErrorCode
-import org.ossiaustria.amigo.platform.exceptions.NotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.io.Resource
@@ -15,7 +13,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.net.URI
-import java.util.*
+import java.util.UUID
 import javax.transaction.Transactional
 
 @Service
@@ -62,7 +60,9 @@ class PersonService {
         avatarFileStorage.saveAvatar(person.id, multipartFile, overwrite = true)
 
         val fileSuffix = multipartFile.contentType!!.substringAfter("/")
-        val avatarUrl = "avatar.$fileSuffix"
+        val timestamp = System.currentTimeMillis()
+        val avatarUrl = "$timestamp.$fileSuffix"
+        Log.info("Referencing avatar for $person as '$avatarUrl'")
         return personRepository.save(
             person.copy(avatarUrl = avatarUrl)
         ).also {
@@ -128,7 +128,7 @@ data class PersonAvatar(
     val person: Person,
     val resource: Resource?,
 ) {
-    val isUseless = person.avatarUrl.isNullOrBlank() && resource == null
+    val isUseless = person.avatarUrl.isNullOrBlank() //&& resource == null
 
     val filename = """${person.id}-${person.avatarUrl}"""
 
