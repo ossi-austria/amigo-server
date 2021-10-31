@@ -74,14 +74,16 @@ internal class PersonServiceTest : AbstractServiceTest() {
     fun `uploadAvatar should save an JPG and store avatarUrl`() {
         val result = service.uploadAvatar(person1, mockMultipartFile("image/jpg", toTypedArray))
         assertThat(result).isNotNull
-        assertThat(result.avatarUrl).isEqualTo("avatar.jpg")
+        assertThat(result.avatarUrl).contains((System.currentTimeMillis() / 10000).toString())
+        assertThat(result.avatarUrl).endsWith(".jpg")
     }
 
     @Test
     fun `uploadAvatar should save an PNG and store avatarUrl`() {
         val result = service.uploadAvatar(person1, mockMultipartFile("image/png", toTypedArray))
         assertThat(result).isNotNull
-        assertThat(result.avatarUrl).isEqualTo("avatar.png")
+        assertThat(result.avatarUrl).contains((System.currentTimeMillis() / 10000).toString())
+        assertThat(result.avatarUrl).endsWith(".png")
     }
 
     @Test

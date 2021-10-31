@@ -278,6 +278,22 @@ it will react in three different ways:
 
 operation::persons-avatar-success[snippets='curl-request']
 
+=== GET /persons/:id/public/:key
+
+Public endpoint for Avatars.
+No need for authentication, but a key has to be provided.
+As $key, the value of "avatarUrl" has to be used.
+
+Hint: Use Person.avatarUrl to get the key.
+
+it will react in three different ways:
+
+* respond with the Image as content, watch out for content-type and length
+* redirect to another URL, which should be an image
+* respond with a 404 when no usable avatar is found
+
+operation::persons-avatar-public-success[snippets='curl-request']
+
 === Example for Redirect of external URL:
 
 operation::persons-avatar-success[snippets='http-response']

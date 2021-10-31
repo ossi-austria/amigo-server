@@ -5,6 +5,7 @@ import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
+import org.ossiaustria.amigo.platform.domain.services.PersonAvatar
 import org.ossiaustria.amigo.platform.domain.services.PersonService
 import org.ossiaustria.amigo.platform.exceptions.BadRequestException
 import org.ossiaustria.amigo.platform.exceptions.ErrorCode
@@ -32,10 +33,13 @@ class PersonsApi(
 ) {
 
     @ApiOperation("Download avatar File of an Person")
-    @GetMapping("/{id}/avatar.*")
+    @GetMapping("/{id}/{key}")
     fun profileAvatar(
         @PathVariable("id")
         id: UUID,
+
+        @PathVariable("key")
+        key: String,
 
         @RequestHeader(Headers.PID, required = false)
         personId: UUID? = null,
@@ -44,11 +48,38 @@ class PersonsApi(
         account: Account,
         request: HttpServletResponse
     ): ResponseEntity<Resource> {
-
         val personAvatar = personService.loadAvatar(account.person(personId), id)
+        return returnAvatarOrFail(personAvatar, null, request)
+    }
 
+    @ApiOperation("Download avatar File of an Person as public URL")
+    @GetMapping("/{id}/public/{key}")
+    fun publicProfileAvatar(
+        @PathVariable("id")
+        id: UUID,
+
+        @PathVariable("key")
+        key: String,
+
+        request: HttpServletResponse
+    ): ResponseEntity<Resource> {
+
+        val personSelfViewer = personService.findById(id)
+            ?: throw NotFoundException(ErrorCode.NotFound, "This Person has no avatar (yet).")
+
+        val personAvatar = personService.loadAvatar(personSelfViewer, id)
+        return returnAvatarOrFail(personAvatar, key, request)
+    }
+
+    private fun returnAvatarOrFail(
+        personAvatar: PersonAvatar,
+        key: String? = null,
+        request: HttpServletResponse
+    ): ResponseEntity<Resource> {
         if (personAvatar.isUseless) {
             throw NotFoundException(ErrorCode.NotFound, "This Person has no avatar (yet).")
+        } else if (key != null && personAvatar.person.avatarUrl != key) {
+            throw NotFoundException(ErrorCode.NotFound, "This Person has no avatar...")
         } else if (personAvatar.resource != null) {
             try {
                 val resource = personAvatar.resource!!
