@@ -17,7 +17,7 @@ import java.util.UUID
 import javax.transaction.Transactional
 
 @Service
-class PersonService {
+class PersonProfileService {
 
     @Autowired
     private lateinit var personRepository: PersonRepository
@@ -92,7 +92,7 @@ class PersonService {
         }
     }
 
-    fun findByViewerAndId(person: Person, id: UUID): Person {
+    private fun findByViewerAndId(person: Person, id: UUID): Person {
         return personRepository.findByGroupIdAndId(person.groupId, id)
             ?: throw SecurityError.PersonsNotInSameGroup()
     }

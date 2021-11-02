@@ -11,6 +11,8 @@ import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
 import org.ossiaustria.amigo.platform.rest.v1.common.Headers
 import org.ossiaustria.amigo.platform.rest.v1.multimedias.AlbumDto
 import org.ossiaustria.amigo.platform.rest.v1.multimedias.toDto
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
@@ -36,7 +39,12 @@ internal class NfcInfoApi(
         request: CreateNfcInfoRequest
     ): NfcInfoDto {
         return nfcInfoService.createNfc(
-            request.name,request.nfcRef, request.ownerId, request.creatorId
+            request.name,
+            request.nfcRef,
+            request.ownerId,
+            request.creatorId,
+            request.linkedPersonId,
+            request.linkedAlbumId
         ).toDto()
     }
 
@@ -67,7 +75,8 @@ internal class NfcInfoApi(
         return nfcInfoService.changeNfcInfo(
             existing, request.name,
             request.linkedPersonId,
-            request.linkedAlbumId).toDto()
+            request.linkedAlbumId
+        ).toDto()
     }
 
     @ApiOperation("Get all NfcInfo which have you as Owner")
@@ -130,11 +139,32 @@ internal class NfcInfoApi(
         return album.toDto()
     }
 
+    @ApiOperation("Delete created NfcInfo")
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteOne(
+        @ApiParam(required = true, value = "UUID of NfcInfo")
+        @PathVariable(value = "id")
+        id: UUID,
+
+        @ApiParam(required = false, value = "Optional personId")
+        @RequestHeader(Headers.PID, required = false)
+        personId: UUID? = null,
+
+        @ApiParam(hidden = true)
+        account: Account,
+    ) {
+        val accessorId = account.person(personId).id
+        nfcInfoService.delete(id, accessorId)
+    }
+
     internal data class CreateNfcInfoRequest(
         val name: String,
         val nfcRef: String,
         val ownerId: UUID,
         val creatorId: UUID,
+        val linkedAlbumId: UUID? = null,
+        val linkedPersonId: UUID? = null,
     )
 
     internal data class ChangeNfcInfoRequest(

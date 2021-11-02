@@ -14,7 +14,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 interface MultimediaService {

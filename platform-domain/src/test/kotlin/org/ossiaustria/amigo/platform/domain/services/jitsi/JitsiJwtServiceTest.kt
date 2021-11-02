@@ -3,7 +3,9 @@ package org.ossiaustria.amigo.platform.domain.services.jitsi
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.impl.TextCodec
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.domain.config.Constants
@@ -32,7 +34,7 @@ internal class JitsiJwtServiceTest : AbstractServiceTest() {
     @Value("\${amigo-platform.jitsi.rootUrl}")
     private lateinit var rootUrl: String
 
-   private val groupId = randomUUID()
+    private val groupId = randomUUID()
 
     @BeforeEach
     fun beforeEach() {

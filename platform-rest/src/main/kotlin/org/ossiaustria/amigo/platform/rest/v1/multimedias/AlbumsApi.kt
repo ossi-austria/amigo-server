@@ -86,10 +86,10 @@ internal class AlbumsApi(
         val accessorId = account.person(personId).id
         val album =
             albumService.getOne(accessorId, id)
-            ?: nfcInfoService
-                .findAlbumsWithAccess(accessorId)
-                .firstOrNull { it.id == id }
-            ?: throw DefaultNotFoundException()
+                ?: nfcInfoService
+                    .findAlbumsWithAccess(accessorId)
+                    .firstOrNull { it.id == id }
+                ?: throw DefaultNotFoundException()
         return album.toDto()
     }
 

@@ -3,7 +3,7 @@ package org.ossiaustria.amigo.platform.domain.services.messaging
 import com.google.firebase.messaging.AndroidConfig
 import org.ossiaustria.amigo.platform.domain.models.Call
 import org.ossiaustria.amigo.platform.domain.models.Message
-import java.util.*
+import java.util.UUID
 
 interface NotificationService {
 

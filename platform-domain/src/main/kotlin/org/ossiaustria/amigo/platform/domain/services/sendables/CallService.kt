@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 interface CallService : SendableService<Call> {

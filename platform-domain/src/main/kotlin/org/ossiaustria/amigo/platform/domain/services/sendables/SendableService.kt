@@ -2,7 +2,7 @@ package org.ossiaustria.amigo.platform.domain.services.sendables
 
 import org.ossiaustria.amigo.platform.domain.models.Sendable
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 
 interface SendableService<S : Sendable<S>> {

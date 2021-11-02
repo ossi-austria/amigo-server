@@ -7,7 +7,7 @@ import org.springframework.util.FileSystemUtils
 import org.springframework.web.multipart.MultipartFile
 import java.net.URI
 import java.nio.file.Paths
-import java.util.*
+import java.util.UUID
 
 @Service
 class DiskMultimediaFileStorage : FileStorage(), MultimediaFileStorage {

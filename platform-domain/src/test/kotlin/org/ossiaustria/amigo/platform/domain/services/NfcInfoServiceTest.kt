@@ -90,6 +90,16 @@ internal class NfcInfoServiceTest : AbstractServiceTest() {
     }
 
     @Test
+    fun `linkToAlbum should update name to Album`() {
+        val album = albumRepository.save(Album(randomUUID(), "name", personId2))
+        val nfc = service.createNfc("ndef", "ref", personId1, personId2)
+        val result = service.linkToAlbum(nfc, album.id)
+        assertThat(result).isNotNull
+        assertThat(result.name).isEqualTo(album.name)
+    }
+
+
+    @Test
     fun `createNfc must not link unknown Persons`() {
         Assertions.assertThrows(SecurityError.PersonNotFound::class.java) {
             service.createNfc("ndef", "ref", personId1, randomUUID())
@@ -132,6 +142,14 @@ internal class NfcInfoServiceTest : AbstractServiceTest() {
         Assertions.assertThrows(SecurityError.PersonsNotInSameGroup::class.java) {
             service.linkToPerson(nfc, person3.id)
         }
+    }
+
+    @Test
+    fun `linkToPerson should update name to Person`() {
+        val nfc = service.createNfc("ndef", "ref", personId1, personId2)
+        val result = service.linkToPerson(nfc, personId2)
+        assertThat(result).isNotNull
+        assertThat(result.name).isEqualTo(person2.name)
     }
 
     @Test
@@ -178,6 +196,27 @@ internal class NfcInfoServiceTest : AbstractServiceTest() {
         assertThat(result).isNotNull
         assertThat(result.id).isEqualTo(nfc.id)
         assertThat(result.name).isEqualTo("newname")
+        assertThat(result.linkedAlbumId).isEqualTo(album.id)
+        assertThat(result.linkedPersonId).isEqualTo(null)
+        assertThat(result.type).isEqualTo(NfcInfoType.OPEN_ALBUM)
+    }
+
+    @Test
+    fun `createNfc should call changeNfcInfo with linked Person`() {
+        val result = service.createNfc("ndef", "ref", personId1, personId2, linkedPersonId = personId2)
+        assertThat(result).isNotNull
+        assertThat(result.name).isEqualTo(person2.name)
+        assertThat(result.linkedAlbumId).isEqualTo(null)
+        assertThat(result.linkedPersonId).isEqualTo(personId2)
+        assertThat(result.type).isEqualTo(NfcInfoType.CALL_PERSON)
+    }
+
+    @Test
+    fun `createNfc should call changeNfcInfo with linked Album `() {
+        val album = albumRepository.save(Album(randomUUID(), "name", personId2))
+        val result = service.createNfc("ndef", "ref", personId1, personId2, linkedAlbumId = album.id)
+        assertThat(result).isNotNull
+        assertThat(result.name).isEqualTo(album.name)
         assertThat(result.linkedAlbumId).isEqualTo(album.id)
         assertThat(result.linkedPersonId).isEqualTo(null)
         assertThat(result.type).isEqualTo(NfcInfoType.OPEN_ALBUM)

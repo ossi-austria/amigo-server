@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.domain.services.PersonAvatar
-import org.ossiaustria.amigo.platform.domain.services.PersonService
+import org.ossiaustria.amigo.platform.domain.services.PersonProfileService
 import org.springframework.core.io.FileUrlResource
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 
@@ -16,7 +16,7 @@ internal class PersonsApiTest : AbstractRestApiTest() {
     val rootUrl = "/v1/persons/"
 
     @SpykBean
-    protected lateinit var personService: PersonService
+    protected lateinit var personService: PersonProfileService
 
     @BeforeEach
     fun clearRepo() {

@@ -7,21 +7,25 @@ import org.springframework.mail.javamail.MimeMessageHelper
 import java.time.Instant
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 import javax.mail.internet.MimeMessage
 
 interface EmailService {
 
-    fun sendAsync(accountId: UUID,
-                  messageType: EmailMessageType,
-                  template: TemplateType,
-                  variables: Map<EmailVariables, Any>): Email
+    fun sendAsync(
+        accountId: UUID,
+        messageType: EmailMessageType,
+        template: TemplateType,
+        variables: Map<EmailVariables, Any>
+    ): Email
 
-    fun sendSync(accountId: UUID,
-                 messageType: EmailMessageType,
-                 template: TemplateType,
-                 variables: Map<EmailVariables, Any>): Email
+    fun sendSync(
+        accountId: UUID,
+        messageType: EmailMessageType,
+        template: TemplateType,
+        variables: Map<EmailVariables, Any>
+    ): Email
 }
 
 enum class EmailVariables {
@@ -42,10 +46,12 @@ class APEmailService(
         val log = LoggerFactory.getLogger(this::class.java)
     }
 
-    override fun sendAsync(accountId: UUID,
-                           messageType: EmailMessageType,
-                           template: TemplateType,
-                           variables: Map<EmailVariables, Any>): Email {
+    override fun sendAsync(
+        accountId: UUID,
+        messageType: EmailMessageType,
+        template: TemplateType,
+        variables: Map<EmailVariables, Any>
+    ): Email {
         val scheduledAt = variables[EmailVariables.SCHEDULED_AT] as Instant?
 
         val task = prepareTask(accountId, scheduledAt, messageType, template, variables)
@@ -55,10 +61,12 @@ class APEmailService(
         return task.getEmail()
     }
 
-    override fun sendSync(accountId: UUID,
-                          messageType: EmailMessageType,
-                          template: TemplateType,
-                          variables: Map<EmailVariables, Any>): Email {
+    override fun sendSync(
+        accountId: UUID,
+        messageType: EmailMessageType,
+        template: TemplateType,
+        variables: Map<EmailVariables, Any>
+    ): Email {
         val scheduledAt = variables[EmailVariables.SCHEDULED_AT] as Instant?
 
         val task = prepareTask(accountId, scheduledAt, messageType, template, variables)
@@ -68,11 +76,13 @@ class APEmailService(
         return task.getEmail()
     }
 
-    private fun prepareTask(accountId: UUID,
-                            scheduledAt: Instant?,
-                            messageType: EmailMessageType,
-                            template: TemplateType,
-                            variables: Map<EmailVariables, Any>): SendEmailTask {
+    private fun prepareTask(
+        accountId: UUID,
+        scheduledAt: Instant?,
+        messageType: EmailMessageType,
+        template: TemplateType,
+        variables: Map<EmailVariables, Any>
+    ): SendEmailTask {
         val email = Email(
             UUID.randomUUID(),
             accountId,
@@ -81,7 +91,7 @@ class APEmailService(
             null,
             variables[EmailVariables.SUBJECT] as String,
             null,
-            if (scheduledAt!=null) ZonedDateTime.ofInstant(scheduledAt, ZoneId.systemDefault()) else null
+            if (scheduledAt != null) ZonedDateTime.ofInstant(scheduledAt, ZoneId.systemDefault()) else null
         )
 
         var textMessage: Pair<SimpleMailMessage, String>? = null
@@ -97,7 +107,11 @@ class APEmailService(
         return SendEmailTask(email, textMessage?.first, htmlMessage?.first)
     }
 
-    private fun generateHtmlMessage(email: Email, template: TemplateType, variables: Map<EmailVariables, Any>): Pair<MimeMessage, String> {
+    private fun generateHtmlMessage(
+        email: Email,
+        template: TemplateType,
+        variables: Map<EmailVariables, Any>
+    ): Pair<MimeMessage, String> {
         val mailMessage = mailSender.createMimeMessage()
         val messageHelper = MimeMessageHelper(mailMessage, true, "UTF-8")
 
@@ -112,7 +126,11 @@ class APEmailService(
         return Pair(mailMessage, messageBodyHtml)
     }
 
-    private fun generateTextMessage(email: Email, template: TemplateType, variables: Map<EmailVariables, Any>): Pair<SimpleMailMessage, String> {
+    private fun generateTextMessage(
+        email: Email,
+        template: TemplateType,
+        variables: Map<EmailVariables, Any>
+    ): Pair<SimpleMailMessage, String> {
         val simpleMessage = SimpleMailMessage()
         simpleMessage.setTo(email.recipientEmail)
         simpleMessage.subject = email.subject
@@ -134,10 +152,12 @@ class APEmailService(
         }
     }
 
-    inner class SendEmailTask(email: Email,
-                              private val textMessage: SimpleMailMessage? = null,
-                              private val htmlMessage: MimeMessage? = null,
-                              private val attempt: Int = 0) : Runnable {
+    inner class SendEmailTask(
+        email: Email,
+        private val textMessage: SimpleMailMessage? = null,
+        private val htmlMessage: MimeMessage? = null,
+        private val attempt: Int = 0
+    ) : Runnable {
         private var email: AtomicReference<Email> = AtomicReference(email)
 
         override fun run() {
@@ -148,7 +168,7 @@ class APEmailService(
                 }
 
 
-                log.debug("Email was sent successfully. Subject: ${email.get().subject} Recipient: ${email.get().recipientEmail}. Attempts: ${attempt+1}")
+                log.debug("Email was sent successfully. Subject: ${email.get().subject} Recipient: ${email.get().recipientEmail}. Attempts: ${attempt + 1}")
             } catch (ex: Exception) {
                 log.error("Unable to send email ${email.get().id}. Subject: ${email.get().subject} Recipient: ${email.get().recipientEmail}. Attempts: ${attempt + 1} Exception: $ex")
 //                val logDateTime = DateTimeFormatter.ISO_INSTANT.format(Instant.now())

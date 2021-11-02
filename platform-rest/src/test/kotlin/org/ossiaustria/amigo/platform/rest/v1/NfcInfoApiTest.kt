@@ -2,6 +2,7 @@ package org.ossiaustria.amigo.platform.rest.v1
 
 import com.ninjasquad.springmockk.SpykBean
 import io.mockk.every
+import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.domain.models.NfcInfo
 import org.ossiaustria.amigo.platform.domain.models.enums.NfcInfoType
 import org.ossiaustria.amigo.platform.domain.services.sendables.NfcInfoService
+import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType.STRING
 import org.springframework.restdocs.payload.PayloadDocumentation.requestFields
@@ -66,6 +68,8 @@ internal class NfcInfoApiTest : AbstractRestApiTest() {
                     field("ownerId", STRING, "UUID of owner - must be the Analogue's id"),
                     field("name", STRING, "Name of NFC Tag to be shown in UI").optional(),
                     field("nfcRef", STRING, "Unique ref id on NTF Tag").optional(),
+                    field("linkedAlbumId", STRING, "Optional Album to link during creation").optional(),
+                    field("linkedPersonId", STRING, "Optional Person to link during creation").optional(),
                 ),
                 responseFields(nfcInfosResponseFields())
             )
@@ -180,6 +184,29 @@ internal class NfcInfoApiTest : AbstractRestApiTest() {
             .returns(NfcInfoDto::class.java)
 
         assertThat(result).isNotNull
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `deleteOne should return 201 for success`() {
+        val itemId = randomUUID()
+
+        every { nfcInfoService.delete(itemId, any()) } returns Unit
+
+        this.performDelete("$baseUrl/$itemId", accessToken.token, person1Id)
+            .expectNoContent()
+            .document("nfcs-delete")
+
+        verify { nfcInfoService.delete(eq(itemId), eq(person1Id)) }
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `deleteOne should return 404 for not found`() {
+        val itemId = randomUUID()
+        every { nfcInfoService.delete(itemId, any()) } answers { throw DefaultNotFoundException() }
+        this.performDelete("$baseUrl/$itemId", accessToken.token, person1Id).isNotFound()
+        verify { nfcInfoService.delete(eq(itemId), eq(person1Id)) }
     }
 
 

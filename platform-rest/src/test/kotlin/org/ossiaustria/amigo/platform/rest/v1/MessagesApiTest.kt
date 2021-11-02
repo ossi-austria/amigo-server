@@ -20,7 +20,7 @@ import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
 import org.springframework.restdocs.request.RequestDocumentation.requestParameters
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 internal class MessagesApiTest : AbstractRestApiTest() {
@@ -60,7 +60,7 @@ internal class MessagesApiTest : AbstractRestApiTest() {
 
         // cannot mock RequestBody "text"
         every { messageService.createMessage(eq(senderId), eq(receiverId), any(), any()) } returns
-                mockMessage(senderId = senderId, receiverId = receiverId, text = text)
+            mockMessage(senderId = senderId, receiverId = receiverId, text = text)
 
         val url = "$baseUrl?receiverId=$receiverId&senderId=$senderId"
 
@@ -91,11 +91,11 @@ internal class MessagesApiTest : AbstractRestApiTest() {
 
         // cannot mock RequestBody "text"
         every { messageService.createMessage(eq(person1Id), eq(person2Id), any(), any()) } returns
-                mockMessage(senderId = senderId, receiverId = receiverId, text = text)
+            mockMessage(senderId = senderId, receiverId = receiverId, text = text)
 
         // Cannot mock "RequestPart" name and file
         every { multimediaService.createMultimedia(eq(person1Id), any(), any(), any()) } returns
-                Multimedia(randomUUID(), ownerId = senderId, filename = "newname", type = MultimediaType.IMAGE)
+            Multimedia(randomUUID(), ownerId = senderId, filename = "newname", type = MultimediaType.IMAGE)
 
         val url = "$baseUrl?receiverId=$receiverId&senderId=$senderId"
 
@@ -172,7 +172,8 @@ internal class MessagesApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "messages-received",
-                responseFields(messageResponseFields("[].")))
+                responseFields(messageResponseFields("[]."))
+            )
             .returnsList(MessageDto::class.java)
 
         assertThat(result).isNotNull
@@ -188,7 +189,8 @@ internal class MessagesApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "messages-sent",
-                responseFields(messageResponseFields("[].")))
+                responseFields(messageResponseFields("[]."))
+            )
             .returnsList(MessageDto::class.java)
 
         assertThat(result).isNotNull
@@ -208,7 +210,8 @@ internal class MessagesApiTest : AbstractRestApiTest() {
         val result: MultiMessageDto = this.performGet("$baseUrl/$msgId", accessToken.token, person1Id)
             .expectOk()
             .document(
-                "messages-one", responseFields(messageResponseFields()))
+                "messages-one", responseFields(messageResponseFields())
+            )
             .returns(MultiMessageDto::class.java)
 
         assertThat(result).isNotNull
@@ -236,8 +239,8 @@ internal class MessagesApiTest : AbstractRestApiTest() {
                 .expectOk()
                 .document(
                     "messages-set-retrieved", responseFields(messageResponseFields()),
-                   
-                )
+
+                    )
                 .returns(MultiMessageDto::class.java)
 
         assertThat(result).isNotNull

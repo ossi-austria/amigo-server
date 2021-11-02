@@ -3,8 +3,14 @@ package org.ossiaustria.amigo.platform.domain.models
 import org.ossiaustria.amigo.platform.domain.models.enums.MultimediaType
 import org.springframework.data.annotation.CreatedDate
 import java.time.ZonedDateTime
-import java.util.*
-import javax.persistence.*
+import java.util.UUID
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.ForeignKey
+import javax.persistence.Id
+import javax.persistence.JoinColumn
 
 @Entity
 data class Multimedia(

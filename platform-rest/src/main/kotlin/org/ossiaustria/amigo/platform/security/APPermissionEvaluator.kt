@@ -13,7 +13,12 @@ class APPermissionEvaluator : PermissionEvaluator {
         return hasPrivilege(auth, targetType, permission.toString().uppercase())
     }
 
-    override fun hasPermission(auth: Authentication?, targetId: Serializable?, targetType: String?, permission: Any): Boolean {
+    override fun hasPermission(
+        auth: Authentication?,
+        targetId: Serializable?,
+        targetType: String?,
+        permission: Any
+    ): Boolean {
         return if (auth == null || targetType == null || permission !is String) {
             false
         } else hasPrivilege(auth, targetType.uppercase(), permission.toString().uppercase())

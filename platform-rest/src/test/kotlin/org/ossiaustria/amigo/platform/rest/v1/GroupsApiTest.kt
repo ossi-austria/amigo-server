@@ -6,7 +6,11 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import org.ossiaustria.amigo.platform.domain.services.GroupService
-import org.ossiaustria.amigo.platform.rest.v1.user.*
+import org.ossiaustria.amigo.platform.rest.v1.user.AddGroupMemberRequest
+import org.ossiaustria.amigo.platform.rest.v1.user.ChangeGroupMemberRequest
+import org.ossiaustria.amigo.platform.rest.v1.user.ChangeGroupRequest
+import org.ossiaustria.amigo.platform.rest.v1.user.CreateGroupRequest
+import org.ossiaustria.amigo.platform.rest.v1.user.GroupDto
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType.ARRAY
@@ -162,11 +166,12 @@ internal class GroupsApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `myGroups should return all Groups where user is member of`() {
 
-        val groups = this.performGet(rootUrl, accessToken = accessToken.token,person1Id)
+        val groups = this.performGet(rootUrl, accessToken = accessToken.token, person1Id)
             .expectOk()
             .document(
                 "groups-my-success",
-                responseFields(groupFields("[].")))
+                responseFields(groupFields("[]."))
+            )
             .returnsList(GroupDto::class.java)
 
         assertEquals(2, groups.size)
@@ -185,8 +190,10 @@ internal class GroupsApiTest : AbstractRestApiTest() {
 
         val person = account.persons.first()
 
-        val groups = this.performGet("$rootUrl/filtered?personId=${person.id}",
-            accessToken = accessToken.token)
+        val groups = this.performGet(
+            "$rootUrl/filtered?personId=${person.id}",
+            accessToken = accessToken.token
+        )
             .expectOk()
             .document(
                 "groups-filtered-success",

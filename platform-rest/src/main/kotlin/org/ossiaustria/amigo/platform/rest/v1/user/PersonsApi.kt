@@ -5,8 +5,8 @@ import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
+import org.ossiaustria.amigo.platform.domain.services.PersonProfileService
 import org.ossiaustria.amigo.platform.domain.services.PersonAvatar
-import org.ossiaustria.amigo.platform.domain.services.PersonService
 import org.ossiaustria.amigo.platform.exceptions.BadRequestException
 import org.ossiaustria.amigo.platform.exceptions.ErrorCode
 import org.ossiaustria.amigo.platform.exceptions.NotFoundException
@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletResponse
 @RestController
 @RequestMapping("/v1/persons")
 class PersonsApi(
-    val personService: PersonService,
+    val personService: PersonProfileService,
     val currentUserService: CurrentUserService
 ) {
 

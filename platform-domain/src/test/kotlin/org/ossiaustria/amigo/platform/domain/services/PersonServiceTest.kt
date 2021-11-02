@@ -20,7 +20,7 @@ internal class PersonServiceTest : AbstractServiceTest() {
     lateinit var fileStorage: DiskAvatarFileStorage
 
     @Autowired
-    lateinit var service: PersonService
+    lateinit var service: PersonProfileService
 
     @Autowired
     private lateinit var repository: PersonRepository

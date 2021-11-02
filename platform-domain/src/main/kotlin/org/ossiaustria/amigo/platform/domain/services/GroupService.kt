@@ -15,7 +15,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.bind.annotation.ResponseStatus
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 import javax.transaction.Transactional
 
@@ -40,7 +40,7 @@ interface GroupService {
     fun findGroup(account: Account, groupId: UUID): Group
     fun filterGroups(account: Account, personId: UUID? = null, name: String? = null): List<Group>
     fun createGroup(account: Account, name: String, adminName: String? = null): Group
-    fun changeName(person: Person, group: Group, name: String): Group
+    fun changeName(admin: Person, group: Group, name: String): Group
     fun findById(id: UUID): Group?
     fun count(): Long
     fun addMember(

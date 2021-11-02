@@ -17,6 +17,14 @@ object EmailValidator : Validator<String> {
     }
 }
 
+object PasswordValidator : Validator<String> {
+    private val regex = """^[!@#$%^&*-+=*\-/?a-zA-Z0-9]{5,40}$""".toRegex()
+
+    override fun validate(item: String) {
+        regex.matches(item) || throw ValidationException("Invalid Password")
+    }
+}
+
 object StringValidator {
 
     fun validateNotBlank(item: String?) {

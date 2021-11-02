@@ -3,7 +3,7 @@ package org.ossiaustria.amigo.platform.domain.repositories
 import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.domain.models.Album
 import org.springframework.beans.factory.annotation.Autowired
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 

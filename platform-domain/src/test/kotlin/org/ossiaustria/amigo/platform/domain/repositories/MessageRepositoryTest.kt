@@ -2,7 +2,7 @@ package org.ossiaustria.amigo.platform.domain.repositories
 
 import org.ossiaustria.amigo.platform.domain.models.Message
 import org.springframework.beans.factory.annotation.Autowired
-import java.util.*
+import java.util.UUID
 
 
 internal class MessageRepositoryTest : AbstractRepositoryTest<Message, MessageRepository>() {

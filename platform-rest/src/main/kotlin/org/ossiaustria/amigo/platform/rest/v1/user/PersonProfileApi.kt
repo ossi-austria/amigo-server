@@ -5,7 +5,7 @@ import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
-import org.ossiaustria.amigo.platform.domain.services.PersonService
+import org.ossiaustria.amigo.platform.domain.services.PersonProfileService
 import org.ossiaustria.amigo.platform.exceptions.UserNotFoundException
 import org.ossiaustria.amigo.platform.rest.CurrentUserService
 import org.ossiaustria.amigo.platform.rest.v1.common.Headers
@@ -25,7 +25,7 @@ import java.util.UUID
 @RestController
 @RequestMapping("/v1/profile", produces = ["application/json"])
 class PersonProfileApi(
-    val personService: PersonService,
+    val personService: PersonProfileService,
     val currentUserService: CurrentUserService
 ) {
 

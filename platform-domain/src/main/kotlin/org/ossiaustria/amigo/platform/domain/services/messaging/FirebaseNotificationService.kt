@@ -5,13 +5,13 @@ import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.Message
 import org.ossiaustria.amigo.platform.domain.models.Call
 import org.ossiaustria.amigo.platform.domain.models.Sendable
-import org.ossiaustria.amigo.platform.domain.services.AccountService
+import org.ossiaustria.amigo.platform.domain.services.auth.AuthService
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 class FirebaseNotificationService(
     private val firebaseMessaging: FirebaseMessaging,
-    private val accountService: AccountService,
+    private val authService: AuthService,
 ) : NotificationService {
 
     override fun messageSent(
@@ -23,7 +23,7 @@ class FirebaseNotificationService(
         sendableChanged(receiverId, call)
 
     private fun <S> sendableChanged(receiverId: UUID, sendable: Sendable<S>): Boolean {
-        val receiver = accountService.findOneByPersonId(receiverId)
+        val receiver = authService.findOneByPersonId(receiverId)
         val data = NotificationBuilder.buildSendableSent(sendable)
         val notification: Message? = buildSendablePush(data, receiver?.fcmToken)
         return if (notification != null) sendNotification(notification) else false

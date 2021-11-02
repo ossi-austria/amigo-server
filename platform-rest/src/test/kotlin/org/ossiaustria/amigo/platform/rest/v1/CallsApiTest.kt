@@ -16,7 +16,7 @@ import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
 import org.springframework.restdocs.request.RequestDocumentation.requestParameters
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 internal class CallsApiTest : AbstractRestApiTest() {
@@ -59,7 +59,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
         val receiverId = person2Id
 
         every { callService.createCall(eq(senderId), eq(receiverId), any()) } returns
-                mockCall(senderId = senderId, receiverId = receiverId)
+            mockCall(senderId = senderId, receiverId = receiverId)
 
         val url = "$baseUrl?receiverId=$receiverId&personId=$senderId&callType=VIDEO"
 
@@ -146,7 +146,8 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-received",
-                responseFields(callResponseFields("[].")))
+                responseFields(callResponseFields("[]."))
+            )
             .returnsList(CallDto::class.java)
 
         assertThat(result).isNotNull
@@ -168,7 +169,8 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-sent",
-                responseFields(callResponseFields("[].")))
+                responseFields(callResponseFields("[]."))
+            )
             .returnsList(CallDto::class.java)
 
         assertThat(result).isNotNull
@@ -195,7 +197,8 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-one",
-                responseFields(callTokenResponseFields()))
+                responseFields(callTokenResponseFields())
+            )
             .returns(CallTokenDto::class.java)
 
         assertThat(result).isNotNull
@@ -214,7 +217,8 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-accept",
-                responseFields(callTokenResponseFields()))
+                responseFields(callTokenResponseFields())
+            )
             .returns(CallTokenDto::class.java)
 
         assertThat(result).isNotNull
@@ -228,7 +232,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
     @Test
     @Tag(TestTags.RESTDOC)
     fun `accept needs authentication`() {
-        this.performPatch("$baseUrl/${randomUUID()}/accept",personId = person1Id).expectUnauthorized()
+        this.performPatch("$baseUrl/${randomUUID()}/accept", personId = person1Id).expectUnauthorized()
     }
 
     @Test
@@ -246,7 +250,8 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-cancel",
-                responseFields(callResponseFields()))
+                responseFields(callResponseFields())
+            )
             .returns(CallDto::class.java)
 
         assertThat(result).isNotNull
@@ -268,7 +273,8 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-deny",
-                responseFields(callResponseFields()))
+                responseFields(callResponseFields())
+            )
             .returns(CallDto::class.java)
 
         assertThat(result).isNotNull
@@ -292,7 +298,8 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "calls-finish",
-                responseFields(callResponseFields()))
+                responseFields(callResponseFields())
+            )
             .returns(CallDto::class.java)
 
         assertThat(result).isNotNull

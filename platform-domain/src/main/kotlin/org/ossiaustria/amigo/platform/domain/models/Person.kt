@@ -1,9 +1,17 @@
 package org.ossiaustria.amigo.platform.domain.models
 
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
-import javax.persistence.*
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.ForeignKey
+import javax.persistence.Id
+import javax.persistence.JoinColumn
+import javax.persistence.Table
+import javax.persistence.UniqueConstraint
 import javax.validation.constraints.NotBlank
 
 
@@ -32,7 +40,7 @@ data class Person(
     val memberType: MembershipType = MembershipType.MEMBER,
 
     val avatarUrl: String? = null
-    ) {
+) {
 
     override fun toString(): String {
         return "$id $accountId $name $memberType $groupId"

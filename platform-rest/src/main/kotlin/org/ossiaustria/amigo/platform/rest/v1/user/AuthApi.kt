@@ -4,7 +4,10 @@ package org.ossiaustria.amigo.platform.rest.v1.user
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import io.swagger.annotations.ApiOperation
+import io.swagger.annotations.ApiParam
+import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.services.auth.AuthService
+import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
 import org.ossiaustria.amigo.platform.rest.CurrentUserService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -45,19 +48,42 @@ class AuthApi(
     @PostMapping("/register")
     fun register(
         @RequestBody registerRequest: RegisterRequest
-    ): SecretAccountDto = authService
-        .registerUser(
+    ): AccountDto = authService
+        .registerAccount(
             email = registerRequest.email,
             plainPassword = registerRequest.password,
             name = registerRequest.name,
             optionalGroupId = registerRequest.optionalGroupId
         )
+        .toDto()
+
+    @ApiOperation("Register a new Analogue-Account")
+    @PostMapping("/register-analogue")
+    fun registerAnalogue(
+        @ApiParam(hidden = true)
+        account: Account,
+
+        @RequestBody registerAnalogueRequest: RegisterAnalogueRequest
+    ): SecretAccountDto = authService
+        .registerAnalogueAccount(
+            creator = account,
+            name = registerAnalogueRequest.name,
+            neededGroupId = registerAnalogueRequest.neededGroupId
+        )
         .toSecretUserDto()
 
-    @ApiOperation("DEPRECATED, get own Account information")
-    @GetMapping("/whoami")
-    fun whoami(): AccountDto = currentUserService.account().toDto()
+    @ApiOperation("Get own Account information")
+    @GetMapping("/account")
+    fun account(): SecretAccountDto = currentUserService.account().toSecretUserDto()
 
+    @ApiOperation("Update Firebase Cloud Messaging token for own Account")
+    @PostMapping("/fcm-token")
+    fun setFcmToken(
+        @ApiParam(hidden = true) tokenUserDetails: TokenUserDetails,
+        @RequestBody setFcmTokenRequest: SetFcmTokenRequest
+    ) {
+        authService.setFcmToken(tokenUserDetails.accountId, setFcmTokenRequest.fcmToken)
+    }
 }
 
 data class LoginRequest(
@@ -79,6 +105,14 @@ data class RegisterRequest(
     val optionalGroupId: UUID? = null
 )
 
-data class UpdateRequest(
-    val name: String? = null,
+@ApiModel("Register a new Analogue-Account and attach to explicit Group with a Person")
+data class RegisterAnalogueRequest(
+    @ApiModelProperty("Not-blank firstname, fullname or spitzname", required = true)
+    @get:NotEmpty val name: String,
+
+    @ApiModelProperty("Attaches to existing Group of Owner")
+    val neededGroupId: UUID
 )
+
+@ApiModel("Provide Firebase Cloud Messaging Token for update Push subscriptions")
+data class SetFcmTokenRequest(val fcmToken: String)

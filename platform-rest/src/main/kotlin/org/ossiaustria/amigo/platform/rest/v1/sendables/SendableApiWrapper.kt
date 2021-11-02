@@ -8,7 +8,7 @@ import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
 import org.ossiaustria.amigo.platform.exceptions.ErrorCode
 import org.ossiaustria.amigo.platform.exceptions.NotFoundException
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 
 internal class SendableApiWrapper<T : Sendable<T>>(

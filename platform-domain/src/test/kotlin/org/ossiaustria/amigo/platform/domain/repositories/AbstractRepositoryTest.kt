@@ -8,7 +8,7 @@ import org.ossiaustria.amigo.platform.domain.models.Group
 import org.ossiaustria.amigo.platform.domain.models.Person
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.findByIdOrNull
-import java.util.*
+import java.util.UUID
 import java.util.UUID.randomUUID
 
 internal abstract class AbstractRepositoryTest<T, R : CrudRepository<T, UUID>> : AbstractWithJpaTest() {
@@ -66,7 +66,7 @@ internal abstract class AbstractRepositoryTest<T, R : CrudRepository<T, UUID>> :
     }
 
     protected fun initGroupAccountPerson() {
-        account = accounts.save(Account(randomUUID(), "email", "pass"))
+        account = accounts.save(Account(randomUUID(), "email@example.org", "pass"))
         group = groups.save(Group(randomUUID(), "group"))
         person = persons.save(Person(randomUUID(), account.id, "person", group.id))
     }

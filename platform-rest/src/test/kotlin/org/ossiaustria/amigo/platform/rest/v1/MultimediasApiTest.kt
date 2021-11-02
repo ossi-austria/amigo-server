@@ -43,7 +43,7 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
         // Cannot mock "RequestPart" name and file
         every { multimediaService.createMultimedia(eq(ownerId), any(), any(), any()) } returns
-                Mocks.multimedia(ownerId = ownerId, filename = name)
+            Mocks.multimedia(ownerId = ownerId, filename = name)
 
         val url = "$baseUrl?ownerId=$ownerId"
 
@@ -72,13 +72,13 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
         // Cannot mock "RequestPart" name and file
         every { multimediaService.createMultimedia(eq(ownerId), any(), any(), any()) } returns
-                Mocks.multimedia(ownerId = ownerId, filename = name)
+            Mocks.multimedia(ownerId = ownerId, filename = name)
 
         every { multimediaService.getOne(any()) } returns
-                Mocks.multimedia(ownerId = ownerId, filename = name)
+            Mocks.multimedia(ownerId = ownerId, filename = name)
 
         every { multimediaService.uploadFile(any(), any()) } returns
-                Mocks.multimedia(ownerId = ownerId, filename = name)
+            Mocks.multimedia(ownerId = ownerId, filename = name)
 
         val first = this.performPartPost("$baseUrl?ownerId=$ownerId", accessToken.token, filePart = file)
             .returns(MultimediaDto::class.java)
@@ -87,7 +87,8 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "multimedias-update-file",
-                responseFields(multimediasResponseFields()))
+                responseFields(multimediasResponseFields())
+            )
             .returns(MultimediaDto::class.java)
         assertThat(second).isNotNull
     }
@@ -107,7 +108,8 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "multimedias-own",
-                responseFields(multimediasResponseFields("[].")))
+                responseFields(multimediasResponseFields("[]."))
+            )
             .returnsList(MultimediaDto::class.java)
 
         assertThat(result).isNotNull
@@ -132,7 +134,8 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "multimedias-one",
-                responseFields(multimediasResponseFields()))
+                responseFields(multimediasResponseFields())
+            )
             .returns(MultimediaDto::class.java)
 
         assertThat(result).isNotNull
@@ -146,9 +149,9 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
         every { multimediaService.getOne(msgId) } returns Mocks.multimedia(id = msgId, ownerId = person1Id)
 
         every { multimediaService.loadFile(any()) } returns
-                ClassPathResource("classpath:application-test.xml")
+            ClassPathResource("classpath:application-test.xml")
 
-        this.performGet("$baseUrl/$msgId/file", accessToken.token,person1Id)
+        this.performGet("$baseUrl/$msgId/file", accessToken.token, person1Id)
             .expectOk()
             .document("multimedias-get-file")
 

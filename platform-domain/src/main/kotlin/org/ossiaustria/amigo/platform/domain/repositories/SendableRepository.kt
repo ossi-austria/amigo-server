@@ -3,7 +3,7 @@ package org.ossiaustria.amigo.platform.domain.repositories
 import org.ossiaustria.amigo.platform.domain.models.Sendable
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.NoRepositoryBean
-import java.util.*
+import java.util.UUID
 
 
 @NoRepositoryBean

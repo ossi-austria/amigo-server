@@ -1,11 +1,10 @@
-package org.ossiaustria.amigo.platform.config
+package org.ossiaustria.amigo.platform.domain.config
 
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.messaging.FirebaseMessaging
-import org.ossiaustria.amigo.platform.domain.config.ApplicationProfiles
-import org.ossiaustria.amigo.platform.domain.services.AccountService
+import org.ossiaustria.amigo.platform.domain.services.auth.AuthService
 import org.ossiaustria.amigo.platform.domain.services.messaging.FirebaseNotificationService
 import org.ossiaustria.amigo.platform.domain.services.messaging.NoopNotificationService
 import org.ossiaustria.amigo.platform.domain.services.messaging.NotificationService
@@ -20,7 +19,7 @@ import java.util.logging.Logger
 class FirebaseMessagingConfig {
 
     @Bean
-    fun messagingService(accountService: AccountService): NotificationService =
+    fun messagingService(authService: AuthService): NotificationService =
         try {
             val googleCredentials = GoogleCredentials
                 .fromStream(FileUrlResource(FIREBASE_CONFIG_FILE).inputStream)
@@ -30,7 +29,7 @@ class FirebaseMessagingConfig {
                 .build()
             val app = FirebaseApp.initializeApp(firebaseOptions, "my-app")
             val firebaseMessaging = FirebaseMessaging.getInstance(app)
-            FirebaseNotificationService(firebaseMessaging, accountService)
+            FirebaseNotificationService(firebaseMessaging, authService)
         } catch (e: Exception) {
             log.warning("# MISSING CONFIG: $FIREBASE_CONFIG_FILE")
             log.warning("# Cannot use Firebase messaging for this server instance")

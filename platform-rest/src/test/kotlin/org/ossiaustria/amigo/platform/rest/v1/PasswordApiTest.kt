@@ -60,7 +60,7 @@ internal class PasswordApiTest : AbstractRestApiTest() {
     fun `should confirm password reset by email`() {
 //        val existingUser = createMockUser("0001")
 
-        val changedUser = accountService.requestPasswordChange(account)
+        val changedUser = authService.requestPasswordChange(account)
 
         val resetConfirmRequest = PasswordResetRequest(changedUser.changeAccountToken!!, "NEW-PASSWORD")
 

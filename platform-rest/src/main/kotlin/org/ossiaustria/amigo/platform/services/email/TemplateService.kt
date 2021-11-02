@@ -89,7 +89,6 @@ class EmailTemplateService(
 }
 
 
-
 enum class TemplateType {
     PASSWORD_RESET_TEMPLATE,
     WELCOME_MESSAGE_TEMPLATE

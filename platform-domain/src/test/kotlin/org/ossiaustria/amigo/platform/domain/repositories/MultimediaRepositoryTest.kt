@@ -3,7 +3,7 @@ package org.ossiaustria.amigo.platform.domain.repositories
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.models.enums.MultimediaType
 import org.springframework.beans.factory.annotation.Autowired
-import java.util.*
+import java.util.UUID
 
 
 internal class MultimediaRepositoryTest : AbstractRepositoryTest<Multimedia, MultimediaRepository>() {
