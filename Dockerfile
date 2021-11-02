@@ -1,4 +1,4 @@
-FROM gradle:7.1-jdk8 AS BUILDER
+FROM gradle:7-jdk11 AS BUILDER
 
 ENV JVM_OPTS -Xmx2g -Xms1g -XX:MaxPermSize=512m
 
@@ -12,8 +12,8 @@ ADD . /workdir
 RUN gradle -x test :platform-domain:jar :platform-rest:bootJar -x :platform-rest:asciidoctor
 
 # Start a new docker stage here, and only copy the finished build artefacts.
-FROM openjdk:8-jdk-alpine
-RUN addgroup -S amigo && adduser -S amigo -G amigo
+FROM openjdk:11-jre-slim-stretch
+RUN addgroup --system amigo && adduser --system amigo --ingroup amigo
 USER amigo:amigo
 COPY --from=BUILDER /workdir/platform-rest/build/libs/platform-rest-*.jar /app.jar
 
