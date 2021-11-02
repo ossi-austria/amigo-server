@@ -1,7 +1,7 @@
 package org.ossiaustria.amigo.platform.rest.v1.sendables
 
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 internal interface SendableDto {
     val id: UUID

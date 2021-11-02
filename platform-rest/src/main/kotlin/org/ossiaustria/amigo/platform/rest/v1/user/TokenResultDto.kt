@@ -1,7 +1,7 @@
 package org.ossiaustria.amigo.platform.rest.v1.user
 
 import org.ossiaustria.amigo.platform.domain.services.auth.TokenResult
-import java.util.*
+import java.util.Date
 
 data class TokenResultDto(
     val token: String,

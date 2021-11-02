@@ -1,11 +1,12 @@
 package org.ossiaustria.amigo.platform.domain.services
 
 import org.ossiaustria.amigo.platform.domain.ApplicationConfiguration
+import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Person
 import org.ossiaustria.amigo.platform.domain.repositories.AbstractWithJpaTest
 import org.ossiaustria.amigo.platform.domain.testcommons.Mocks
 import org.springframework.beans.factory.annotation.Autowired
-import java.util.*
+import java.util.UUID
 
 internal abstract class AbstractServiceTest : AbstractWithJpaTest() {
 
@@ -22,19 +23,23 @@ internal abstract class AbstractServiceTest : AbstractWithJpaTest() {
     lateinit var person2: Person
     lateinit var person3: Person
 
+    lateinit var accounts1: Account
+    lateinit var accounts2: Account
+    lateinit var accounts3: Account
+
     val groupId1: UUID = UUID.randomUUID()
     val groupId2: UUID = UUID.randomUUID()
 
     protected fun mockPersons() {
         groups.save(Mocks.group(groupId1))
         groups.save(Mocks.group(groupId2))
-        accounts.save(Mocks.account()).also {
+        accounts1 = accounts.save(Mocks.account()).also {
             person1 = persons.save(Mocks.person(personId1, it.id, groupId1))
         }
-        accounts.save(Mocks.account()).also {
+        accounts2 = accounts.save(Mocks.account()).also {
             person2 = persons.save(Mocks.person(personId2, it.id, groupId1))
         }
-        accounts.save(Mocks.account()).also {
+        accounts3 = accounts.save(Mocks.account()).also {
             person3 = persons.save(Mocks.person(personId3, it.id, groupId2))
         }
     }

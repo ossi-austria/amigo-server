@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModelProperty
 import org.ossiaustria.amigo.platform.domain.models.Message
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 
 @ApiModel(description = "Message")

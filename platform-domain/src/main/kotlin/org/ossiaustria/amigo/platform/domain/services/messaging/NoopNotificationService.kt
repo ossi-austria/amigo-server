@@ -4,7 +4,7 @@ import com.google.firebase.messaging.AndroidConfig
 import org.ossiaustria.amigo.platform.domain.models.Call
 import org.ossiaustria.amigo.platform.domain.models.Message
 import org.slf4j.LoggerFactory
-import java.util.*
+import java.util.UUID
 
 class NoopNotificationService : NotificationService {
 

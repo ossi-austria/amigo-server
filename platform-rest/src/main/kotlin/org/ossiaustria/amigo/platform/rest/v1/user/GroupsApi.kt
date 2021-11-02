@@ -9,20 +9,37 @@ import org.ossiaustria.amigo.platform.domain.models.Group
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import org.ossiaustria.amigo.platform.domain.services.GroupService
 import org.ossiaustria.amigo.platform.domain.services.SecurityError
+import org.ossiaustria.amigo.platform.domain.services.auth.AuthService
 import org.ossiaustria.amigo.platform.rest.CurrentUserService
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.*
-import java.util.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 @Timed(value = "time.api.groups")
 @RestController
 @RequestMapping("/v1/groups", produces = ["application/json"])
 class GroupsApi(
     val groupsService: GroupService,
+    val authService: AuthService,
     val currentUserService: CurrentUserService
 ) {
 
-    @ApiOperation("Get own Group[s]")
+    @ApiOperation(
+        "Get own Group[s]", notes = """
+        Groups contain all necessary Person profiles inside them.
+        A User can just access the Groups where they have a Person profile and is at least MEMBER (default).
+        
+        A Group can contain at max 1 ANALOGUE Person."""
+    )
     @GetMapping
     fun getMyGroups(
         @ApiParam(hidden = true)
@@ -69,7 +86,12 @@ class GroupsApi(
         ).toDto()
     }
 
-    @ApiOperation("Add a new Person to this Group")
+    @ApiOperation(
+        "Add a new Person to this Group", notes = """
+        *Email* is used to find an existing Account and create a new Person in this Group.
+        *Name* and *MembershipType* must be initialised
+    """
+    )
     @PostMapping("/{id}/members")
     fun addMember(
         @ApiParam(hidden = true)
@@ -93,7 +115,13 @@ class GroupsApi(
         ).toDto()
     }
 
-    @ApiOperation("Change a Person/Membership of this Group")
+    @ApiOperation(
+        "Change a Person/Membership of this Group", notes = """
+        Change privilege of a member.
+
+        Attention: OWNER cannot be decreased in privilege.
+    """
+    )
     @PatchMapping("/{id}/members/{personId}")
     fun changeMember(
         @ApiParam(hidden = true)
@@ -116,7 +144,12 @@ class GroupsApi(
         return groupsService.changeMember(admin, findGroup, member, request.membershipType).toDto()
     }
 
-    @ApiOperation("Remove a Person/Membership of this Group")
+    @ApiOperation(
+        "Remove a Person/Member of this Group",
+        notes = """
+            Remove a non-OWNER of a Group.
+            Note: This endpoint might change to not return a result"""
+    )
     @DeleteMapping("/{id}/members/{personId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun removeMember(
@@ -145,10 +178,14 @@ class GroupsApi(
 
         @ApiParam(hidden = true)
         account: Account
-        ): GroupDto =
+    ): GroupDto =
         groupsService.findGroup(account, id).toDto()
 
-    @ApiOperation("Search/filter visible Groups")
+    @ApiOperation(
+        "Search/filter visible Groups", notes = """
+        Filter accessible Groups for *own* Person and/or Group name
+    """
+    )
     @GetMapping("/filtered")
     fun filterGroups(
         @RequestParam(value = "personId", required = false)

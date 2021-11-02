@@ -4,7 +4,8 @@ import org.ossiaustria.amigo.platform.domain.config.Constants
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
-import java.util.*
+import java.util.Date
+import java.util.UUID
 
 data class TokenUserDetails(
     val accountId: UUID,
@@ -31,8 +32,5 @@ data class TokenUserDetails(
     override fun isCredentialsNonExpired(): Boolean = expiration.after(Date())
 
     override fun isEnabled(): Boolean = true
-
-    @Deprecated("use given personID")
-    fun personId() = personsIds.first()
 
 }

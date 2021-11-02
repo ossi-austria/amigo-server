@@ -11,7 +11,7 @@ import org.ossiaustria.amigo.platform.exceptions.NotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 internal class SendableServiceMixin<S : Sendable<S>>(
     private val repository: SendableRepository<S>,

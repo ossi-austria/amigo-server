@@ -9,7 +9,7 @@ import org.ossiaustria.amigo.platform.domain.config.ApplicationProfiles
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Group
 import org.ossiaustria.amigo.platform.domain.models.Person
-import org.ossiaustria.amigo.platform.domain.services.AccountService
+import org.ossiaustria.amigo.platform.domain.services.auth.AuthService
 import org.ossiaustria.amigo.platform.domain.services.auth.JwtService
 import org.ossiaustria.amigo.platform.domain.services.auth.TokenResult
 import org.ossiaustria.amigo.platform.rest.CurrentUserService
@@ -27,7 +27,6 @@ import org.springframework.restdocs.operation.preprocess.Preprocessors.removeHea
 import org.springframework.restdocs.payload.FieldDescriptor
 import org.springframework.restdocs.payload.JsonFieldType
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
-import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import org.springframework.restdocs.snippet.Snippet
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity
 import org.springframework.test.annotation.DirtiesContext
@@ -35,11 +34,10 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.test.web.servlet.ResultActions
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
-import java.util.*
+import java.util.UUID
 import javax.transaction.Transactional
 
 @TestPropertySource("classpath:application-test.yml")
@@ -59,7 +57,7 @@ internal abstract class AbstractRestApiTest : AbstractRestTest() {
     protected lateinit var jwtService: JwtService
 
     @Autowired
-    protected lateinit var accountService: AccountService
+    protected lateinit var authService: AuthService
 
     @Autowired
     protected lateinit var accountSubjectPreparationTrait: AccountSubjectPreparationTrait

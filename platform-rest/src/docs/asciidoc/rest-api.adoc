@@ -117,7 +117,7 @@ Amigo-Person-Id: $UUID of own person
 As amigo-platform is designed to be a multi-group user system, an Account can have several Persons in different Groups.
 Therefore, the usage of *Amigo-Person-Id* is meant as specific authentication and encouraged.
 
-Addtionally it is useful to provide the
+Additionally it is useful to provide the
 
 The Private Token can be obtained during authentication
 
@@ -156,33 +156,30 @@ Or use explicit Group registering:
 
 operation::register-explicit-success[snippets='curl-request,request-fields,http-response']
 
+[[authentication-register-analogue]]
+=== POST /auth/register-analogue
+
+operation::register-analogue-success[snippets='curl-request,request-fields,http-response,response-fields']
+
 [[authentication-login]]
 === POST /auth/login
-
-Login can be executed with the username or the email.
 
 operation::login-success[snippets='curl-request,request-fields,http-response,response-fields']
 
 === POST /auth/refresh-token
 
 When performing this action to "refresh a token" you get a new "access token".
-Naming is hard.
 
 operation::refresh-token-success[snippets='curl-request,request-fields,http-response,response-fields']
 
-=== GET /auth/whoami
+=== GET /auth/account
 
 Get user short profile info, when already logged in.
 
-operation::who-am-i[snippets='curl-request,http-response,response-fields']
-
-[[account]]
-== Account - /account
-
-Account endpoint is a singular endpoint just for the current user.
+operation::account[snippets='curl-request,http-response,response-fields']
 
 [[account-set-fcm-token]]
-=== POST /account/set-fcm-token
+=== POST /auth/fcm-token
 
 Set the new Firebase Cloud Messaging (FCM) token for the current user.
 No Data as response.
@@ -242,7 +239,7 @@ Note: This endpoint might change to not return a result
 operation::groups-member-remove[snippets='curl-request,http-response']
 
 [[groups-my]]
-=== GET /groups/my
+=== GET /groups/
 
 Fetch all Groups of own User.
 
@@ -376,12 +373,15 @@ operation::nfcs-create[snippets='response-fields']
 
 == Create new NFC - POST /nfc
 
+You can optionally set linked Album OR linked Person.
+If both are provided, Album will be linked.
+
 operation::nfcs-create[snippets='curl-request,request-fields,http-response,response-fields']
 
 == Change NFC - PATCH /nfc/:id
 
 You can set Name and ONE OF linked Album OR linked Person.
-Of both are provided, Album will be linked.
+If both are provided, Album will be linked.
 
 operation::nfcs-change[snippets='curl-request,request-fields,http-response,response-fields']
 
@@ -397,6 +397,9 @@ operation::nfcs-created[snippets='curl-request,http-response']
 
 operation::nfcs-one[snippets='curl-request,http-response']
 
+== Delete one NFC - DELETE /nfc/:id
+
+operation::nfcs-delete[snippets='curl-request,http-response']
 
 = Sendables
 

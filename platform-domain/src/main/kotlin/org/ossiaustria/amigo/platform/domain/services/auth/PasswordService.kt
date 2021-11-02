@@ -11,7 +11,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.UUID
 
 interface PasswordService {
     fun resetPasswordStart(email: String? = null, userName: String? = null, userId: UUID? = null)
@@ -32,14 +32,13 @@ class APPasswordService(
     }
 
     override fun resetPasswordStart(email: String?, userName: String?, userId: UUID?) {
-        val account: Account
 
-        when {
-            email != null -> account = accountRepository.findOneByEmail(email)
+        val account: Account = when {
+            email != null -> accountRepository.findOneByEmail(email)
                 ?: throw UnknownUserException()
-            userName != null -> account = accountRepository.findOneByEmail(userName)
+            userName != null -> accountRepository.findOneByEmail(userName)
                 ?: throw UnknownUserException()
-            userId != null -> account = accountRepository.findByIdOrNull(userId)
+            userId != null -> accountRepository.findByIdOrNull(userId)
                 ?: throw UnknownUserException()
             else -> throw ConflictException(ErrorCode.UserBadCredentials, "Any search parameter should be presented")
         }
@@ -86,7 +85,8 @@ class APPasswordService(
             )
         }
 
-        val savedAccount = accountRepository.save(account.copy(changeAccountToken = null, changeAccountTokenCreatedAt = null))
+        val savedAccount =
+            accountRepository.save(account.copy(changeAccountToken = null, changeAccountTokenCreatedAt = null))
 
         return authService.changePasswordForUser(savedAccount, password)
     }

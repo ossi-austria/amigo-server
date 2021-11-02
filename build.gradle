@@ -10,7 +10,7 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.31"
         classpath("org.jetbrains.kotlin:kotlin-noarg:1.5.31")
         classpath("org.jetbrains.kotlin:kotlin-allopen:1.5.31")
-  }
+    }
 }
 
 plugins {
@@ -56,8 +56,8 @@ subprojects {
         }
     }
 
-    compileKotlin { kotlinOptions { jvmTarget = "1.8" } }
-    compileTestKotlin { kotlinOptions { jvmTarget = "1.8" } }
+    compileKotlin { kotlinOptions { jvmTarget = "11" } }
+    compileTestKotlin { kotlinOptions { jvmTarget = "11" } }
 
     test {
         systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'

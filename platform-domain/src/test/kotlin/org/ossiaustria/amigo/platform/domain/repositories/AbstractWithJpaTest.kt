@@ -2,8 +2,8 @@ package org.ossiaustria.amigo.platform.domain.repositories
 
 import io.zonky.test.db.AutoConfigureEmbeddedDatabase
 import org.junit.jupiter.api.assertThrows
-import org.ossiaustria.amigo.platform.config.NoopMessagingConfig
 import org.ossiaustria.amigo.platform.domain.config.ApplicationProfiles
+import org.ossiaustria.amigo.platform.domain.config.NoopMessagingConfig
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest

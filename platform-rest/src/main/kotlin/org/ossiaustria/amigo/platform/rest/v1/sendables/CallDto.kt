@@ -4,7 +4,7 @@ import org.ossiaustria.amigo.platform.domain.models.Call
 import org.ossiaustria.amigo.platform.domain.models.enums.CallState
 import org.ossiaustria.amigo.platform.domain.models.enums.CallType
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 
 internal data class CallDto(

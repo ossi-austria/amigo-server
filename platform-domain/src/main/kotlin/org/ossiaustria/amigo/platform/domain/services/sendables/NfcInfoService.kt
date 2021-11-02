@@ -9,6 +9,7 @@ import org.ossiaustria.amigo.platform.domain.repositories.AlbumRepository
 import org.ossiaustria.amigo.platform.domain.repositories.NfcInfoRepository
 import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
 import org.ossiaustria.amigo.platform.domain.services.SecurityError
+import org.ossiaustria.amigo.platform.exceptions.DefaultNotFoundException
 import org.ossiaustria.amigo.platform.exceptions.ErrorCode
 import org.ossiaustria.amigo.platform.exceptions.NotFoundException
 import org.slf4j.LoggerFactory
@@ -21,16 +22,19 @@ import java.util.UUID.randomUUID
 
 interface NfcInfoService {
 
-    fun createNfc(name: String, nfcRef: String, ownerId: UUID, creatorId: UUID): NfcInfo
+    fun createNfc(
+        name: String, nfcRef: String, ownerId: UUID, creatorId: UUID,
+        linkedPersonId: UUID? = null, linkedAlbumId: UUID? = null
+    ): NfcInfo
+
     fun changeName(nfc: NfcInfo, newName: String): NfcInfo
     fun linkToAlbum(nfc: NfcInfo, albumId: UUID): NfcInfo
     fun linkToPerson(nfc: NfcInfo, personId: UUID): NfcInfo
-    fun delete(nfc: NfcInfo)
+    fun delete(id: UUID, personId: UUID)
 
     fun getOne(id: UUID): NfcInfo?
     fun findAllByCreator(creatorId: UUID): List<NfcInfo>
     fun findAllByOwner(ownerId: UUID): List<NfcInfo>
-    fun findAllByPerson(personId: UUID): List<NfcInfo>
     fun findByLinkedAlbum(linkedAlbumId: UUID): List<NfcInfo>
     fun findByLinkedPerson(linkedPersonId: UUID): List<NfcInfo>
     fun count(): Long
@@ -52,7 +56,10 @@ class NfcInfoServiceImpl : NfcInfoService {
 
     override fun count(): Long = repository.count()
 
-    override fun createNfc(name: String, nfcRef: String, ownerId: UUID, creatorId: UUID): NfcInfo {
+    override fun createNfc(
+        name: String, nfcRef: String, ownerId: UUID, creatorId: UUID,
+        linkedPersonId: UUID?, linkedAlbumId: UUID?
+    ): NfcInfo {
         val creator = personRepository.findByIdOrNull(creatorId)
             ?: throw SecurityError.PersonNotFound(creatorId.toString())
         val owner = personRepository.findByIdOrNull(ownerId)
@@ -67,7 +74,9 @@ class NfcInfoServiceImpl : NfcInfoService {
             creatorId = creatorId,
             type = NfcInfoType.UNDEFINED
         )
-        return repository.save(nfc)
+        return repository.save(
+            changeNfcInfo(nfc, null, linkedPersonId, linkedAlbumId)
+        )
     }
 
     override fun changeName(nfc: NfcInfo, newName: String): NfcInfo {
@@ -90,6 +99,7 @@ class NfcInfoServiceImpl : NfcInfoService {
         Group.assertSameGroup(owner.groupId, albumOwner.groupId)
         return repository.save(
             nfc.copy(
+                name = album.name,
                 updatedAt = ZonedDateTime.now(),
                 linkedAlbumId = albumId,
                 type = NfcInfoType.OPEN_ALBUM
@@ -105,6 +115,7 @@ class NfcInfoServiceImpl : NfcInfoService {
         Group.assertSameGroup(owner.groupId, linkedPerson.groupId)
         return repository.save(
             nfc.copy(
+                name = linkedPerson.name,
                 updatedAt = ZonedDateTime.now(),
                 linkedPersonId = personId,
                 type = NfcInfoType.CALL_PERSON
@@ -134,7 +145,10 @@ class NfcInfoServiceImpl : NfcInfoService {
             }
         }
 
-    override fun delete(nfc: NfcInfo) {
+    override fun delete(id: UUID, personId: UUID) {
+        val nfc = repository.findByIdAndCreatorId(id, personId)
+            ?: repository.findByIdAndOwnerId(id, personId)
+            ?: throw DefaultNotFoundException()
         return repository.delete(nfc)
     }
 
@@ -143,12 +157,8 @@ class NfcInfoServiceImpl : NfcInfoService {
     override fun findAllByCreator(creatorId: UUID) = repository.findByCreatorId(creatorId)
     override fun findAllByOwner(ownerId: UUID): List<NfcInfo> = repository.findByOwnerId(ownerId)
 
-    override fun findAllByPerson(personId: UUID): List<NfcInfo> =
-        repository.findByCreatorIdOrOwnerId(personId, personId)
-
     override fun findByLinkedAlbum(linkedAlbumId: UUID): List<NfcInfo> =
         repository.findByLinkedAlbumId(linkedAlbumId)
-
 
     override fun findByLinkedPerson(linkedPersonId: UUID): List<NfcInfo> =
         repository.findByLinkedPersonId(linkedPersonId)

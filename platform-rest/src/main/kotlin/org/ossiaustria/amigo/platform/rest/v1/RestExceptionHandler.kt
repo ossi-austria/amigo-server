@@ -2,7 +2,14 @@ package org.ossiaustria.amigo.platform.rest.v1
 
 import org.hibernate.exception.ConstraintViolationException
 import org.ossiaustria.amigo.platform.domain.services.ServiceError
-import org.ossiaustria.amigo.platform.exceptions.*
+import org.ossiaustria.amigo.platform.exceptions.BadRequestException
+import org.ossiaustria.amigo.platform.exceptions.ConflictException
+import org.ossiaustria.amigo.platform.exceptions.ErrorCode
+import org.ossiaustria.amigo.platform.exceptions.ForbiddenContentException
+import org.ossiaustria.amigo.platform.exceptions.NotFoundException
+import org.ossiaustria.amigo.platform.exceptions.RestException
+import org.ossiaustria.amigo.platform.exceptions.UnauthorizedException
+import org.ossiaustria.amigo.platform.exceptions.ValidationException
 import org.ossiaustria.amigo.platform.rest.v1.common.RestExceptionDto
 import org.ossiaustria.amigo.platform.rest.v1.common.ValidationFailureDto
 import org.springframework.http.HttpStatus

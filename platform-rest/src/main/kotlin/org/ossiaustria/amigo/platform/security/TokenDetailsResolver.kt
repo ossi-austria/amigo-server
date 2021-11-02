@@ -1,6 +1,7 @@
 package org.ossiaustria.amigo.platform.security
 
 import org.ossiaustria.amigo.platform.domain.services.auth.TokenUserDetails
+import org.ossiaustria.amigo.platform.exceptions.UnauthorizedException
 import org.springframework.core.MethodParameter
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.support.WebDataBinderFactory
@@ -22,6 +23,6 @@ class TokenDetailsResolver : HandlerMethodArgumentResolver {
         val authentication = SecurityContextHolder.getContext().authentication
         val principal = authentication.principal
         return principal as? TokenUserDetails
-            ?: throw IllegalStateException("Token details can not be resolved in current context")
+            ?: throw UnauthorizedException("Token details can not be resolved in current context")
     }
 }

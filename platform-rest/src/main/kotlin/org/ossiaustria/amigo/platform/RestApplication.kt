@@ -15,7 +15,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2
 )
 @EnableConfigurationProperties(ApplicationConfiguration::class)
 @EnableSwagger2
-@Import(value=[DomainModule::class,BeanValidatorPluginsConfiguration::class])
+@Import(value = [DomainModule::class, BeanValidatorPluginsConfiguration::class])
 class RestApplication
 
 fun main(args: Array<String>) {

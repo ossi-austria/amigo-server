@@ -3,7 +3,7 @@ package org.ossiaustria.amigo.platform.rest.v1.multimedias
 import org.ossiaustria.amigo.platform.domain.models.Album
 import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 
 internal data class AlbumDto(

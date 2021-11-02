@@ -6,7 +6,7 @@ import org.ossiaustria.amigo.platform.domain.models.Multimedia
 import org.ossiaustria.amigo.platform.domain.models.Person
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import org.ossiaustria.amigo.platform.domain.models.enums.MultimediaType
-import java.util.*
+import java.util.UUID
 
 
 internal object Mocks {

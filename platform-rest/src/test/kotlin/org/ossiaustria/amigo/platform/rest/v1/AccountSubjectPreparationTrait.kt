@@ -4,9 +4,9 @@ import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Group
 import org.ossiaustria.amigo.platform.domain.models.Person
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
-import org.ossiaustria.amigo.platform.domain.services.AccountService
 import org.ossiaustria.amigo.platform.domain.services.GroupService
-import org.ossiaustria.amigo.platform.domain.services.PersonService
+import org.ossiaustria.amigo.platform.domain.services.PersonProfileService
+import org.ossiaustria.amigo.platform.domain.services.auth.AuthService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -23,15 +23,15 @@ internal class AccountSubjectPreparationTrait {
     protected lateinit var groupService: GroupService
 
     @Autowired
-    protected lateinit var personService: PersonService
+    protected lateinit var personService: PersonProfileService
 
     @Autowired
-    protected lateinit var accountService: AccountService
+    protected lateinit var authService: AuthService
 
     fun apply() {
         account = createMockAccount()
         group = createMockGroup(account)
-        account = accountService.findOneByEmail(account.email)!! // has to be reloaded
+        account = authService.findOneByEmail(account.email)!! // has to be reloaded
         account2 = createMockAccount(userOverrideSuffix = "0002")
         person = account.persons.first()
         person2 = account2.persons.first()
@@ -49,7 +49,7 @@ internal class AccountSubjectPreparationTrait {
         accountInvocations++
         val userSuffix = "-$accountInvocations$userOverrideSuffix"
 
-        val nextAccout = accountService.createAccount("email$userSuffix@example.com", plainPassword)
+        val nextAccout = authService.createAccount("email$userSuffix@example.com", plainPassword)
 
         group?.let {
             groupService.addMember(
@@ -61,7 +61,7 @@ internal class AccountSubjectPreparationTrait {
             )
         }
 
-        return accountService.findOneByEmail(nextAccout.email)!!
+        return authService.findOneByEmail(nextAccout.email)!!
     }
 
     companion object {

@@ -28,7 +28,7 @@ enum class ErrorCode(val errorCode: Int, val errorName: String) {
 
     CallChangeNotSenderError(3001, "Call can just be manipulated by sender for this request"),
     CallChangeNotReceiverError(3002, "Call can just be manipulated by receiver for this request"),
-    AlbumNotFound(4001,"Album not Found"),
+    AlbumNotFound(4001, "Album not Found"),
 }
 
 @ResponseStatus(
@@ -57,7 +57,7 @@ open class RestException(
 class ValidationException(message: String, val validationErrors: Array<FieldError?> = arrayOf()) :
     RestException(ErrorCode.ValidationFailed, message) {
     constructor(validationErrors: Array<FieldError?>) :
-            this(validationErrors.joinToString("\n") { it.toString() }, validationErrors)
+        this(validationErrors.joinToString("\n") { it.toString() }, validationErrors)
 
 }
 
@@ -95,10 +95,6 @@ class ForbiddenContentException(errorCode: ErrorCode, message: String) : RestExc
 
 @ResponseStatus(code = HttpStatus.CONFLICT, reason = "Cannot create entity due to a duplicate conflict:")
 class ConflictException(errorCode: ErrorCode, message: String) : RestException(errorCode, message)
-
-@ResponseStatus(code = HttpStatus.CONFLICT, reason = "The state of internal db is inconsistent")
-class UserAlreadyExistsException(username: String, email: String) :
-    RestException(ErrorCode.UserCreationFailedEmailOrUsernameUsed, "'$username' or '$email' is already in use!")
 
 @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "User not found")
 open class UnknownUserException(message: String? = null) :

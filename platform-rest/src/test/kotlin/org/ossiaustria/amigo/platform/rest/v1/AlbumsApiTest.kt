@@ -17,7 +17,6 @@ import org.springframework.restdocs.payload.JsonFieldType.ARRAY
 import org.springframework.restdocs.payload.JsonFieldType.STRING
 import org.springframework.restdocs.payload.PayloadDocumentation.requestFields
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
-import org.springframework.restdocs.request.RequestDocumentation.requestParameters
 import java.util.UUID
 import java.util.UUID.randomUUID
 
@@ -86,7 +85,8 @@ internal class AlbumsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "albums-own",
-                responseFields(albumsResponseFields("[].")))
+                responseFields(albumsResponseFields("[]."))
+            )
             .returnsList(AlbumDto::class.java)
 
         assertThat(result).isNotNull
@@ -102,7 +102,8 @@ internal class AlbumsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "albums-shared",
-                responseFields(albumsResponseFields("[].")))
+                responseFields(albumsResponseFields("[]."))
+            )
             .returnsList(AlbumDto::class.java)
 
         assertThat(result).isNotNull
@@ -129,7 +130,8 @@ internal class AlbumsApiTest : AbstractRestApiTest() {
             .expectOk()
             .document(
                 "albums-one",
-                responseFields(albumsResponseFields()))
+                responseFields(albumsResponseFields())
+            )
             .returns(AlbumDto::class.java)
 
         assertThat(result).isNotNull
@@ -149,9 +151,9 @@ internal class AlbumsApiTest : AbstractRestApiTest() {
     ): Album {
         return Album(
             id, ownerId = ownerId, name = name, items = listOf(
-            Multimedia(id = randomUUID(), ownerId = ownerId, type = MultimediaType.IMAGE, filename = "filename"),
-            Multimedia(id = randomUUID(), ownerId = ownerId, type = MultimediaType.IMAGE, filename = "filename"),
-        )
+                Multimedia(id = randomUUID(), ownerId = ownerId, type = MultimediaType.IMAGE, filename = "filename"),
+                Multimedia(id = randomUUID(), ownerId = ownerId, type = MultimediaType.IMAGE, filename = "filename"),
+            )
         )
     }
 

@@ -4,8 +4,15 @@ import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
 import org.ossiaustria.amigo.platform.domain.services.SecurityError
 import java.time.ZonedDateTime
-import java.util.*
-import javax.persistence.*
+import java.util.UUID
+import javax.persistence.CascadeType
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.FetchType
+import javax.persistence.Id
+import javax.persistence.OneToMany
+import javax.persistence.Table
+import javax.persistence.UniqueConstraint
 import javax.validation.constraints.NotBlank
 
 @Entity
@@ -39,6 +46,10 @@ data class Account(
     val changeAccountTokenCreatedAt: ZonedDateTime? = null,
 
     val fcmToken: String? = null,
+
+    // extra fields for AMIGOBOX users
+    val createdByAccountId: UUID? = null,
+    val hasValidMail: Boolean = true
 ) {
 
     fun person(personId: UUID?): Person = if (personId != null) {
@@ -51,5 +62,6 @@ data class Account(
 
 
     fun hasPersonId(personId: UUID?): Boolean = this.persons.map { it.id }.contains(personId)
+
 
 }

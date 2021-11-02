@@ -4,15 +4,19 @@ package org.ossiaustria.amigo.platform.domain.services.auth
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.EmailValidator
 import org.ossiaustria.amigo.platform.domain.models.Group
+import org.ossiaustria.amigo.platform.domain.models.LoginToken
+import org.ossiaustria.amigo.platform.domain.models.PasswordValidator
 import org.ossiaustria.amigo.platform.domain.models.Person
 import org.ossiaustria.amigo.platform.domain.models.StringValidator
 import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import org.ossiaustria.amigo.platform.domain.repositories.AccountRepository
 import org.ossiaustria.amigo.platform.domain.repositories.GroupRepository
+import org.ossiaustria.amigo.platform.domain.repositories.LoginTokenRepository
 import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
+import org.ossiaustria.amigo.platform.domain.services.NameGeneratorService
 import org.ossiaustria.amigo.platform.domain.services.SecurityError
+import org.ossiaustria.amigo.platform.domain.services.ServiceError
 import org.ossiaustria.amigo.platform.exceptions.UnauthorizedException
-import org.ossiaustria.amigo.platform.exceptions.UserAlreadyExistsException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
@@ -20,7 +24,6 @@ import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import org.springframework.validation.Validator
 import java.time.ZonedDateTime
 import java.util.UUID
 import java.util.UUID.randomUUID
@@ -44,7 +47,10 @@ class AuthService(
     private lateinit var personRepository: PersonRepository
 
     @Autowired
-    private lateinit var validator: Validator
+    private lateinit var loginTokenRepository: LoginTokenRepository
+
+    @Autowired
+    private lateinit var nameGeneratorService: NameGeneratorService
 
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
@@ -52,6 +58,7 @@ class AuthService(
         val GUEST_ACCOUNT_ID = UUID(0L, 0L)
 
         private const val DEFAULT_GROUP = "AMIGO"
+        private const val AMIGO_ANALOGUE_EMAIL_SUFFIX = "@amigobox"
     }
 
     @Transactional
@@ -63,9 +70,24 @@ class AuthService(
         val checkPw = passwordEncoder.matches(plainPassword, account.passwordEncrypted)
 
         if (!checkPw) throw UnauthorizedException("username or password is incorrect")
+        return generateTokenResult(account)
+    }
 
-        val refreshToken = jwtService.generateRefreshToken(account.id, email)
-        val accessToken = jwtService.generateAccessToken(account.id, email, personsIds = account.persons.map { it.id })
+    @Transactional
+    fun loginUserPerToken(token: String): LoginResult {
+        val invitation = loginTokenRepository.findByToken(token)
+            ?: throw UnauthorizedException("Token is not found")
+        val person = personRepository.findByIdOrNull(invitation.personId)
+            ?: throw UnauthorizedException("Token is not valid")
+        val account = accountRepository.findByIdOrNull(person.accountId)
+            ?: throw UnauthorizedException("Token is not usable")
+        return generateTokenResult(account)
+    }
+
+    private fun generateTokenResult(account: Account): LoginResult {
+        val refreshToken = jwtService.generateRefreshToken(account.id, account.email)
+        val accessToken =
+            jwtService.generateAccessToken(account.id, account.email, personsIds = account.persons.map { it.id })
         accountRepository.save(account.copy(lastLogin = ZonedDateTime.now()))
         return LoginResult(
             account = account,
@@ -75,64 +97,73 @@ class AuthService(
     }
 
     @Transactional
-    fun registerUser(
+    fun registerAccount(
         @Email email: String,
         @NotBlank plainPassword: String,
         @NotBlank name: String,
         optionalGroupId: UUID? = null,
     ): Account {
+        val account = createAccount(email, plainPassword)
+        val person = createInitialGroupPerson(name, account.id, optionalGroupId)
+        val finalAccount = accountRepository.save(account.copy(persons = listOf(person)))
+        return accountRepository.findOneByEmail(finalAccount.email)!!
+    }
 
-        EmailValidator.validate(email)
-        StringValidator.validateLength(plainPassword, 6)
-        StringValidator.validateLength(name, 6)
-        val encryptedPassword = passwordEncoder.encode(plainPassword)
-        val byEmail: Account? = accountRepository.findOneByEmail(email)
+    @Transactional
+    fun registerAnalogueAccount(
+        creator: Account,
+        @NotBlank name: String,
+        neededGroupId: UUID,
+    ): Account {
+        var freeToken: String
+        // generate an unused LoginToken token
+        while (true) {
+            freeToken = nameGeneratorService.generateName()
+            loginTokenRepository.findByToken(freeToken) ?: break
+        }
 
-        log.info("Someone tries to register: $name $email")
-        if (byEmail != null) throw UserAlreadyExistsException(email, email)
-
-        val accountId = randomUUID()
-
-        val initialPersons = createInitialGroupPersons(name, accountId, optionalGroupId)
-        val account = Account(
-                id = accountId, email = email, passwordEncrypted = encryptedPassword,
-                persons = initialPersons
-            )
-
-        val newUser = accountRepository.save(account)
-
-        return accountRepository.findOneByEmail(newUser.email)!!
+        val account = createAnalogueAccount(creator, freeToken)
+        val group = groupRepository.findByIdOrNull(neededGroupId)
+            ?: throw SecurityError.GroupNotFound(neededGroupId.toString())
+        val person = createInitialGroupPerson(name, account.id, neededGroupId, type = MembershipType.ANALOGUE)
+        val finalAccount = accountRepository.save(account.copy(persons = listOf(person)))
+        loginTokenRepository.save(LoginToken(randomUUID(), person.id, freeToken))
+        groupRepository.save(group.copy(name = person.name))
+        return finalAccount
     }
 
     /**
      * Can create a Registration for a new User with an invitation (optionalGroupId), or
      * create an implicit Group
      */
-    fun createInitialGroupPersons(
+    private fun createInitialGroupPerson(
         name: String,
         accountId: UUID,
         optionalGroupId: UUID? = null,
-    ): List<Person> {
-        var type = MembershipType.MEMBER
+        type: MembershipType = MembershipType.MEMBER
+    ): Person {
+        StringValidator.validateLength(name, 6)
+        var memberType = type
         val chosenGroupId = if (optionalGroupId != null) {
             groupRepository.findByIdOrNull(optionalGroupId)?.id
                 ?: throw SecurityError.GroupNotFound(optionalGroupId.toString())
         } else {
-            type = MembershipType.OWNER
+            memberType = MembershipType.OWNER
             createImplicitGroup(accountId, optionalGroupId).id
         }
 
-        return listOf(
-            Person(
-                id = randomUUID(),
-                accountId = accountId,
-                name = name,
-                groupId = chosenGroupId,
-                memberType = type
-            )
+        return Person(
+            id = randomUUID(),
+            accountId = accountId,
+            name = name,
+            groupId = chosenGroupId,
+            memberType = memberType
         )
+
     }
 
+
+    @Deprecated("Needs to deprecated")
     private fun createImplicitGroup(accountId: UUID, optionalGroupId: UUID?): Group {
         val group = groupRepository.findByName(accountId.toString()).firstOrNull()
         if (group != null) {
@@ -195,6 +226,56 @@ class AuthService(
     }
 
     @Transactional
+    fun createAccount(email: String, plainPassword: String): Account {
+        log.info("Someone tries to register: $email")
+
+        try {
+            if (!email.endsWith(AMIGO_ANALOGUE_EMAIL_SUFFIX)) EmailValidator.validate(email)
+        } catch (e: Exception) {
+            throw AccountCreationError.EmailInvalid(email)
+        }
+        try {
+            PasswordValidator.validate(plainPassword)
+            StringValidator.validateLength(plainPassword, 6)
+        } catch (e: Exception) {
+            throw AccountCreationError.PasswordInvalid()
+        }
+
+        accountRepository.findOneByEmail(email)?.let {
+            throw AccountCreationError.EmailUsed(email)
+        }
+        val passwordEncrypted = passwordEncoder.encode(plainPassword)
+        val id = randomUUID()
+        val account = Account(
+            id = id,
+            email = email,
+            passwordEncrypted = passwordEncrypted,
+        )
+        return accountRepository.save(account)
+    }
+
+    @Transactional
+    fun createAnalogueAccount(creator: Account, password: String): Account {
+        val timestamp = System.currentTimeMillis()
+        val email = "user-$timestamp$AMIGO_ANALOGUE_EMAIL_SUFFIX"
+        val account = createAccount(email, password).copy(
+            createdByAccountId = creator.id,
+            hasValidMail = false,
+        )
+        return accountRepository.save(account)
+    }
+
+    @Transactional
+    fun requestPasswordChange(account: Account): Account {
+        return accountRepository.save(
+            account.copy(
+                changeAccountToken = randomUUID().toString(),
+                changeAccountTokenCreatedAt = ZonedDateTime.now()
+            )
+        )
+    }
+
+    @Transactional
     fun changePasswordForUser(account: Account, newPassword: String): Boolean {
         val passwordEncrypted = passwordEncoder.encode(newPassword)
         accountRepository.save(account.copy(passwordEncrypted = passwordEncrypted))
@@ -208,7 +289,24 @@ class AuthService(
         return accountRepository.save(account.copy(fcmToken = fcmToken)).also {
             log.info("Set FCM token for account ${accountId} : $fcmToken")
         }
-
     }
+
+    fun findById(id: UUID) = accountRepository.findByIdOrNull(id)
+    fun findOneByEmail(email: String) = accountRepository.findOneByEmail(email)
+
+    fun findOneByPersonId(id: UUID) = personRepository.findByIdOrNull(id)?.let {
+        accountRepository.findByIdOrNull(it.accountId)
+    }
+
+    fun count(): Long = accountRepository.count()
+    fun findByIdOrNull(id: UUID): Account? = accountRepository.findByIdOrNull(id)
+
+}
+
+sealed class AccountCreationError(errorName: String, message: String, cause: Throwable? = null) :
+    ServiceError(errorName, message, cause) {
+    class EmailUsed(name: String) : AccountCreationError("ACCOUNT_CREATE_EMAIL_USED", "Email is already used: $name")
+    class EmailInvalid(name: String) : AccountCreationError("ACCOUNT_CREATE_EMAIL_INVALID", "Email is invalid: $name")
+    class PasswordInvalid : AccountCreationError("ACCOUNT_CREATE_PASSWORD_INVALID", "Password is invalid")
 }
 

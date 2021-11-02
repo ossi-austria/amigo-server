@@ -4,12 +4,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.ossiaustria.amigo.platform.rest.v1.user.AccountDto
 import org.ossiaustria.amigo.platform.rest.v1.user.LoginRequest
 import org.ossiaustria.amigo.platform.rest.v1.user.LoginResultDto
 import org.ossiaustria.amigo.platform.rest.v1.user.RefreshAccessTokenRequest
+import org.ossiaustria.amigo.platform.rest.v1.user.RegisterAnalogueRequest
 import org.ossiaustria.amigo.platform.rest.v1.user.RegisterRequest
 import org.ossiaustria.amigo.platform.rest.v1.user.SecretAccountDto
+import org.ossiaustria.amigo.platform.rest.v1.user.SetFcmTokenRequest
 import org.ossiaustria.amigo.platform.rest.v1.user.TokenResultDto
 import org.ossiaustria.amigo.platform.utils.RandomUtils
 import org.springframework.restdocs.payload.FieldDescriptor
@@ -46,7 +47,7 @@ internal class AuthApiTest : AbstractRestApiTest() {
                 responseFields(userSecretDtoResponseFields())
             ).returns(SecretAccountDto::class.java)
 
-        with(accountService.findOneByEmail(email)!!) {
+        with(authService.findOneByEmail(email)!!) {
             assertThat(id).isEqualTo(result.id)
         }
     }
@@ -71,7 +72,35 @@ internal class AuthApiTest : AbstractRestApiTest() {
                 responseFields(userSecretDtoResponseFields())
             ).returns(SecretAccountDto::class.java)
 
-        with(accountService.findOneByEmail(email)!!) {
+        with(authService.findOneByEmail(email)!!) {
+            assertThat(id).isEqualTo(result.id)
+        }
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `should register with new Analogue Account for explicit Group`() {
+        mockUserAuthentication()
+
+        val registerRequest = RegisterAnalogueRequest(
+            "absolute-new-name", neededGroupId = group.id
+        )
+
+        val url = "$authUrl/register-analogue"
+
+        val result = this.performPost(url, body = registerRequest, accessToken = accessToken.token)
+            .expectOk()
+            .document(
+                "register-analogue-success",
+                requestFields(registerAnalogueRequestFields()),
+                responseFields(userSecretDtoResponseFields())
+            ).returns(SecretAccountDto::class.java)
+
+        assertThat(result.email).endsWith("amigobox")
+        assertThat(result.createdByAccountId).isNotNull
+        assertThat(result.persons.first()).isNotNull
+        assertThat(result.persons.first().groupId).isNotNull
+        with(authService.findOneByEmail(result.email)!!) {
             assertThat(id).isEqualTo(result.id)
         }
     }
@@ -216,17 +245,16 @@ internal class AuthApiTest : AbstractRestApiTest() {
 
     @Test
     @Tag(TestTags.RESTDOC)
-    fun `should answer get who-am-i`() {
+    fun `account should return own Account`() {
 
         mockUserAuthentication()
 
-        val result: AccountDto = this.performGet("$authUrl/whoami", accessToken = accessToken.token)
+        val result: SecretAccountDto = this.performGet("$authUrl/account", accessToken = accessToken.token)
             .expectOk()
-            .document("who-am-i", responseFields(accountDtoResponseFields()))
+            .document("account", responseFields(userSecretDtoResponseFields()))
             .returns()
 
         assertThat(account.id).isEqualTo(result.id)
-        assertThat(account.email).isEqualTo(result.email)
         assertThat(account.email).isEqualTo(result.email)
     }
 
@@ -254,6 +282,24 @@ internal class AuthApiTest : AbstractRestApiTest() {
         this.performGet(securedUrl(), accessToken = accessToken.token).expectUnauthorized()
     }
 
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `setFcmToken should save fcm token in Account`() {
+        mockUserAuthentication()
+        this.performPost("$authUrl/fcm-token", accessToken.token, SetFcmTokenRequest("fcm"))
+            .expectOk()
+            .document(
+                "account-set-fcm-token",
+                requestFields(fcmTokenRequestFields()),
+            )
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `setFcmToken needs authentication`() {
+        this.performPost("$authUrl/fcm-token", body = SetFcmTokenRequest("fcm")).expectUnauthorized()
+    }
+
     private fun securedUrl(subjectId: UUID = account.persons.first().id): String =
         "/v1/messages/filter?receiverId=${subjectId}"
 
@@ -263,22 +309,12 @@ internal class AuthApiTest : AbstractRestApiTest() {
             field(prefix + "id", STRING, "UUID"),
             field(prefix + "email", STRING, "An unique email"),
             field(prefix + "persons", ARRAY, "All persons of that Account"),
+            field(prefix + "createdByAccountId", STRING, "ID of Creator Account").optional(),
             field(prefix + "changeAccountToken", STRING, "").optional(),
             field(prefix + "changeAccountTokenCreatedAt", STRING, "").optional(),
-            field(prefix + "persons", ARRAY, "persops"),
 
             ).apply {
             addAll(personFields(prefix + "persons[]."))
-        }
-    }
-
-    private fun accountDtoResponseFields(): List<FieldDescriptor> {
-        return arrayListOf(
-            field("id", STRING, "UUID"),
-            field("email", STRING, "An unique email"),
-            field("persons", ARRAY, "All persons of that Account"),
-        ).apply {
-            addAll(personFields("persons[]."))
         }
     }
 
@@ -298,6 +334,13 @@ internal class AuthApiTest : AbstractRestApiTest() {
         return listOf(
             field("password", STRING, "A plain text password"),
             field("email", STRING, "A valid email"),
+        )
+    }
+
+    private fun registerAnalogueRequestFields(): List<FieldDescriptor> {
+        return listOf(
+            field("name", STRING, "The fullname of the user"),
+            field("neededGroupId", STRING, "Attaches to existing Group."),
         )
     }
 
@@ -334,10 +377,9 @@ internal class AuthApiTest : AbstractRestApiTest() {
         )
     }
 
-    private fun updateProfileRequestFields(): List<FieldDescriptor> {
-        return listOf(
-            field("name", STRING, "The fullname of the user"),
+    private fun fcmTokenRequestFields(prefix: String = ""): List<FieldDescriptor> {
+        return arrayListOf(
+            field(prefix + "fcmToken", STRING, "Secret token for FCM client messages"),
         )
     }
-
 }

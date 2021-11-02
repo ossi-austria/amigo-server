@@ -3,7 +3,8 @@ package org.ossiaustria.amigo.platform.utils
 object RandomUtils {
     private val charPool: List<Char> = ('a'..'z') + ('A'..'Z')
     private val charNumberPool: List<Char> = charPool + ('0'..'9')
-    private val enhancedCharPool: List<Char> = charNumberPool + listOf('!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '+', '=', '|', '{', '}', '[', ']', ':', ';')
+    private val enhancedCharPool: List<Char> =
+        charNumberPool + listOf('!', '@', '#', '$', '%', '^', '&', '*', '-', '+', '=')
     const val DEFAULT_USERNAME_LENGTH = 10
     const val DEFAULT_PASSWORD_LENGTH = 30
 

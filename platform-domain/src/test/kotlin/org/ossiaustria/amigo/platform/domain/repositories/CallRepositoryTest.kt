@@ -3,7 +3,7 @@ package org.ossiaustria.amigo.platform.domain.repositories
 import org.ossiaustria.amigo.platform.domain.models.Call
 import org.ossiaustria.amigo.platform.domain.models.enums.CallType
 import org.springframework.beans.factory.annotation.Autowired
-import java.util.*
+import java.util.UUID
 
 
 internal class CallRepositoryTest : AbstractRepositoryTest<Call, CallRepository>() {

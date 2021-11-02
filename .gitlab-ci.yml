@@ -3,9 +3,13 @@ variables:
   DOCKER_DRIVER: overlay2           # gitlab needs this to support docker testcontainers
   DOCKER_TLS_CERTDIR: ""            # "/certs" gitlab needs this to support docker testcontainers
 
+stages:
+  - build
+  - deploy
+  - devops
 build & test:
   stage: build
-  image: java:8
+  image: openjdk:11-jre-slim-stretch
   services:
     - docker:19.03.12-dind
   cache:
@@ -26,6 +30,8 @@ build & test:
 push docker:
   image: docker:19.03.12
   stage: deploy
+  only:
+    - develop
   cache:
     key: "$CI_COMMIT_REF_SLUG"
     paths:
@@ -41,9 +47,11 @@ push docker:
     - docker push $IMAGE_TAG
 
 update server:
-  stage: deploy
+  stage: devops
   only:
     - develop
+  dependencies:
+    - "push docker"
   allow_failure: false
   variables:
     SSH_KEY_64: $SSH_KEY_64

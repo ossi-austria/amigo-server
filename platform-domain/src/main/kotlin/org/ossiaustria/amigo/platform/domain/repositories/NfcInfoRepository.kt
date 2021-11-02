@@ -9,7 +9,8 @@ import java.util.UUID
 internal interface NfcInfoRepository : CrudRepository<NfcInfo, UUID> {
     fun findByCreatorId(creatorId: UUID): List<NfcInfo>
     fun findByOwnerId(ownerId: UUID): List<NfcInfo>
-    fun findByCreatorIdOrOwnerId(creatorId: UUID, ownerId: UUID): List<NfcInfo>
+    fun findByIdAndCreatorId(id: UUID, creatorId: UUID): NfcInfo?
+    fun findByIdAndOwnerId(id: UUID, ownerId: UUID): NfcInfo?
     fun findByLinkedAlbumId(linkedAlbumId: UUID): List<NfcInfo>
     fun findByLinkedPersonId(linkedPersonId: UUID): List<NfcInfo>
 }

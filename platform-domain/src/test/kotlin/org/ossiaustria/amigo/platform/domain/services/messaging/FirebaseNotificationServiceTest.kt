@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Message
 import org.ossiaustria.amigo.platform.domain.services.AbstractServiceTest
-import org.ossiaustria.amigo.platform.domain.services.AccountService
+import org.ossiaustria.amigo.platform.domain.services.auth.AuthService
 import java.util.UUID.randomUUID
 
 internal class FirebaseNotificationServiceTest : AbstractServiceTest() {
@@ -22,14 +22,14 @@ internal class FirebaseNotificationServiceTest : AbstractServiceTest() {
     private lateinit var firebaseMessaging: FirebaseMessaging
 
     @MockkBean
-    private lateinit var accountService: AccountService
+    private lateinit var authService: AuthService
 
 
     @BeforeEach
     fun beforeEach() {
         cleanTables()
 
-        service = FirebaseNotificationService(firebaseMessaging, accountService)
+        service = FirebaseNotificationService(firebaseMessaging, authService)
         cleanTables()
     }
 
@@ -37,8 +37,8 @@ internal class FirebaseNotificationServiceTest : AbstractServiceTest() {
     @Test
     fun `messageSent should return true when FB Message and receiver's token are valid`() {
 
-        every { accountService.findOneByPersonId(personId2) } returns
-                Account(randomUUID(), "email", "password", fcmToken = "valid")
+        every { authService.findOneByPersonId(personId2) } returns
+            Account(randomUUID(), "email", "password", fcmToken = "valid")
 
         every { firebaseMessaging.send(any()) } returns "id"
 
@@ -49,8 +49,8 @@ internal class FirebaseNotificationServiceTest : AbstractServiceTest() {
     @Test
     fun `messageSent should return false when receiver's token is null`() {
 
-        every { accountService.findOneByPersonId(personId2) } returns
-                Account(randomUUID(), "email", "password", fcmToken = null)
+        every { authService.findOneByPersonId(personId2) } returns
+            Account(randomUUID(), "email", "password", fcmToken = null)
 
         verify(exactly = 0) { firebaseMessaging.send(any()) }
 
@@ -61,8 +61,8 @@ internal class FirebaseNotificationServiceTest : AbstractServiceTest() {
     @Test
     fun `messageSent should return false when fcm has an error`() {
 
-        every { accountService.findOneByPersonId(personId2) } returns
-                Account(randomUUID(), "email", "password", fcmToken = "valid")
+        every { authService.findOneByPersonId(personId2) } returns
+            Account(randomUUID(), "email", "password", fcmToken = "valid")
 
         every { firebaseMessaging.send(any()) } throws IllegalArgumentException("Some exception")
 

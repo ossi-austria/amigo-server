@@ -1,6 +1,10 @@
 package org.ossiaustria.amigo.platform.domain.services.messaging
 
-import org.ossiaustria.amigo.platform.domain.models.*
+import org.ossiaustria.amigo.platform.domain.models.AlbumShare
+import org.ossiaustria.amigo.platform.domain.models.Call
+import org.ossiaustria.amigo.platform.domain.models.Message
+import org.ossiaustria.amigo.platform.domain.models.Multimedia
+import org.ossiaustria.amigo.platform.domain.models.Sendable
 
 object NotificationBuilder {
 

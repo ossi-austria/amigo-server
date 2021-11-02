@@ -1,7 +1,7 @@
 package org.ossiaustria.amigo.platform.services.email
 
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 data class Email(
     val id: UUID,

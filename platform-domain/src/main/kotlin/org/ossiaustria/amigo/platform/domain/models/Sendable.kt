@@ -1,7 +1,7 @@
 package org.ossiaustria.amigo.platform.domain.models
 
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 interface Sendable<S> {
     val id: UUID

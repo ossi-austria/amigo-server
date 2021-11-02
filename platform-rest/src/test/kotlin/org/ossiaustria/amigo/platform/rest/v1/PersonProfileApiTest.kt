@@ -6,7 +6,7 @@ import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.ossiaustria.amigo.platform.domain.services.PersonService
+import org.ossiaustria.amigo.platform.domain.services.PersonProfileService
 import org.ossiaustria.amigo.platform.rest.v1.user.ChangePersonDto
 import org.ossiaustria.amigo.platform.rest.v1.user.PersonDto
 import org.springframework.mock.web.MockMultipartFile
@@ -19,7 +19,7 @@ internal class PersonProfileApiTest : AbstractRestApiTest() {
     val rootUrl = "/v1/profile"
 
     @SpykBean
-    protected lateinit var personService: PersonService
+    protected lateinit var personService: PersonProfileService
 
     @BeforeEach
     fun clearRepo() {
@@ -73,8 +73,10 @@ internal class PersonProfileApiTest : AbstractRestApiTest() {
     fun `changeMyProfile should change name of User`() {
 
         val request = ChangePersonDto("name", null)
-        val person = this.performPatch(rootUrl, accessToken = accessToken.token, personId = person1Id,
-            body = request)
+        val person = this.performPatch(
+            rootUrl, accessToken = accessToken.token, personId = person1Id,
+            body = request
+        )
             .returns(PersonDto::class.java)
 
         assertEquals(person.id, person1Id)
