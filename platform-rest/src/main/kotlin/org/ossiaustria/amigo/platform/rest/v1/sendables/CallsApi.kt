@@ -109,12 +109,8 @@ internal class CallsApi(private val callService: CallService) {
 
         @ApiParam(hidden = true)
         account: Account,
-    ) =
-        callWithPermissions(
-            withPersonId(account, personId),
-            id,
-            matchReceiver = true
-        ).let { callService.finishCall(it) }.toDto()
+    ) = callWithPermissions(withPersonId(account, personId), id)
+        .let { callService.finishCall(it) }.toDto()
 
 
     internal fun callWithPermissions(

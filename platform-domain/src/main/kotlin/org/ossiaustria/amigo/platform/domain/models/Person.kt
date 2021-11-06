@@ -45,4 +45,8 @@ data class Person(
     override fun toString(): String {
         return "$id $accountId $name $memberType $groupId"
     }
+
+    fun isAnAdmin() = memberType.isAtLeast(MembershipType.ADMIN)
+    fun isAnalogue() = memberType == MembershipType.ANALOGUE
+    fun isDigitalUser() = memberType != MembershipType.ANALOGUE
 }

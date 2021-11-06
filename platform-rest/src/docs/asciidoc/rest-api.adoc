@@ -361,6 +361,12 @@ operation::multimedias-one[snippets='curl-request,http-response']
 
 operation::multimedias-get-file[snippets='curl-request,http-response']
 
+=== GET /multimedias/:id/public/:filename
+
+Allowed for unauthenticated usage:
+
+operation::multimedias-get-file-public[snippets='curl-request,http-response']
+
 === POST /multimedias/:id/file
 
 operation::multimedias-update-file[snippets='curl-request,http-response']
