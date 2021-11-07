@@ -33,7 +33,7 @@ data class Call(
     val finishedAt: ZonedDateTime? = null,
 
     @Enumerated(EnumType.STRING)
-    val callState: CallState = CallState.CREATED,
+    val callState: CallState = CallState.CALLING,
 
     /**
      * Jitsi JWT token for sender

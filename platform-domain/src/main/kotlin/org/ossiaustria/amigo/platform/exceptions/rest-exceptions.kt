@@ -7,10 +7,8 @@ import org.springframework.web.bind.annotation.ResponseStatus
 enum class ErrorCode(val errorCode: Int, val errorName: String) {
     // authentication and general errors: 1xxx
     NotFound(1404, "Entity not found"),
-    NotAllowed(1405, "Method NotAllowed "),
     Conflict(1409, "Entity already exists"),
     Unauthorized(401, "Access denied exception"),
-    Forbidden(403, "Access denied exception"),
     ValidationFailed(1400, "ValidationFailed"),
 
 
@@ -18,13 +16,8 @@ enum class ErrorCode(val errorCode: Int, val errorName: String) {
     BadParametersRequest(1601, "Bad request parameters"),
 
     // specific user management errors 2xxx
-    UserAlreadyExisting(2001, "User already exists"),
     UserNotExisting(2002, "User does not exist"),
     UserBadCredentials(2003, "Username or password is incorrect"),
-    GroupNotExisting(2004, "Group does not exist"),
-    ProjectNotExisting(2005, "Project does not exist"),
-    UserCreationFailedEmailOrUsernameUsed(2007, "Email or username is already in use"),
-    GroupNameInvalidReserved(2008, "Cannot save group with a reserved name/slug"),
 
     CallChangeNotSenderError(3001, "Call can just be manipulated by sender for this request"),
     CallChangeNotReceiverError(3002, "Call can just be manipulated by receiver for this request"),
@@ -42,7 +35,6 @@ open class RestException(
     cause: Throwable? = null
 ) : RuntimeException(detailMessage, cause) {
 
-    constructor(errorCode: ErrorCode) : this(errorCode.errorCode, errorCode.errorName)
     constructor(errorCode: ErrorCode, detailMessage: String) : this(
         errorCode.errorCode,
         errorCode.errorName,
@@ -69,19 +61,6 @@ class UnauthorizedException(message: String? = null) : RestException(
     ErrorCode.Unauthorized, message ?: "Unauthorized"
 )
 
-@ResponseStatus(code = HttpStatus.FORBIDDEN, reason = "Authorized, but forbidden")
-class ForbiddenException(message: String? = null) : RestException(
-    ErrorCode.Forbidden, message ?: "Forbidden"
-)
-
-@ResponseStatus(
-    code = HttpStatus.BAD_REQUEST,
-    reason = "Operation cannot be executed due to malformed input or invalid states."
-)
-class InternalException(message: String? = null) : RestException(
-    ErrorCode.ValidationFailed, message
-        ?: "Internal server error"
-)
 
 @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Entity not found")
 open class NotFoundException(errorCode: ErrorCode, message: String) : RestException(errorCode, message)

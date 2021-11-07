@@ -94,22 +94,39 @@ internal class MultimediasApi(private val multimediaService: MultimediaService) 
         @ApiParam(hidden = true)
         account: Account,
     ): ResponseEntity<Resource> {
+        val multimedia = getOneEntity(account.person(personId).id, id)
         try {
-            val multimedia = getOneEntity(account.person(personId).id, id)
-            val resource = multimediaService.loadFile(multimedia)
-
-            val filename = multimedia.filename()
-            val header = "attachment; filename=$filename"
-            return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, header)
-                .header(HttpHeaders.CONTENT_TYPE, multimedia.contentType)
-                .header(HttpHeaders.CONTENT_LENGTH, multimedia.size?.toString() ?: "0")
-                .body(resource)
+            return multimediaResource(multimedia)
         } catch (e: Exception) {
             throw BadRequestException(ErrorCode.NotFound, e.message!!)
         }
     }
 
+    @ApiOperation("Download Public File of Multimedia")
+    @GetMapping("/{id}/public/{filename}")
+    fun publicDownloadFile(
+        @PathVariable(value = "id")
+        id: UUID,
+
+        @PathVariable(value = "filename")
+        filename: String,
+    ): ResponseEntity<Resource> {
+
+        val multimediaEntity = multimediaService.getOne(id)
+            ?: throw NotFoundException(ErrorCode.NotFound, "This Person has no avatar (yet).")
+
+        val multimedia = getOneEntity(multimediaEntity.ownerId, id)
+
+        // use provided filename as Security check
+        if (multimedia.filename != filename)
+            throw NotFoundException(ErrorCode.NotFound, "Multimedia $id not found!")
+
+        try {
+            return multimediaResource(multimedia)
+        } catch (e: Exception) {
+            throw BadRequestException(ErrorCode.NotFound, e.message!!)
+        }
+    }
 
     @ApiOperation("Get all own Multimedias")
     @GetMapping("/own")
@@ -151,6 +168,17 @@ internal class MultimediasApi(private val multimediaService: MultimediaService) 
         @ApiParam(hidden = true)
         account: Account,
     ): MultimediaDto = getOneEntity(account.person(personId).id, id).toDto()
+
+    private fun multimediaResource(multimedia: Multimedia): ResponseEntity<Resource> {
+        val resource = multimediaService.loadFile(multimedia)
+        val filename = multimedia.filename()
+        val header = "attachment; filename=$filename"
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, header)
+            .header(HttpHeaders.CONTENT_TYPE, multimedia.contentType)
+            .header(HttpHeaders.CONTENT_LENGTH, multimedia.size?.toString() ?: "0")
+            .body(resource)
+    }
 
     private fun getOneEntity(
         personId: UUID,

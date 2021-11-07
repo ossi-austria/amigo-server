@@ -12,12 +12,12 @@ internal data class CallDto(
     override val senderId: UUID,
     override val receiverId: UUID,
     val callType: CallType,
-    val startedAt: ZonedDateTime? = null,
-    val finishedAt: ZonedDateTime? = null,
-    val callState: CallState = CallState.CREATED,
-    override val createdAt: ZonedDateTime = ZonedDateTime.now(),
-    override val sentAt: ZonedDateTime? = null,
-    override val retrievedAt: ZonedDateTime? = null
+    val startedAt: ZonedDateTime?,
+    val finishedAt: ZonedDateTime?,
+    val callState: CallState,
+    override val createdAt: ZonedDateTime,
+    override val sentAt: ZonedDateTime?,
+    override val retrievedAt: ZonedDateTime?
 ) : SendableDto
 
 internal data class CallTokenDto(
@@ -25,13 +25,13 @@ internal data class CallTokenDto(
     override val senderId: UUID,
     override val receiverId: UUID,
     val callType: CallType,
-    val startedAt: ZonedDateTime? = null,
-    val finishedAt: ZonedDateTime? = null,
-    val callState: CallState = CallState.CREATED,
-    val token: String? = null,
-    override val createdAt: ZonedDateTime = ZonedDateTime.now(),
-    override val sentAt: ZonedDateTime? = null,
-    override val retrievedAt: ZonedDateTime? = null
+    val startedAt: ZonedDateTime?,
+    val finishedAt: ZonedDateTime?,
+    val callState: CallState,
+    val token: String?,
+    override val createdAt: ZonedDateTime,
+    override val sentAt: ZonedDateTime?,
+    override val retrievedAt: ZonedDateTime?
 ) : SendableDto
 
 internal fun Call.toDto() = CallDto(

@@ -18,7 +18,6 @@ import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import org.ossiaustria.amigo.platform.domain.repositories.AccountRepository
 import org.ossiaustria.amigo.platform.domain.repositories.GroupRepository
 import org.ossiaustria.amigo.platform.domain.testcommons.then
-import org.ossiaustria.amigo.platform.exceptions.NotFoundException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.annotation.Rollback
@@ -72,7 +71,7 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
     fun `findGroup must not find group which does not contain user's account`() {
         val (_, group2) = createAccountWithGroups("user2@email.com")
 
-        assertThrows(NotFoundException::class.java) {
+        assertThrows(GroupServiceError.GroupNotFound::class.java) {
             groupService.findGroup(account, group2.id)
         }
     }
@@ -254,7 +253,7 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
     @Test
     fun `changeMember fails for change of original Owner`() {
         val (account, group, _) = createAccountWithGroups("user2@email.org", MembershipType.OWNER)
-        val (account2, _, _) = createAccountWithGroups("user3@email.org")
+        val (_, _, _) = createAccountWithGroups("user3@email.org")
 
         assertThrows(GroupServiceError.GroupOwnerNotChangeable::class.java) {
             groupService.changeMember(account.primaryPerson(), group, account.primaryPerson(), MembershipType.ADMIN)
@@ -307,8 +306,7 @@ internal class GroupServiceImplTest : AbstractServiceTest() {
     fun `removeMember fails for removal of original Owner`() {
         val (account, group, _) = createAccountWithGroups("user2@email.org", MembershipType.OWNER)
         val (account2, _, _) = createAccountWithGroups("user3@email.org")
-        val addMember =
-            groupService.addMember(account.primaryPerson(), group, account2.email, "new member", MembershipType.OWNER)
+        groupService.addMember(account.primaryPerson(), group, account2.email, "new member", MembershipType.OWNER)
 
         assertThrows(GroupServiceError.GroupOwnerNotChangeable::class.java) {
             groupService.removeMember(account.primaryPerson(), group, account.primaryPerson())

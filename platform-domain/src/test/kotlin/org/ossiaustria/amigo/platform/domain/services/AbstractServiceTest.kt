@@ -3,6 +3,7 @@ package org.ossiaustria.amigo.platform.domain.services
 import org.ossiaustria.amigo.platform.domain.ApplicationConfiguration
 import org.ossiaustria.amigo.platform.domain.models.Account
 import org.ossiaustria.amigo.platform.domain.models.Person
+import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import org.ossiaustria.amigo.platform.domain.repositories.AbstractWithJpaTest
 import org.ossiaustria.amigo.platform.domain.testcommons.Mocks
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,13 +35,13 @@ internal abstract class AbstractServiceTest : AbstractWithJpaTest() {
         groups.save(Mocks.group(groupId1))
         groups.save(Mocks.group(groupId2))
         accounts1 = accounts.save(Mocks.account()).also {
-            person1 = persons.save(Mocks.person(personId1, it.id, groupId1))
+            person1 = persons.save(Mocks.person(personId1, it.id, groupId1, memberType = MembershipType.ADMIN))
         }
         accounts2 = accounts.save(Mocks.account()).also {
-            person2 = persons.save(Mocks.person(personId2, it.id, groupId1))
+            person2 = persons.save(Mocks.person(personId2, it.id, groupId1, memberType = MembershipType.ANALOGUE))
         }
         accounts3 = accounts.save(Mocks.account()).also {
-            person3 = persons.save(Mocks.person(personId3, it.id, groupId2))
+            person3 = persons.save(Mocks.person(personId3, it.id, groupId2, memberType = MembershipType.MEMBER))
         }
     }
 }

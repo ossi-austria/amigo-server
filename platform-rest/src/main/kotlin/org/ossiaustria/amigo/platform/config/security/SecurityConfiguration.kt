@@ -76,7 +76,8 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
                 "/error",
                 "/favicon.ico",
                 "/actuator/**",
-                PROFILE_AVATAR_URLS,
+                PUBLIC_AVATAR_URLS,
+                PUBLIC_MULTIMEDIA_URLS,
                 AUTH_URLS,
                 AUTH_LOGIN_URLS,
                 AUTH_PASSWORD_URLS,
@@ -154,7 +155,8 @@ class SecurityConfiguration(private val provider: AuthenticationProvider) : WebS
     companion object {
         private val log = LoggerFactory.getLogger(this::class.java)
         private const val AUTH_URLS = "/v1/auth/*"
-        private const val PROFILE_AVATAR_URLS = "/v1/persons/*/public/*"
+        private const val PUBLIC_AVATAR_URLS = "/v1/persons/*/public/*"
+        private const val PUBLIC_MULTIMEDIA_URLS = "/v1/multimedias/*/public/*"
         private const val AUTH_LOGIN_URLS = "/v1/auth/login"
         private const val AUTH_PASSWORD_URLS = "/v1/auth/password/*"
         private const val AUTH_PASSWORD_RESET_URLS = "/v1/auth/password/reset/*"
