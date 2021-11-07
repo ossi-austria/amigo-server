@@ -13,6 +13,7 @@ import org.springframework.core.io.ClassPathResource
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.restdocs.payload.PayloadDocumentation.responseFields
 import org.springframework.restdocs.request.RequestDocumentation.requestParameters
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.util.UUID.randomUUID
 
 internal class MultimediasApiTest : AbstractRestApiTest() {
@@ -145,9 +146,7 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
     @Tag(TestTags.RESTDOC)
     fun `download file should return Multimedia's file`() {
         val msgId = randomUUID()
-
         every { multimediaService.getOne(msgId) } returns Mocks.multimedia(id = msgId, ownerId = person1Id)
-
         every { multimediaService.loadFile(any()) } returns
             ClassPathResource("classpath:application-test.xml")
 
@@ -159,7 +158,51 @@ internal class MultimediasApiTest : AbstractRestApiTest() {
 
     @Test
     @Tag(TestTags.RESTDOC)
+    fun `public download file should return Multimedia's file`() {
+        val msgId = randomUUID()
+        every { multimediaService.getOne(msgId) } returns Mocks.multimedia(id = msgId, ownerId = person1Id)
+        every { multimediaService.loadFile(any()) } returns
+            ClassPathResource("classpath:application-test.xml")
+
+        this.performGet("$baseUrl/$msgId/public/filename")
+            .andExpect(MockMvcResultMatchers.status().isOk)
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `public download file should return redirect when no Multimedia is available`() {
+        val msgId = randomUUID()
+        every { multimediaService.getOne(msgId) } returns Mocks.multimedia(id = msgId, ownerId = person1Id)
+        every { multimediaService.loadFile(any()) } returns
+            ClassPathResource("classpath:application-test.xml")
+
+        this.performGet("$baseUrl/$msgId/public/filename")
+            .document("multimedias-get-file-public")
+            .andExpect(MockMvcResultMatchers.status().isOk)
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
     fun `getOne needs authentication`() {
         this.performGet("$baseUrl/${randomUUID()}").expectUnauthorized()
+    }
+
+    @Test
+    @Tag(TestTags.RESTDOC)
+    fun `getOne-File needs no authentication`() {
+
+        val msgId = randomUUID()
+
+        every { multimediaService.getOne(msgId) } returns Mocks.multimedia(id = msgId, ownerId = person1Id)
+
+        every { multimediaService.loadFile(any()) } returns
+            ClassPathResource("classpath:application-test.xml")
+
+        this.performGet("$baseUrl").expectUnauthorized()
+        this.performGet("$baseUrl/$msgId").expectUnauthorized()
+        this.performGet("$baseUrl/$msgId/file").expectUnauthorized()
+        this.performGet("$baseUrl/$msgId/public/filename").expectOk()
+        this.performGet("$baseUrl/$msgId/public/1234").isNotFound()
+
     }
 }

@@ -190,7 +190,7 @@ internal class CallServiceTest : SendableServiceTest<Call, CallService>() {
         assertThat(result).isNotNull
         assertThat(result.sentAt).isNull()
         assertThat(result.retrievedAt).isNull()
-        assertThat(result.callState).isEqualTo(CallState.CREATED)
+        assertThat(result.callState).isEqualTo(CallState.CALLING)
 
     }
 

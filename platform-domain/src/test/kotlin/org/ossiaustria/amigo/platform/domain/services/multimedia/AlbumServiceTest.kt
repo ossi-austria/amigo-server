@@ -6,9 +6,7 @@ import org.junit.Assert.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.ossiaustria.amigo.platform.domain.models.Album
-import org.ossiaustria.amigo.platform.domain.models.AlbumShare
 import org.ossiaustria.amigo.platform.domain.repositories.AlbumRepository
-import org.ossiaustria.amigo.platform.domain.repositories.AlbumShareRepository
 import org.ossiaustria.amigo.platform.domain.services.AbstractServiceTest
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID.randomUUID
@@ -20,9 +18,6 @@ internal class AlbumServiceTest : AbstractServiceTest() {
 
     @Autowired
     private lateinit var repository: AlbumRepository
-
-    @Autowired
-    private lateinit var albumShareRepository: AlbumShareRepository
 
     private lateinit var album_1_1: Album
     private lateinit var album_1_2: Album
@@ -74,51 +69,13 @@ internal class AlbumServiceTest : AbstractServiceTest() {
     }
 
     @Test
-    fun `findWithAccess should return accessible Albums`() {
-
-        albumShareRepository.save(
-            AlbumShare(
-                id = randomUUID(),
-                senderId = personId1,
-                receiverId = personId2,
-                album = album_1_1
-            )
-        )
-
-        albumShareRepository.save(
-            AlbumShare(
-                id = randomUUID(),
-                senderId = personId1,
-                receiverId = personId2,
-                album = album_1_2
-            )
-        )
-
+    fun `findWithAccess should return accessible Albums of same Gruop`() {
         val result = service.findWithAccess(person2.id).map { it.id }
         assertThat(result).containsAll(listOf(album_1_1.id, album_1_2.id))
     }
 
     @Test
     fun `findWithAccess should return accessible Albums based on receiverId`() {
-
-        albumShareRepository.save(
-            AlbumShare(
-                id = randomUUID(),
-                senderId = personId1,
-                receiverId = personId2,
-                album = album_1_1
-            )
-        )
-
-        albumShareRepository.save(
-            AlbumShare(
-                id = randomUUID(),
-                senderId = personId1,
-                receiverId = personId3,
-                album = album_1_2
-            )
-        )
-
         val result = service.findWithAccess(person2.id).map { it.id }
         assertThat(result).containsAll(listOf(album_1_1.id))
     }
@@ -126,22 +83,13 @@ internal class AlbumServiceTest : AbstractServiceTest() {
     @Test
     fun `findWithAccess should return accessible Albums based on albumId`() {
 
-        albumShareRepository.save(
-            AlbumShare(
-                id = randomUUID(),
-                senderId = personId1,
-                receiverId = personId2,
-                album = album_1_1
-            )
-        )
-
         val result = service.findWithAccess(person2.id).map { it.id }
         assertThat(result).containsAll(listOf(album_1_1.id))
     }
 
     @Test
     fun `findWithAccess should not return own Albums`() {
-        val result = service.findWithAccess(person2.id).map { it.id }
-        assertThat(result).isEmpty()
+        val result = service.findWithAccess(person2.id).map { it.ownerId }
+        assertThat(result).doesNotContain(person2.id)
     }
 }

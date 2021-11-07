@@ -7,8 +7,6 @@ import org.ossiaustria.amigo.platform.domain.models.enums.MembershipType
 import org.ossiaustria.amigo.platform.domain.repositories.AccountRepository
 import org.ossiaustria.amigo.platform.domain.repositories.GroupRepository
 import org.ossiaustria.amigo.platform.domain.repositories.PersonRepository
-import org.ossiaustria.amigo.platform.exceptions.ErrorCode
-import org.ossiaustria.amigo.platform.exceptions.NotFoundException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
@@ -143,7 +141,7 @@ class GroupServiceImpl : SecuredService(), GroupService {
             groupRepository.findByIdOrNull(groupId) ?: throw GroupServiceError.GroupNotFound(groupId.toString())
         } else {
             log.warn("User requested group, which they are not a member of: ${account.email}: $groupId")
-            throw NotFoundException(ErrorCode.NotFound, "Cannot find Group with id $groupId")
+            throw GroupServiceError.GroupNotFound("Cannot find Group with id $groupId")
         }
         group.members.size
         return group
