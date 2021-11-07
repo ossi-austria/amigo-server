@@ -37,7 +37,7 @@ internal class AlbumRepositoryTest : AbstractRepositoryTest<Album, AlbumReposito
 
     @Test
     fun `save should save Multimedia list`() {
-        val (id, entity) = createDefaultEntityPair()
+        val (_, entity) = createDefaultEntityPair()
         val saved = repository.save(entity)
         Assertions.assertThat(saved.items).isNotNull
         Assertions.assertThat(saved.items).isNotEmpty

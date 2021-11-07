@@ -77,7 +77,7 @@ internal class CallsApiTest : AbstractRestApiTest() {
             .returns(CallTokenDto::class.java)
 
         assertThat(result).isNotNull
-        assertThat(result.callState).isEqualTo(CallState.CREATED)
+        assertThat(result.callState).isEqualTo(CallState.CALLING)
         assertThat(result.senderId).isEqualTo(senderId)
         assertThat(result.receiverId).isEqualTo(receiverId)
         assertThat(result.token).isNotNull
