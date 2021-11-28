@@ -1,7 +1,6 @@
 package org.ossiaustria.amigo.platform.rest.v1.user
 
 
-import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.util.UUID
 
-@Timed(value = "amigo.api.profile")
 @RestController
 @RequestMapping("/v1/profile", produces = ["application/json"])
 class PersonProfileApi(
