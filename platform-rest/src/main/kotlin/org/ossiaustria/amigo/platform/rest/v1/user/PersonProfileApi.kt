@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.util.UUID
 
-@Timed(value = "time.api.profile")
+@Timed(value = "amigo.api.profile")
 @RestController
 @RequestMapping("/v1/profile", produces = ["application/json"])
 class PersonProfileApi(

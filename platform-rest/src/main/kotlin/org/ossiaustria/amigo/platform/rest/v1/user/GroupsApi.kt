@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-@Timed(value = "time.api.groups")
+@Timed(value = "amigo.api.groups")
 @RestController
 @RequestMapping("/v1/groups", produces = ["application/json"])
 class GroupsApi(

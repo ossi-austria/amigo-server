@@ -5,8 +5,8 @@ import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
-import org.ossiaustria.amigo.platform.domain.services.PersonProfileService
 import org.ossiaustria.amigo.platform.domain.services.PersonAvatar
+import org.ossiaustria.amigo.platform.domain.services.PersonProfileService
 import org.ossiaustria.amigo.platform.exceptions.BadRequestException
 import org.ossiaustria.amigo.platform.exceptions.ErrorCode
 import org.ossiaustria.amigo.platform.exceptions.NotFoundException
@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 import javax.servlet.http.HttpServletResponse
 
-@Timed(value = "time.api.profile")
+@Timed(value = "amigo.api.persons")
 @RestController
 @RequestMapping("/v1/persons")
 class PersonsApi(
