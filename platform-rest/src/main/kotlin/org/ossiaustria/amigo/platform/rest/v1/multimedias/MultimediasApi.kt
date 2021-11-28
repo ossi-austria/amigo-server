@@ -1,6 +1,5 @@
 package org.ossiaustria.amigo.platform.rest.v1.multimedias
 
-import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.util.UUID
 
-@Timed(value = "amigo.api.multimedias")
 @RestController
 @RequestMapping("/v1/multimedias", produces = ["application/json"])
 internal class MultimediasApi(private val multimediaService: MultimediaService) {

@@ -1,6 +1,5 @@
 package org.ossiaustria.amigo.platform.rest.v1
 
-import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-@Timed(value = "amigo.api.nfcs")
 @RestController
 @RequestMapping("/v1/nfcs", produces = ["application/json"])
 internal class NfcInfoApi(

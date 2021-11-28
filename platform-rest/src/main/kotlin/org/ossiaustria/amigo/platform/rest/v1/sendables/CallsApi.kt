@@ -1,6 +1,5 @@
 package org.ossiaustria.amigo.platform.rest.v1.sendables
 
-import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-@Timed(value = "amigo.api.calls")
 @RestController
 @RequestMapping("/v1/calls", produces = ["application/json"])
 internal class CallsApi(private val callService: CallService) {

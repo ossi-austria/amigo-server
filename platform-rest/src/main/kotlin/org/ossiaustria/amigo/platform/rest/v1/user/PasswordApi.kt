@@ -1,6 +1,5 @@
 package org.ossiaustria.amigo.platform.rest.v1.user
 
-import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.ApiOperation
 import org.ossiaustria.amigo.platform.domain.services.auth.PasswordService
 import org.springframework.http.HttpStatus
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-@Timed(value = "amigo.api.password")
 @RestController
 @RequestMapping("/v1/auth/password", produces = ["application/json"])
 class PasswordApi(

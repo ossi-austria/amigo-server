@@ -1,7 +1,6 @@
 package org.ossiaustria.amigo.platform.rest.v1.user
 
 
-import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.ApiModel
 import io.swagger.annotations.ApiModelProperty
 import io.swagger.annotations.ApiOperation
@@ -19,7 +18,6 @@ import java.util.UUID
 import javax.validation.constraints.Email
 import javax.validation.constraints.NotEmpty
 
-@Timed(value = "amigo.api.auth")
 @RestController
 @RequestMapping("/v1/auth", produces = ["application/json"])
 class AuthApi(

@@ -1,6 +1,5 @@
 package org.ossiaustria.amigo.platform.rest.v1.multimedias
 
-import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
 import org.ossiaustria.amigo.platform.domain.models.Account
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-@Timed(value = "amigo.api.albums")
 @RestController
 @RequestMapping("/v1/albums", produces = ["application/json"])
 internal class AlbumsApi(
