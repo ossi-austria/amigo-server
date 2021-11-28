@@ -1,5 +1,6 @@
 package org.ossiaustria.amigo.platform.rest.v1.sendables
 
+import io.micrometer.core.annotation.Timed
 import io.swagger.annotations.Api
 import io.swagger.annotations.ApiOperation
 import io.swagger.annotations.ApiParam
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.util.UUID
 
 
+@Timed(value = "amigo.api.messages")
 @Api("REST for Messages and sending")
 @RestController
 @RequestMapping("/v1/messages", produces = ["application/json"])

@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.util.UUID
 
-@Timed(value = "time.api.multimedias")
+@Timed(value = "amigo.api.multimedias")
 @RestController
 @RequestMapping("/v1/multimedias", produces = ["application/json"])
 internal class MultimediasApi(private val multimediaService: MultimediaService) {

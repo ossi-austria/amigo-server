@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
-@Timed
+@Timed(value = "amigo.api.albums")
 @RestController
 @RequestMapping("/v1/albums", produces = ["application/json"])
 internal class AlbumsApi(
